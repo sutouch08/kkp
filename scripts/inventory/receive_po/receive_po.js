@@ -48,12 +48,12 @@ function goAdd(){
 
 
 function goEdit(code){
-	window.location.href = HOME + 'edit/'+ code; //"index.php?content=receive_product&edit=Y&id_receive_product="+id;
+	window.location.href = HOME + 'edit/'+ code;
 }
 
 
 function viewDetail(code){
-	window.location.href = HOME + 'view_detail/'+ code; //"index.php?content=receive_product&view_detail=Y&id_receive_product="+id;
+	window.location.href = HOME + 'view_detail/'+ code; 
 }
 
 

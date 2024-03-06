@@ -96,7 +96,7 @@ function updateHeader(){
   }
 
   if(venderCode.length == 0){
-    swal('กรุณาระบุผู้ขาย');
+    swal('กรุณาระบุผู้ผลิต');
     return false;
   }
 

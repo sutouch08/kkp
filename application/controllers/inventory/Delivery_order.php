@@ -662,7 +662,7 @@ class Delivery_order extends PS_Controller
 
 						if(!empty($sold_amount))
 						{
-							$dept_amount = $sold_amount;
+							$dept_amount = $sold_amount + $order->shipping_fee + $order->service_fee;
 							$customer = $this->customers_model->get($order->customer_code);
 	            $arr = array(
 	              'order_code' => $code,

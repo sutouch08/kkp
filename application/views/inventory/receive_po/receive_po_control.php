@@ -1,6 +1,6 @@
 
 <div class="row">
-<?php //if(empty($doc->po_code)) : ?>
+<?php if(empty($doc->po_code)) : ?>
 	<?php if(getConfig('PRODUCT_TAB_TYPE') == 'style') : ?>
 	<div class="col-lg-2 col-md-2-harf col-sm-3 col-xs-8">
     <label>รุ่นสินค้า</label>
@@ -13,7 +13,7 @@
 	<div class="divider visible-xs"></div>
 	<?php endif; ?>
 
-	<div class="col-lg-3 col-md-3 col-sm-3 col-xs-6 col-lg-offset-1 col-md-offset-1 padding-5">
+	<div class="col-lg-3 col-md-3 col-sm-3 col-xs-6 padding-5">
 		<label>รหัสสินค้า</label>
 		<input type="text" class="form-control input-sm text-center" name="itemCode" id="item-code" value=""/>
 	</div>
@@ -25,15 +25,13 @@
 		<label class="display-block not-show">get</label>
 		<button type="button" class="btn btn-xs btn-primary btn-block" id="btn-add-item" onclick="addItem()">เพิ่ม</button>
 	</div>
+<?php endif; ?>
 
-<?php //endif; ?>
-
-  <div class="col-lg-3 col-md-2-harf col-sm-2-harf col-xs-12 padding-5 text-right">
-    <?php if( ! empty($doc->po_code)) : ?>
-    <label class="display-block not-show">getPo</label>
-    <button type="button" class="btn btn-xs btn-info" onclick="getData()">ดึงใบสั่งซื้อ</button>
-    <?php endif; ?>
-		<button type="button" class="btn btn-xs btn-danger" onclick="removeAll()">ลบทั้งหมด</button>
+	<div class="col-lg-1-harf col-lg-offset-9 col-md-1-harf col-md-offset-9 col-sm-2 col-sm-offset-8 col-xs-4 col-xs-offset-4 padding-5">
+		<button type="button" class="btn btn-xs btn-info btn-block" onclick="getData()">ดึงใบสั่งผลิต</button>
+	</div>
+  <div class="col-lg-1-harf col-md-1-harf col-sm-2 col-xs-4 padding-5">
+		<button type="button" class="btn btn-xs btn-danger btn-block" onclick="removeAll()">ลบทั้งหมด</button>
   </div>
 </div>
 <hr class="margin-top-15">

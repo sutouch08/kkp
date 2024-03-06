@@ -241,12 +241,21 @@ class Order_credit_model extends CI_Model
 
   public function recal_balance($code)
   {
-    $rs = $this->db->set('balance', 'amount - paid', FALSE)->where('order_code', $code)->update('order_credit');
-    if($rs)
+    $rs = $this->db->where('order_code', $code)->get('order_credit');
+
+    if($rs->num_rows() > 0)
     {
-      $this->db->set('valid', 1)->where('order_code', $code)->where('balance =', 0, FALSE)->update('order_credit');
-      $this->db->set('valid', 0)->where('order_code', $code)->where('balance !=', 0, FALSE)->update('order_credit');
-    }
+      $balance = $rs->row()->amount - $rs->row()->paid;
+
+      if($balance > 0)
+      {
+        $this->db->query("UPDATE order_credit SET balance = (amount - paid), valid = 0 WHERE order_code = '{$code}'");
+      }
+      else
+      {
+        $this->db->query("UPDATE order_credit SET balance = 0, valid = 1 WHERE order_code = '{$code}'");
+      }
+    }    
   }
 
 

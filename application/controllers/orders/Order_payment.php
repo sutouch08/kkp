@@ -171,6 +171,12 @@ class Order_payment extends PS_Controller
         $this->order_state_model->add_state($arr);
       }
 
+      //--- ถ้าเปิดบิลไปแล้ว มาแนบสลิปทีหลัง ต้องไป update ยอดเงินค้างรับด้วย
+      if($order->state == 8) {
+        $this->load->model('account/order_credit_model');
+        $this->order_credit_model->pay_order($detail->order_code, $detail->pay_amount);
+      }
+
       //--- complete transecrtion with commit or rollback if any error
 
       if($sc === TRUE)
@@ -240,10 +246,7 @@ class Order_payment extends PS_Controller
           $this->error = 'เพิ่มรายการเงินเข้าไม่สำเร็จ';
         }
 
-        if($detail->is_deposit == 1 && $order->deposit >= $detail->pay_amount)
-        {
-          $this->orders_model->update_deposit($detail->order_code, (-1) * $detail->pay_amount);
-        }
+        $this->orders_model->update_deposit($detail->order_code, (-1) * $detail->pay_amount);
         //--
         update_order_total_amount($detail->order_code);
 

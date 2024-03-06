@@ -36,8 +36,8 @@
 		<input type="text" class="form-control input-sm" name="venderName" id="venderName" placeholder="ค้นหาชื่อผู้ขาย"/>
 	</div>
 	<div class="col-lg-1-harf col-md-1-harf col-sm-2 col-xs-4">
-		<label><?php label('po'); ?></label>
-		<input type="text" class="form-control input-sm text-center" name="poCode" id="poCode" placeholder="ค้นหาใบสั่งซื้อ" />
+		<label>ใบสั่งผลิต</label>
+		<input type="text" class="form-control input-sm text-center" name="poCode" id="poCode" placeholder="ค้นหาใบสั่งผลิต" />
 		<span class="help-block red" id="po-error"></span>
 	</div>
 	<div class="col-lg-1-harf col-md-1-harf col-sm-2 col-xs-4">

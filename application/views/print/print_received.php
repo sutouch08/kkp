@@ -3,7 +3,7 @@ $this->load->helper('print');
 $total_row 	= empty($details) ? 0 :count($details);
 $row_span = 3;
 $config 		= array(
-	"row" => 10,
+	"row" => 14,
 	"total_row" => $total_row,
 	"font_size" => 10,
 	"text_color" => "text-red" //--- hilight text color class
@@ -33,7 +33,7 @@ $header['left']['A'] = array(
 if(!empty($vender))
 {
 	$header['left']['B'] = array(
-		"client" => "<span style='font-size:".($this->printer->font_size + 1)."px; font-weight:bolder; color:#910DDE;'>ผู้จำหน่าย</span>",
+		"client" => "<span style='font-size:".($this->printer->font_size + 1)."px; font-weight:bolder; color:#910DDE;'>Vendor</span>",
 		"customer" => "<span style='font-size:".($this->printer->font_size + 1)."px; font-weight:bolder;'>{$vender->name}</span>",
 		"address1" => "{$vender->address}",
 		"phone" => "โทร: {$vender->phone}",
@@ -43,7 +43,7 @@ if(!empty($vender))
 else
 {
 	$header['left']['B'] = array(
-		"client" => "<span style='font-size:".($this->printer->font_size + 1)."px; font-weight:bolder; color:orange;'>ผู้จำหน่าย</span>",
+		"client" => "<span style='font-size:".($this->printer->font_size + 1)."px; font-weight:bolder; color:orange;'>ผู้ผลิต</span>",
 		"customer" => "<span style='font-size:".($this->printer->font_size + 1)."px; font-weight:bolder;'>{$po->vender_name}</span>",
 		"taxid" => "Tax ID: -"
 	);
@@ -56,7 +56,7 @@ $header['right'] = array();
 $header['right']['A'] = array(
 	array('label' => 'เลขที่', 'value' => $doc->code),
 	array('label' => 'วันที่', 'value' => thai_date($doc->date_add, FALSE, '/')),
-	array('label' => 'ใบสั่งซื้อ', 'value' => $doc->po_code),
+	array('label' => 'ใบสั่งผลิต', 'value' => $doc->po_code),
 	array('label' => 'ใบส่งของ', 'value' => $doc->invoice_code)
 );
 
@@ -71,9 +71,9 @@ $total_vat = 0;
 	//**************  กำหนดหัวตาราง  ******************************//
 	$thead	= array(
 	          array("#", "width:5%; text-align:center;"),
-	          array("รายละเอียด", "width:60%; text-align:center;"),
-						array("จำนวน", "width:10%; text-align:right;"),
-	          array("ราคา/หน่วย", "width:10%; text-align:right;"),
+	          array("รายละเอียด", "width:50%; text-align:center;"),
+						array("จำนวน", "width:15%; text-align:right;"),
+	          array("ราคา/หน่วย", "width:15%; text-align:right;"),
 	          array("มูลค่า", "width:15%; text-align:right;")
 	          );
 
@@ -173,22 +173,22 @@ $total_vat = 0;
 				if($this->printer->current_page == $this->printer->total_page)
 			  {
 					//--- จำนวนรวม   ตัว
-				  $sub_qty  = '<td class="width-70 text-center" style="border:0;">';
+				  $sub_qty  = '<td class="width-60 text-center" style="border:0;">';
 					$sub_qty .= '<span class="'.$this->printer->text_color.'">'.$qty.'</span>';
 				  $sub_qty .= '</td>';
-				  $sub_qty .= '<td class="width-15" style="border:0;">';
+				  $sub_qty .= '<td class="width-20" style="border:0;">';
 				  $sub_qty .= '</td>';
-					$sub_qty .= '<td class="width-15 text-right" style="border:0;"></td>';
+					$sub_qty .= '<td class="width-20 text-right" style="border:0;"></td>';
 
 				  array_push($subTotal, array($sub_qty));
 				}
 
 
-				$sub_price  = '<td rowspan="3" class="width-70 subtotal-first-row middle text-center"><span class="'.$this->printer->text_color.'">'.$baht_text.'</span></td>';
-				$sub_price .= '<td class="width-15 subtotal subtotal-first-row">';
+				$sub_price  = '<td rowspan="3" class="width-60 subtotal-first-row middle text-center"><span class="'.$this->printer->text_color.'">'.$baht_text.'</span></td>';
+				$sub_price .= '<td class="width-20 subtotal subtotal-first-row">';
 			  $sub_price .=  '<strong class="'.$this->printer->text_color.'">รวมเป็นเงิน</strong>';
 			  $sub_price .= '</td>';
-			  $sub_price .= '<td class="width-15 subtotal subtotal-first-row text-right">';
+			  $sub_price .= '<td class="width-20 subtotal subtotal-first-row text-right">';
 			  $sub_price .=  $totalBfTax;
 			  $sub_price .= '</td>';
 			  array_push($subTotal, array($sub_price));

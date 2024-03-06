@@ -5,7 +5,7 @@ function save(){
     return false;
   }
 
-  
+
   $('.input-amount').each(function(index){
     let amount = $(this).val();
     if(amount.length === 0){
@@ -57,6 +57,12 @@ function add(){
   var customer_code = $('#customerCode').val();
   var customer_name = $('#customer').val();
   var date_add = $('#date').val();
+  var pay_type = $('#pay_type').val();
+
+  if(pay_type == '') {
+    swal("กรุณาระบุวิธีการชำระเงิน");
+    return false;
+  }
 
   if(customer_code.length == 0 || customer_name.length == 0){
     swal('ชื่อลูกค้าไม่ถูกต้อง');

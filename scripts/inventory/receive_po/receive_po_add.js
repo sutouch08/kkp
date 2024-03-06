@@ -90,7 +90,12 @@ function addNew()
   }
 
   if(venderCode.length == 0){
-    swal('กรุณาระบุผู้ขาย');
+    swal('กรุณาระบุผู้ผลิต');
+    return false;
+  }
+
+  if(poCode.length == 0){
+    swal('กรุณาระบุใบสั่งผลิต');
     return false;
   }
 
@@ -209,7 +214,7 @@ function updateVender(poCode){
 
 
 $("#zoneCode").autocomplete({
-	source: BASE_URL + 'auto_complete/get_zone_code_and_name', //"controller/receiveProductController.php?search_zone",
+	source: BASE_URL + 'auto_complete/get_zone_code_and_name',
 	autoFocus: true,
 	open: function(event, ui) {
 		$(this).autocomplete("widget").css({
@@ -233,7 +238,7 @@ $("#zoneCode").autocomplete({
 
 
 $("#zoneName").autocomplete({
-	source: BASE_URL + 'auto_complete/get_zone_code_and_name', //"controller/receiveProductController.php?search_zone",
+	source: BASE_URL + 'auto_complete/get_zone_code_and_name',
 	autoFocus: true,
 	open: function(event, ui) {
 		$(this).autocomplete("widget").css({

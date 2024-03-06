@@ -34,16 +34,16 @@
 
 	<div class="col-lg-1-harf col-md-1-harf col-sm-2 col-xs-4">
 			<label><?php label('vender_code'); ?></label>
-				<input type="text" class="form-control input-sm text-center edit" id="venderCode" value="<?php echo $doc->vender_code; ?>" placeholder="ค้นหารหัสผู้ขาย" disabled/>
+				<input type="text" class="form-control input-sm text-center edit" id="venderCode" value="<?php echo $doc->vender_code; ?>" placeholder="ค้นหารหัสผู้ผลิต" disabled/>
 	 </div>
 
 	 <div class="col-lg-4-harf col-md-4-harf col-sm-6 col-xs-12">
 			<label><?php label('vender_name'); ?></label>
-				<input type="text" class="form-control input-sm edit" id="venderName" value="<?php echo $doc->vender_name; ?>" placeholder="ค้นหาชื่อผู้ขาย" disabled/>
+				<input type="text" class="form-control input-sm edit" id="venderName" value="<?php echo $doc->vender_name; ?>" placeholder="ค้นหาชื่อผู้ผลิต" disabled/>
 	 </div>
 	<div class="col-lg-1-harf col-md-1-harf col-sm-2 col-xs-4">
-			<label><?php label('po'); ?></label>
-			<input type="text" class="form-control input-sm text-center edit" id="poCode" value="<?php echo $doc->po_code; ?>" placeholder="ค้นหาใบสั่งซื้อ" disabled/>
+			<label>ใบสั่งผลิต</label>
+			<input type="text" class="form-control input-sm text-center edit" id="poCode" value="<?php echo $doc->po_code; ?>" placeholder="ค้นหาใบสั่งผลิต" disabled/>
 	</div>
 	<div class="col-lg-1-harf col-md-1-harf col-sm-2 col-xs-4">
 		<label><?php label('inv'); ?></label>

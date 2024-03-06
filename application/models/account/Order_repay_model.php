@@ -144,7 +144,7 @@ class Order_repay_model extends CI_Model
 
 
 
-  public function get_list(array $ds = array(), $perpage = NULL, $offset = NULL)
+  public function get_list(array $ds = array(), $perpage = 20, $offset = 0)
   {
     $this->db
     ->select('repay.*')
@@ -185,11 +185,7 @@ class Order_repay_model extends CI_Model
       $this->db->where('repay.date_add <=', to_date($ds['to_date']));
     }
 
-    if(!empty($perpage))
-    {
-      $offset = $offset === NULL ? 0 : $offset;
-      $this->db->limit($perpage, $offset);
-    }
+    $this->db->order_by('repay.code', 'DESC')->limit($perpage, $offset);
 
     $rs = $this->db->get();
 

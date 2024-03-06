@@ -27,7 +27,7 @@
   </div>
 
   <div class="col-lg-1-harf col-md-1-harf col-sm-3 col-xs-6 padding-5">
-    <label>ใบสั่งซื้อ</label>
+    <label>ใบสั่งผลิต</label>
     <input type="text" class="form-control input-sm search" name="po" value="<?php echo $po; ?>" />
   </div>
 
@@ -37,7 +37,7 @@
   </div>
 
 	<div class="col-lg-1-harf col-md-1-harf col-sm-3 col-xs-6 padding-5">
-    <label>ผู้ขาย</label>
+    <label>ผู้ผลิต</label>
 		<input type="text" class="form-control input-sm search" name="venderx" value="<?php echo $vender; ?>" />
   </div>
 
@@ -78,7 +78,7 @@
 					<th class="fix-width-100 middle text-center"><?php label('date'); ?></th>
 					<th class="fix-width-120 middle"><?php label('doc_num'); ?></th>
 					<th class="fix-width-120 middle"><?php label('inv'); ?></th>
-					<th class="fix-width-120 middle"><?php label('po'); ?></th>
+					<th class="fix-width-120 middle">ใบสั่งผลิต</th>
 					<th class="min-width-200 middle"><?php label('vender'); ?></th>
 					<th class="fix-width-100 middle text-center"><?php label('qty'); ?></th>
 					<th class="fix-width-80 middle text-center"><?php label('status'); ?></th>

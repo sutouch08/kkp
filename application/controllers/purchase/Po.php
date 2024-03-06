@@ -16,7 +16,7 @@ class Po extends PS_Controller
     $this->load->model('purchase/po_model');
     $this->load->model('masters/vender_model');
     $this->load->model('masters/products_model');
-    $this->title = label_value($this->menu_code);
+    $this->title = "ใบสั่งผลิต";
   }
 
 
@@ -590,7 +590,7 @@ public function delete_po($code)
 		$ds = array(
 			'po' => $po,
 			'details' => $details,
-			'title' => "ใบสั่งซื้อ",
+			'title' => "ใบสั่งผลิต",
 			'vender' => $this->vender_model->get($po->vender_code)
 		);
 

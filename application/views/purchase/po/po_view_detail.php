@@ -10,7 +10,7 @@
     	<p class="pull-right top-p">
        <button type="button" class="btn btn-sm btn-warning" onclick="goBack()"><i class="fa fa-arrow-left"></i> <?php label('back'); ?></button>
 			 <?php if($po->status == 3 && ($this->pm->can_add OR $this->pm->can_edit)) : ?>
-				 <button type="button" class="btn btn-sm btn-primary" onclick="unClosePO()"><i class="fa fa-unlock"></i> <?php label('un_close_po'); ?></button>
+				 <button type="button" class="btn btn-sm btn-primary" onclick="unClosePO()"><i class="fa fa-unlock"></i> ยกเลิกการปิดใบสั่งผลิต</button>
 			 <?php endif; ?>
        <button type="button" class="btn btn-sm btn-info" onclick="printPO()"><i class="fa fa-print"></i> <?php label('print'); ?></button>
       </p>
@@ -18,31 +18,30 @@
 </div><!-- End Row -->
 <hr class=""/>
 <div class="row">
-  <div class="col-sm-1 col-1-harf col-xs-6 padding-5 first">
-    <label><?php label('doc_num'); ?></label>
-    <input type="text" class="form-control input-sm text-center" value="<?php echo $po->code; ?>" disabled>
-  </div>
-  <div class="col-sm-1 col-1-harf col-xs-6 padding-5">
-    <label><?php label('date'); ?></label>
-    <input type="text" class="form-control input-sm text-center edit" name="date_add" id="date_add" value="<?php echo date('d-m-Y'); ?>" disabled>
-  </div>
-  <div class="col-sm-2 col-xs-6 padding-5">
-    <label><?php label('vender_code'); ?></label>
-    <input type="text" class="form-control input-sm text-center edit" name="vender_code" id="vender_code" value="<?php echo $po->vender_code; ?>" disabled>
-  </div>
-  <div class="col-sm-5 col-5-harf col-xs-6 padding-5">
-    <label><?php label('vender_name'); ?></label>
-    <input type="text" class="form-control input-sm edit" name="vender_name" id="vender_name" value="<?php echo $po->vender_name; ?>" disabled>
-  </div>
-  <div class="col-sm-1 col-1-harf col-xs-6 padding-5 last">
-    <label><?php label('require_date'); ?></label>
-    <input type="text" class="form-control input-sm text-center edit" name="require_date" id="require_date" value="<?php echo thai_date($po->require_date); ?>" disabled>
-  </div>
-  <div class="col-sm-12 col-xs-12 padding-5 first last">
-    <label><?php label('remark'); ?></label>
-    <input type="text" class="form-control input-sm edit" name="remark" id="remark" value="<?php echo $po->remark; ?>" disabled>
-  </div>
-
+	<div class="col-lg-1-harf col-md-1-harf col-sm-1-harf col-xs-6 padding-5">
+		<label><?php label('doc_num'); ?></label>
+		<input type="text" class="form-control input-sm text-center" value="<?php echo $po->code; ?>" disabled>
+	</div>
+	<div class="col-lg-1-harf col-md-1-harf col-sm-1-harf col-xs-6 padding-5">
+		<label><?php label('date'); ?></label>
+		<input type="text" class="form-control input-sm text-center edit" name="date_add" id="date_add" value="<?php echo date('d-m-Y'); ?>" disabled readonly required>
+	</div>
+	<div class="col-lg-1-harf col-md-1-harf col-sm-1-harf col-xs-6 padding-5">
+		<label><?php label('vender_code'); ?></label>
+		<input type="text" class="form-control input-sm text-center edit" name="vender_code" id="vender_code" value="<?php echo $po->vender_code; ?>" disabled required>
+	</div>
+	<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 padding-5">
+		<label><?php label('vender_name'); ?></label>
+		<input type="text" class="form-control input-sm edit" name="vender_name" id="vender_name" value="<?php echo $po->vender_name; ?>" disabled required>
+	</div>
+	<div class="col-lg-1-harf col-md-1-harf col-sm-1-harf col-xs-6 padding-5">
+		<label><?php label('require_date'); ?></label>
+		<input type="text" class="form-control input-sm text-center edit" name="require_date" id="require_date" value="<?php echo thai_date($po->require_date); ?>" disabled readonly required>
+	</div>
+	<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5">
+		<label><?php label('remark'); ?></label>
+		<input type="text" class="form-control input-sm edit" name="remark" id="remark" value="<?php echo $po->remark; ?>" disabled>
+	</div>
 </div>
 
 <input type="hidden" name="code" id="code" value="<?php echo $po->code; ?>">

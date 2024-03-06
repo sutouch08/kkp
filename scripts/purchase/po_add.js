@@ -132,7 +132,7 @@ function update(){
   var remark = $('#remark').val();
 
   if(vender_code.length == 0){
-    swal('กรุณาระบุผู้ขาย');
+    swal('กรุณาระบุผู้ผลิต');
     return false;
   }
 

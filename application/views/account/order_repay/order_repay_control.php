@@ -1,7 +1,7 @@
 
 <form id="updateForm" method="post" action="<?php echo $this->home; ?>/save/<?php echo $doc->code; ?>">
 <div class="row">
-  <div class="col-sm-12">
+  <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5 table-responsive">
     <table class="table table-striped border-1">
       <thead>
         <tr>

@@ -16,13 +16,14 @@ class Receive_po extends PS_Controller
     $this->load->model('inventory/receive_po_model');
     $this->load->model('purchase/po_model');
 
-    $this->title = "รับสินค้าจากการซื้อ";
+    $this->title = "รับ FG จากใบสั่งผลิต";
   }
 
 
   public function index()
   {
     $this->load->helper('channels');
+    
     $filter = array(
       'code'    => get_filter('code', 'code', ''),
       'invoice' => get_filter('invoice', 'invoice', ''),
