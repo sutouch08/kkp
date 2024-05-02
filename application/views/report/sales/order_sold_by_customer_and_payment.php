@@ -17,23 +17,23 @@
 <hr class="hidden-print"/>
 <form class="hidden-print" id="reportForm" method="post" action="<?php echo $this->home; ?>/do_export">
 <div class="row">
-  <div class="col-sm-1 col-1-harf padding-5 first">
+  <div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
     <label class="display-block">ลูกค้า</label>
     <div class="btn-group width-100">
       <button type="button" class="btn btn-sm btn-primary width-50" id="btn-cus-all" onclick="toggleAllCustomer(1)">ทั้งหมด</button>
       <button type="button" class="btn btn-sm width-50" id="btn-cus-range" onclick="toggleAllCustomer(0)">เลือก</button>
     </div>
   </div>
-  <div class="col-sm-1 col-1-harf padding-5">
+  <div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
     <label class="display-block">เริ่มต้น</label>
     <input type="text" class="form-control input-sm text-center" id="cusFrom" name="cusFrom" disabled>
   </div>
-  <div class="col-sm-1 col-1-harf padding-5">
+  <div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
     <label class="display-block">สิ้นสุด</label>
     <input type="text" class="form-control input-sm text-center" id="cusTo" name="cusTo" disabled>
   </div>
 
-  <div class="col-sm-2 padding-5">
+  <div class="col-lg-2 col-md-2-harf col-sm-3 col-xs-6 padding-5">
     <label>วันที่</label>
     <div class="input-daterange input-group">
       <input type="text" class="form-control input-sm text-center width-50 from-date" name="fromDate" id="fromDate" value="" />
@@ -41,15 +41,40 @@
     </div>
   </div>
 
+	<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
+		<label>ช่องทางขาย</label>
+		<select class="form-control input-sm" id="channels" name="channels">
+			<option value="all">ทั้งหมด</option>
+			<?php echo select_channels(); ?>
+		</select>
+	</div>
+
+	<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
+		<label>การชำระเงิน</label>
+		<select class="form-control input-sm" id="payments" name="payments">
+			<option value="all">ทั้งหมด</option>
+			<?php echo select_payment_method(); ?>
+		</select>
+	</div>
+
+	<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
+		<label>การแสดงผล</label>
+		<select class="form-control input-sm" id="options" name="options">
+			<option value="all">ทั้งหมด</option>
+			<option value="0">เฉพาะที่ค้าง</option>
+			<option value="1">เฉพาะที่ไม่ค้าง</option>
+		</select>
+	</div>
+
   <input type="hidden" id="allCustomer" name="allCustomer" value="1">
 </div>
 <hr>
 </form>
 
 <div class="row">
-	<div class="col-sm-12" id="rs">
+	<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5 table-responsive" id="rs">
 
-    </div>
+  </div>
 </div>
 
 
@@ -109,5 +134,5 @@
   </table>
 </script>
 
-<script src="<?php echo base_url(); ?>scripts/report/sales/order_sold_by_customer_and_payment.js"></script>
+<script src="<?php echo base_url(); ?>scripts/report/sales/order_sold_by_customer_and_payment.js?v=<?php echo date('Ymd'); ?>"></script>
 <?php $this->load->view('include/footer'); ?>

@@ -70,60 +70,6 @@ $('#cusTo').autocomplete({
 })
 
 
-function toggleAllProduct(option){
-  $('#allProduct').val(option);
-  if(option == 1){
-    $('#btn-pd-all').addClass('btn-primary');
-    $('#btn-pd-range').removeClass('btn-primary');
-    $('#pdFrom').val('');
-    $('#pdFrom').attr('disabled', 'disabled');
-    $('#pdTo').val('');
-    $('#pdTo').attr('disabled', 'disabled');
-    return
-  }
-
-  if(option == 0){
-    $('#btn-pd-all').removeClass('btn-primary');
-    $('#btn-pd-range').addClass('btn-primary');
-    $('#pdFrom').removeAttr('disabled');
-    $('#pdTo').removeAttr('disabled');
-    $('#pdFrom').focus();
-  }
-}
-
-
-$('#pdFrom').autocomplete({
-  source : BASE_URL + 'auto_complete/get_style_code',
-  autoFocus:true,
-  close:function(){
-    var pdFrom = $(this).val();
-    var pdTo = $('#pdTo').val();
-    if(pdTo.length > 0 && pdFrom.length > 0){
-      if(pdFrom > pdTo){
-        $('#pdTo').val(pdFrom);
-        $('#pdFrom').val(pdTo);
-      }
-    }
-  }
-});
-
-
-$('#pdTo').autocomplete({
-  source:BASE_URL + 'auto_complete/get_style_code',
-  autoFocus:true,
-  close:function(){
-    var pdTo = $(this).val();
-    var pdFrom = $('#pdFrom').val();
-    if(pdTo.length > 0 && pdFrom.length > 0){
-      if(pdFrom > pdTo){
-        $('#pdTo').val(pdFrom);
-        $('#pdFrom').val(pdTo);
-      }
-    }
-  }
-})
-
-
 $("#fromDate").datepicker({
 	dateFormat: 'dd-mm-yy',
 	onClose: function(ds){
@@ -146,6 +92,9 @@ function getReport(){
   var cusTo = $('#cusTo').val();
   var fromDate = $('#fromDate').val();
   var toDate = $('#toDate').val();
+  var channels = $('#channels').val();
+  var payments = $('#payments').val();
+  var options = $('#options').val();
 
   if(allCustomer == 0){
     if(cusFrom.length == 0){
@@ -182,7 +131,10 @@ function getReport(){
     {'name' : 'fromDate' , 'value' : fromDate},
     {'name' : 'toDate', 'value' : toDate},
     {'name' : 'cusFrom', 'value' : cusFrom},
-    {'name' : 'cusTo', 'value' : cusTo}
+    {'name' : 'cusTo', 'value' : cusTo},
+    {'name' : 'channels', 'value' : channels},
+    {'name' : 'payments', 'value' : payments},
+    {'name' : 'options', 'value' : options}
   ];
 
   load_in();
@@ -207,12 +159,12 @@ function getReport(){
 }
 
 
-function doExport(){
+function doExport() {
   var allCustomer = $('#allCustomer').val();
   var cusFrom = $('#cusFrom').val();
   var cusTo = $('#cusTo').val();
   var fromDate = $('#fromDate').val();
-  var toDate = $('#toDate').val();
+  var toDate = $('#toDate').val();  
 
   if(allCustomer == 0){
     if(cusFrom.length == 0){
@@ -245,5 +197,4 @@ function doExport(){
   }
 
   $('#reportForm').submit();
-
 }

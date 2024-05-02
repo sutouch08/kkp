@@ -87,10 +87,11 @@
               	<th class="fix-width-40 text-center">#</th>
                 <th class="fix-width-150 text-center">รหัสสินค้า</th>
                 <th class="min-width-200">ชื่อสินค้า</th>
+								<th class="fix-width-150">โซน</th>
 								<th class="fix-width-100 text-right">ราคา</th>
                 <th class="fix-width-100 text-right">จำนวน</th>
 								<th class="fix-width-120 text-right">มูลค่า</th>
-								<th class="fix-width-100 text-right"></th>
+								<th class="fix-width-40"></th>
               </tr>
             </thead>
             <tbody id="receiveTable">
@@ -103,6 +104,7 @@
 									<td class="middle text-center no"><?php echo $no; ?></td>
 									<td class="moddle"><?php echo $rs->product_code; ?></td>
 									<td class="middle"><?php echo $rs->product_name; ?></td>
+									<td class="middle"><?php echo $rs->zone_name; ?></td>
 									<td class="middle text-right"><?php echo number($rs->price,2); ?></td>
 									<td class="middle text-right"><?php echo number($rs->qty); ?></td>
 									<td class="middle text-right"><?php echo number($rs->amount, 2); ?></td>

@@ -208,12 +208,28 @@ class Sales_report_model extends CI_Model
         $this->db->where('sold.customer_code <=', $ds['cusTo']);
       }
 
+      if( ! empty($ds['channels']) && $ds['channels'] != 'all')
+      {
+        $this->db->where('sold.channels_code', $ds['channels']);
+      }
+
+      if( ! empty($ds['payments']) && $ds['payments'] != 'all')
+      {
+        $this->db->where('sold.payment_code', $ds['payments']);
+      }
+
+      if(isset($ds['options']) && $ds['options'] != 'all')
+      {
+        $this->db->where('credit.valid', $ds['options']);
+      }
+
       $this->db->group_by('sold.reference');
 
       $this->db->order_by('sold.customer_code', 'ASC');
       $this->db->order_by('sold.reference', 'ASC');
 
       $rs = $this->db->get();
+
       if($rs->num_rows() > 0)
       {
         return $rs->result();

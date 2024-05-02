@@ -112,58 +112,41 @@ function insert_item()
 }
 
 
-$('#item-code').autocomplete({
-  source:BASE_URL + 'auto_complete/get_item_code',
-  autoFocus:true,
-  close:function(){
-		if($(this).val() == "not found") {
-			$(this).val('');
-		}
-  }
-});
-
-$('#item-code').keyup(function(e) {
-	if(e.keyCode === 13) {
-		var itemCode = $(this).val();
-		if(itemCode.length) {
-			$('#item-qty').val(1);
-			$('#item-qty').focus().select();
-		}
-	}
-});
-
-
-$('#item-qty').keyup(function(e) {
-	if(e.keyCode === 13) {
-		addItem();
-	}
-})
-
 function addItem()
 {
-	var code = $('#code').val();
-	var itemCode = $('#item-code').val();
-	var qty = parseDefault(parseFloat($('#item-qty').val()), 0);
+  let code = $('#code').val();
+	let barcode = $('#barcode-item').val();
+	let zone_code = $('#zone-code').val();
+  let zone_name = $('#zone-name').val();
+	let qty = parseDefault(parseFloat($('#item-qty').val()), 0);
 
-	if(itemCode.length && qty > 0) {
+  if(zone_code.length == 0 || zone_name.length == 0) {
+    swal("กรุณาระบุโซน");
+    return false;
+  }
+
+	if(barcode.length > 0 && qty > 0) {
+
 		$('#btn-add-item').attr('disabled', 'disabled');
+
 	  $.ajax({
 	    url:HOME + 'add_item',
 			type:'POST',
 			cache:false,
 			data:{
-				'code' : code,
-				'item_code' : itemCode,
+        'code' : code,
+				'barcode' : barcode,
+				'zone_code' : zone_code,
 				'qty' : qty
 			},
 			success:function(rs) {
 				$('#btn-add-item').removeAttr('disabled');
 
-				if(rs == 'success'){
+				if(rs == 'success') {
 					updateReceiveTable(code);
-					$('#item-code').val('');
-					$('#item-qty').val('');
-					$('#item-code').focus();
+					$('#barcode-item').val('');
+          $('#item-qty').val(1);
+          $('#barcode-item').focus();
 				}
 				else {
 					swal({
@@ -221,8 +204,26 @@ function updateReceiveTable(code) {
 
 
 function getData(){
-	var po = $("#poCode").val();
-	if(po.length > 0){
+	let po = $("#poCode").val();
+  let zone_code = $('#zone-code').val();
+  let zone_name = $('#zone-name').val();
+
+  if(zone_code.length == 0 || zone_name.length == 0) {
+    swal({
+      title:'Oops!',
+      text:"กรุณาระบุโซนรับสินค้า",
+      type:'warning'
+    },
+    function() {
+      setTimeout(() => {
+        $('#zone-code').focus();
+      }, 200);
+    });
+
+    return false;
+  }
+
+	if(po.length > 0) {
 		load_in();
 		$.ajax({
 			url: HOME + 'get_po_details',
@@ -257,17 +258,26 @@ function insertPoItems()
 {
 	$('#poGrid').modal('hide');
 
-	var code = $("#code").val();
+	let code = $("#code").val();
+  let zone_code = $('#zone-code').val();
+  let zone_name = $('#zone-name').val();
+
+  if(zone_code.length == 0 || zone_name.length == 0) {
+    swal("กรุณาระบุโซนรับสินค้า");
+    return false;
+  }
+
 	var items = [];
 
-  $('.receive_qty').each(function(){
+  $('.receive_qty').each(function() {
 		let pdCode = $(this).data('pdcode');
     var qty = parseDefault(parseFloat($(this).val()),0);
 
     if(qty > 0){
       var item = {
         'product_code' : pdCode,
-        'qty' : qty
+        'qty' : qty,
+        'zone_code' : zone_code
       }
 
       items.push(item);
@@ -340,3 +350,76 @@ function clearAll() {
 		$(this).val('');
 	})
 }
+
+function changeZone() {
+  $('#zone-code').val('');
+  $('#zone-name').val('');
+  $('#zone-code').removeAttr('disabled');
+  $('#btn-change-zone').addClass('hide');
+  $('#btn-add-zone').removeClass('hide');
+
+  $('#barcode-item').val('');
+  $('#barcode-item').attr('disabled', 'disabled');
+  $('#item-qty').val(1);
+  $('#btn-add-item').attr('disabled', 'disabled');
+  $('#zone-code').focus();
+}
+
+
+function getZone() {
+  let code = $.trim($('#zone-code').val());
+
+  if(code.length) {
+    $.ajax({
+      url:HOME + 'get_zone',
+      type:'POST',
+      cache:false,
+      data:{
+        'code' : code
+      },
+      success:function(rs) {
+        if(isJson(rs)) {
+          let ds = JSON.parse(rs);
+
+          if(ds.status == 'success') {
+            $('#zone-code').val(ds.data.code);
+            $('#zone-name').val(ds.data.name);
+            $('#zone-code').attr('disabled', 'disabled');
+            $('#btn-add-zone').addClass('hide');
+            $('#btn-change-zone').removeClass('hide');
+            $('#barcode-item').removeAttr('disabled');
+            $('#btn-add-item').removeAttr('disabled');
+            $('#barcode-item').focus();
+          }
+          else {
+            swal({
+              title:'Error!',
+              text:ds.message,
+              type:'error'
+            })
+          }
+        }
+        else {
+          swal({
+            title:'Error!',
+            text:rs,
+            type:'error'
+          })
+        }
+      }
+    })
+  }
+}
+
+$("#zone-code").keyup(function(e) {
+  if(e.keyCode === 13) {
+    getZone();
+  }
+})
+
+
+$('#barcode-item').keyup(function(e) {
+  if(e.keyCode == 13) {
+    addItem();
+  }
+});

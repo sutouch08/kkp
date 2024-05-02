@@ -1,43 +1,39 @@
 
 <div class="row">
-	<div class="col-lg-1-harf col-md-1-harf col-sm-2 col-xs-4 padding-5">
-		<label>โซน</label>
-		<input type="text" class="form-control input-sm" id="zone-code" placeholder="รหัสโซน" autofocus />
-	</div>
-	<div class="col-lg-1 col-md-1 col-sm-1 col-xs-3 padding-5">
-		<label class="display-block not-show">get</label>
-		<button type="button" class="btn btn-xs btn-primary btn-block" id="btn-add-zone" onclick="getZone()">ตกลง</button>
-		<button type="button" class="btn btn-xs btn-info btn-block hide" id="btn-change-zone" onclick="changeZone()">เปลี่ยน</button>
-	</div>
+<?php if(empty($doc->po_code)) : ?>
+	<?php if(getConfig('PRODUCT_TAB_TYPE') == 'style') : ?>
+	<div class="col-lg-2 col-md-2-harf col-sm-3 col-xs-8">
+    <label>รุ่นสินค้า</label>
+    <input type="text" class="form-control input-sm text-center" name="pdCode" id="pd-code" value="" autofocus>
+  </div>
+  <div class="col-lg-1 col-md-1 col-sm-1-harf col-xs-4">
+    <label class="display-block not-show">search</label>
+    <button type="button" class="btn btn-xs btn-primary btn-block" onclick="getProductGrid()">ดึงรายการ</button>
+  </div>
+	<div class="divider visible-xs"></div>
+	<?php endif; ?>
+
 	<div class="col-lg-3 col-md-3 col-sm-3 col-xs-6 padding-5">
-		<label class="display-block not-show">ชื่อโซน</label>
-		<input type="text" class="form-control input-sm text-center" id="zone-name" value="" disabled/>
-	</div>
-	<div class="col-lg-1-harf col-md-1-harf col-sm-2 col-xs-6 padding-5">
-		<label>บาร์โค้ดสินค้า</label>
-		<input type="text" class="form-control input-sm text-center"  id="barcode-item" value="" disabled/>
+		<label>รหัสสินค้า</label>
+		<input type="text" class="form-control input-sm text-center" name="itemCode" id="item-code" value=""/>
 	</div>
 	<div class="col-lg-1 col-md-1 col-sm-1 col-xs-3 padding-5">
 		<label>จำนวน</label>
-		<input type="number" class="form-control input-sm text-center" id="item-qty" value="1" disabled/>
+		<input type="number" class="form-control input-sm text-center" name="itemQty" id="item-qty" value=""/>
 	</div>
 	<div class="col-lg-1 col-md-1 col-sm-1 col-xs-3 padding-5">
 		<label class="display-block not-show">get</label>
-		<button type="button" class="btn btn-xs btn-primary btn-block" id="btn-add-item" onclick="addItem()" disabled>เพิ่ม</button>
+		<button type="button" class="btn btn-xs btn-primary btn-block" id="btn-add-item" onclick="addItem()">เพิ่ม</button>
 	</div>
-	<div class="col-lg-1 col-md-1 col-sm-1 col-xs-6">
+<?php endif; ?>
 
-	</div>
-	<div class="col-lg-1 col-md-1-harf col-sm-1-harf col-xs-4 padding-5">
-		<label class="display-block not-show">get</label>
+	<div class="col-lg-1-harf col-lg-offset-9 col-md-1-harf col-md-offset-9 col-sm-2 col-sm-offset-8 col-xs-4 col-xs-offset-4 padding-5">
 		<button type="button" class="btn btn-xs btn-info btn-block" onclick="getData()">ดึงใบสั่งผลิต</button>
 	</div>
-  <div class="col-lg-1 col-md-1-harf col-sm-2 col-xs-4 padding-5">
-		<label class="display-block not-show">get</label>
+  <div class="col-lg-1-harf col-md-1-harf col-sm-2 col-xs-4 padding-5">
 		<button type="button" class="btn btn-xs btn-danger btn-block" onclick="removeAll()">ลบทั้งหมด</button>
   </div>
 </div>
-
 <hr class="margin-top-15">
 
 
@@ -98,12 +94,12 @@
 	{{#each this}}
 		{{#if nodata}}
 		<tr>
-			<td colspan="8" class="middle text-center">---- ไม่พบรายการ ----</td>
+			<td colspan="7" class="middle text-center">---- ไม่พบรายการ ----</td>
 		</tr>
 		{{else}}
 			{{#if @last}}
 				<tr>
-				<td colspan="5" class="middle text-right"><strong>รวม</strong></td>
+				<td colspan="4" class="middle text-right"><strong>รวม</strong></td>
 				<td class="middle text-right"><strong>{{total_qty}}</strong></td>
 				<td class="middle text-right"><strong>{{total_amount}}</strong></td>
 				<td></td>
@@ -113,7 +109,6 @@
 						<td class="middle text-center no">{{no}}</td>
 						<td class="moddle">{{product_code}}</td>
 						<td class="middle">{{product_name}}</td>
-						<td class="middle">{{zone_name}}</td>
 						<td class="middle text-right">{{price}}</td>
 						<td class="middle text-right">{{qty}}</td>
 						<td class="middle text-right">{{amount}}</td>

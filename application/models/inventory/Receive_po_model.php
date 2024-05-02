@@ -73,6 +73,23 @@ class Receive_po_model extends CI_Model
     ->where('receive_code', $code)
     ->where('product_code', $product_code)
     ->get('receive_product_detail');
+
+    if($rs->num_rows() === 1)
+    {
+      return $rs->row();
+    }
+
+    return FALSE;
+  }
+
+  public function get_detail_by_product_and_zone($code, $product_code, $zone_code)
+  {
+    $rs = $this->db
+    ->where('receive_code', $code)
+    ->where('product_code', $product_code)
+    ->where('zone_code', $zone_code)
+    ->get('receive_product_detail');
+
     if($rs->num_rows() === 1)
     {
       return $rs->row();
@@ -100,9 +117,11 @@ class Receive_po_model extends CI_Model
     $this->db
     ->select('rd.*')
     ->select('pd.barcode')
+    ->select('zn.code AS zone_code, zn.name AS zone_name, zn.warehouse_code')
     ->from('receive_product_detail AS rd')
     ->join('products AS pd', 'rd.product_code = pd.code', 'left')
     ->join('product_size AS ps', 'pd.size_code = ps.code', 'left')
+    ->join('zone AS zn', 'rd.zone_code = zn.code', 'left')
     ->where('rd.receive_code', $code)
     ->order_by('rd.style_code', 'ASC')
     ->order_by('pd.color_code', 'ASC')
@@ -149,6 +168,7 @@ class Receive_po_model extends CI_Model
   public function get_unsave_details($code)
   {
     $rs = $this->db->where('receive_code', $code)->where('status', 'N')->get('receive_product_detail');
+
     if($rs->num_rows() > 0)
     {
       return $rs->result();

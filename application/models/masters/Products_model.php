@@ -317,14 +317,7 @@ class Products_model extends CI_Model
       return $rs->row();
     }
 
-
-    // $rs = $this->db->where('barcode', $barcode)->or_where('code', $barcode)->get('products');
-    // if($rs->num_rows() === 1)
-    // {
-    //   return $rs->row();
-    // }
-
-    return FALSE;
+    return NULL;
   }
 
 
@@ -334,11 +327,6 @@ class Products_model extends CI_Model
   {
     return $this->db->set($field, $val)->where('code', $item)->update('products');
   }
-
-
-
-
-
 
 
   public function delete_item($code)
@@ -361,7 +349,7 @@ class Products_model extends CI_Model
       return $rs->row();
     }
 
-    return FALSE;
+    return NULL;
   }
 
 

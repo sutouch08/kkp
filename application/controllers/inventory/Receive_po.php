@@ -23,7 +23,7 @@ class Receive_po extends PS_Controller
   public function index()
   {
     $this->load->helper('channels');
-    
+
     $filter = array(
       'code'    => get_filter('code', 'code', ''),
       'invoice' => get_filter('invoice', 'invoice', ''),
@@ -122,70 +122,116 @@ class Receive_po extends PS_Controller
 	{
 		$sc = TRUE;
 
-		$code = trim($this->input->post('code'));
+    $code = $this->input->post('code');
+		$barcode = trim($this->input->post('barcode'));
+    $zone_code = $this->input->post('zone_code');
+    $qty = $this->input->post('qty');
 
-		if(!empty($code))
+		if( ! empty($code))
 		{
 			$doc = $this->receive_po_model->get($code);
-			if(!empty($doc))
+
+			if( ! empty($doc))
 			{
 				if($doc->status == 0)
 				{
-					$item_code = trim($this->input->post('item_code'));
-					$qty = $this->input->post('qty');
-
-					if(!empty($item_code))
+					if( ! empty($barcode))
 					{
 						if($qty > 0)
 						{
 							//-- check item
 							$this->load->model('masters/products_model');
+              $this->load->model('masters/zone_model');
 
-							$item = $this->products_model->get($item_code);
+							$item = $this->products_model->get_product_by_barcode($barcode);
 
-							if(!empty($item))
+              $item = empty($item) ? $this->products_model->get($barcode) : $item;
+
+							if( ! empty($item))
 							{
-								$detail = $this->receive_po_model->get_detail_by_product($code, $item->code);
+                $zone = $this->zone_model->get($zone_code);
 
-								if(!empty($detail))
-								{
-									$uQty = $detail->qty + $qty;
-									$amount = $uQty * $detail->price;
+                if( ! empty($zone))
+                {
+                  $detail = $this->receive_po_model->get_detail_by_product_and_zone($code, $item->code, $zone_code);
 
-									$arr = array(
-										'qty' => $uQty,
-										'amount' => $amount
-									);
+                  if( ! empty($detail))
+                  {
+                    $uQty = $detail->qty + $qty;
+                    $amount = $uQty * $detail->price;
 
-									if(!$this->receive_po_model->update_detail($detail->id, $arr))
-									{
-										$sc = FALSE;
-										$this->error = "Update failed";
-									}
-								}
-								else
-								{
-									$pod = empty($doc->po_code) ? NULL : $this->po_model->get_detail($doc->po_code, $item->code);
-			            $price = empty($pod) ? $item->cost : $pod->price;
+                    $arr = array(
+                      'qty' => $uQty,
+                      'amount' => $amount
+                    );
 
-			            $arr = array(
-			              'receive_code' => $code,
-										'po_code' => (empty($pod) ? NULL : $pod->po_code),
-			              'style_code' => $item->style_code,
-			              'product_code' => $item->code,
-			              'product_name' => $item->name,
-			              'price' => $price,
-			              'qty' => $qty,
-			              'amount' => $price * $qty,
-			              'status' => 'N'
-			            );
+                    if(!$this->receive_po_model->update_detail($detail->id, $arr))
+                    {
+                      $sc = FALSE;
+                      $this->error = "Update failed";
+                    }
+                  }
+                  else
+                  {
+                    if( ! empty($doc->po_code))
+                    {
+                      $pod = $this->po_model->get_detail($doc->po_code, $item->code);
 
-			            if(! $this->receive_po_model->add_detail($arr))
-									{
-										$sc = FALSE;
-										$this->error = "Add Item failed";
-									}
-								}
+                      if( ! empty($pod))
+                      {
+                        $price = $pod->price;
+
+                        $arr = array(
+                          'receive_code' => $code,
+                          'po_code' => $doc->po_code,
+                          'style_code' => $item->style_code,
+                          'product_code' => $item->code,
+                          'product_name' => $item->name,
+                          'price' => $price,
+                          'qty' => $qty,
+                          'amount' => $price * $qty,
+                          'zone_code' => $zone->code,
+                          'warehouse_code' => $zone->warehouse_code,
+                          'status' => 'N'
+                        );
+                      }
+                      else
+                      {
+                        $sc = FALSE;
+                        $this->error = "Item : {$item->code} ไม่อยู่ในรายการสั่งผลิต เลขที่ {$doc->po_code}";
+                      }
+                    }
+                    else
+                    {
+                      $arr = array(
+                      'receive_code' => $code,
+                      'po_code' => NULL,
+                      'style_code' => $item->style_code,
+                      'product_code' => $item->code,
+                      'product_name' => $item->name,
+                      'price' => $item->cost,
+                      'qty' => $qty,
+                      'amount' => $item->cost * $qty,
+                      'zone_code' => $zone_code,
+                      'status' => 'N'
+                      );
+                    }
+
+                    if($sc === TRUE)
+                    {
+                      if( ! $this->receive_po_model->add_detail($arr))
+                      {
+                        $sc = FALSE;
+                        $this->error = "Add Item failed";
+                      }
+                    }
+                  }
+                }
+                else
+                {
+                  $sc = FALSE;
+                  $this->error = "Invalid zone";
+                }
 							}
 							else
 							{
@@ -202,7 +248,7 @@ class Receive_po extends PS_Controller
 					else
 					{
 						$sc = FALSE;
-						$this->error = "Missing required parameter : Item code";
+						$this->error = "Missing required parameter : barcode";
 					}
 				}
 				else
@@ -235,69 +281,99 @@ class Receive_po extends PS_Controller
   {
     $sc = TRUE;
     $this->load->model('masters/products_model');
+    $this->load->model('masters/zone_model');
     $this->load->model('purchase/po_model');
     $details = json_decode($this->input->post('details'));
-    $doc = $this->receive_po_model->get($code);
-    if(!empty($doc))
-    {
-      if(!empty($details))
-      {
-        $this->db->trans_start();
-        foreach($details as $rs)
-        {
-          $row = $this->receive_po_model->get_detail_by_product($code, $rs->product_code);
-          if(!empty($row))
-          {
-            $qty = $row->qty + $rs->qty;
-            $arr = array(
-              'qty' => $qty,
-              'amount' => $qty * $row->price
-            );
 
-            $this->receive_po_model->update_detail($row->id, $arr);
+    $doc = $this->receive_po_model->get($code);
+
+    if( ! empty($doc))
+    {
+      if($doc->status == 0)
+      {
+        if(!empty($details))
+        {
+          $this->db->trans_begin();
+
+          foreach($details as $rs)
+          {
+            if($sc === FALSE)
+            {
+              break;
+            }
+
+            $row = $this->receive_po_model->get_detail_by_product_and_zone($code, $rs->product_code, $rs->zone_code);
+
+            if( ! empty($row))
+            {
+              $qty = $row->qty + $rs->qty;
+
+              $arr = array(
+                'qty' => $qty,
+                'amount' => $qty * $row->price
+              );
+
+              if( ! $this->receive_po_model->update_detail($row->id, $arr))
+              {
+                $sc = FALSE;
+                $this->error = "Failed to update item {$rs->product_code}";
+              }
+            }
+            else
+            {
+              $item = $this->products_model->get($rs->product_code);
+              $zone = $this->zone_model->get($rs->zone_code);
+              $pod = $this->po_model->get_detail($doc->po_code, $item->code);
+              $price = empty($pod) ? $item->cost : $pod->price;
+
+              $arr = array(
+                'receive_code' => $code,
+                'po_code' => (empty($pod) ? NULL : $pod->po_code),
+                'style_code' => $item->style_code,
+                'product_code' => $item->code,
+                'product_name' => $item->name,
+                'price' => $price,
+                'qty' => $rs->qty,
+                'amount' => $price * $rs->qty,
+                'zone_code' => $zone->code,
+                'warehouse_code' => $zone->warehouse_code,
+                'status' => 'N'
+              );
+
+              if( ! $this->receive_po_model->add_detail($arr))
+              {
+                $sc = FALSE;
+                $this->error = "Failed to insert item {$rs->product_code}";
+              }
+            }
+          }
+
+          if( $sc === TRUE)
+          {
+            $this->db->trans_commit();
           }
           else
           {
-            $item = $this->products_model->get($rs->product_code);
-            $pod = empty($doc->po_code) ? NULL : $this->po_model->get_detail($doc->po_code, $item->code);
-            $price = empty($pod) ? $item->cost : $pod->price;
-
-            $arr = array(
-              'receive_code' => $code,
-							'po_code' => (empty($pod) ? NULL : $pod->po_code),
-              'style_code' => $item->style_code,
-              'product_code' => $item->code,
-              'product_name' => $item->name,
-              'price' => $price,
-              'qty' => $rs->qty,
-              'amount' => $price * $rs->qty,
-              'status' => 'N'
-            );
-
-            $this->receive_po_model->add_detail($arr);
+            $this->db->trans_rollback();
           }
         }
-
-        $this->db->trans_complete();
-
-        if($this->db->trans_status() === FALSE)
+        else
         {
           $sc = FALSE;
-          $this->error = 'insert_fail';
+          $this->error = 'no items found';
         }
       }
       else
       {
         $sc = FALSE;
-        $this->error = 'no_data_found';
+        $this->error = "Invalid document status";
       }
     }
     else
     {
       $sc = FALSE;
-      $this->error = 'doc_not_found';
+      $this->error = 'Invalid document number';
     }
-
 
     echo $sc === TRUE ? 'success' : $this->error;
   }
@@ -309,47 +385,61 @@ class Receive_po extends PS_Controller
 		$sc = TRUE;
 		$ds = array();
 		$code = $this->input->get('code');
+
 		if(!empty($code))
 		{
-			$details = $this->receive_po_model->get_details($code);
+      $doc = $this->receive_po_model->get($code);
 
-			if(!empty($details))
-			{
-				$no = 1;
-				$total_qty = 0;
-				$total_amount = 0;
+      if( ! empty($doc))
+      {
+        $details = $this->receive_po_model->get_details($code);
 
-				foreach($details as $rs)
-				{
-					$arr = array(
-						'no' => $no,
-						'id' => $rs->id,
-						'product_code' => $rs->product_code,
-						'product_name' => $rs->product_name,
-						'price' => number($rs->price, 2),
-						'qty' => number($rs->qty),
-						'amount' => number($rs->amount, 2),
-						'open' => $rs->status === 'N' ? TRUE : FALSE
-					);
+        if(!empty($details))
+        {
+          $no = 1;
+          $total_qty = 0;
+          $total_amount = 0;
 
-					array_push($ds, $arr);
-					$no++;
-					$total_qty += $rs->qty;
-					$total_amount += $rs->amount;
-				}
+          foreach($details as $rs)
+          {
+            $arr = array(
+              'no' => $no,
+              'id' => $rs->id,
+              'product_code' => $rs->product_code,
+              'product_name' => $rs->product_name,
+              'price' => number($rs->price, 2),
+              'qty' => number($rs->qty),
+              'amount' => number($rs->amount, 2),
+              'zone_code' => $rs->zone_code,
+              'zone_name' => $rs->zone_name,
+              'open' => $rs->status === 'N' ? TRUE : FALSE
+            );
 
-				$arr = array(
-					'total_qty' => number($total_qty),
-					'total_amount' => number($total_amount, 2)
-				);
+            array_push($ds, $arr);
+            $no++;
+            $total_qty += $rs->qty;
+            $total_amount += $rs->amount;
+          }
 
-				array_push($ds, $arr);
-			}
-			else
-			{
-				$arr = array("nodata" => "Nodata");
-				array_push($ds, $arr);
-			}
+          $arr = array(
+            'total_qty' => number($total_qty),
+            'total_amount' => number($total_amount, 2)
+          );
+
+          array_push($ds, $arr);
+        }
+        else
+        {
+          $arr = array("nodata" => "Nodata");
+          array_push($ds, $arr);
+        }
+
+      }
+      else
+      {
+        $sc = FALSE;
+        $this->error = "Invalid Document Number";
+      }
 		}
 		else
 		{
@@ -400,7 +490,9 @@ class Receive_po extends PS_Controller
     $this->load->model('stock/stock_model');
 
     $auto_close = getConfig('AUTO_CLOSE_PO');
+
     $doc = $this->receive_po_model->get($code);
+
     if(empty($doc))
     {
       $sc = FALSE;
@@ -416,9 +508,11 @@ class Receive_po extends PS_Controller
     if($sc === TRUE)
     {
       $details = $this->receive_po_model->get_unsave_details($code);
+
       if(!empty($details))
       {
-        $this->db->trans_start();
+        $this->db->trans_begin();
+
         foreach($details as $rs)
         {
           if($sc === FALSE)
@@ -427,7 +521,7 @@ class Receive_po extends PS_Controller
           }
 
           //---- update stock
-          if(! $this->stock_model->update_stock_zone($doc->zone_code, $rs->product_code, $rs->qty))
+          if(! $this->stock_model->update_stock_zone($rs->zone_code, $rs->product_code, $rs->qty))
           {
             $sc = FALSE;
             $this->error = "Update stock failed";
@@ -436,16 +530,16 @@ class Receive_po extends PS_Controller
 
           //--- update stock movement
           $arr = array(
-            'reference' => $doc->code,
-            'warehouse_code' => $doc->warehouse_code,
-            'zone_code' => $doc->zone_code,
+            'reference' => $rs->receive_code,
+            'warehouse_code' => $rs->warehouse_code,
+            'zone_code' => $rs->zone_code,
             'product_code' => $rs->product_code,
             'move_in' => $rs->qty,
             'move_out' => 0,
             'date_add' => $doc->date_add
           );
 
-          if(! $this->movement_model->move_in($doc->code, $rs->product_code, $doc->warehouse_code, $doc->zone_code, $rs->qty, $doc->date_add))
+          if(! $this->movement_model->move_in($rs->receive_code, $rs->product_code, $rs->warehouse_code, $rs->zone_code, $rs->qty, $doc->date_add))
           {
             $sc = FALSE;
             $this->error = 'Insert Movement failed';
@@ -498,7 +592,14 @@ class Receive_po extends PS_Controller
           $this->error = 'Change document status failed : '.$code;
         }
 
-        $this->db->trans_complete();
+        if($sc === TRUE)
+        {
+          $this->db->trans_commit();
+        }
+        else
+        {
+          $this->db->trans_rollback();
+        }
       }
       else
       {
@@ -775,10 +876,13 @@ class Receive_po extends PS_Controller
   public function edit($code)
   {
     $this->load->model('masters/zone_model');
+
     $document = $this->receive_po_model->get($code);
+
     if(!empty($document))
     {
       $zone = $this->zone_model->get($document->zone_code);
+
       if(!empty($zone))
       {
         $document->zone_name = $zone->name;
@@ -1007,6 +1111,37 @@ class Receive_po extends PS_Controller
     }
   }
 
+
+  public function get_zone()
+  {
+    $this->load->model('masters/zone_model');
+    $sc = TRUE;
+    $code = $this->input->post('code');
+
+    if( ! empty($code))
+    {
+      $zone = $this->zone_model->get($code);
+
+      if(empty($zone))
+      {
+        $sc = FALSE;
+        $this->error = "Not found";
+      }
+    }
+    else
+    {
+      $sc = FALSE;
+      $this->error = "Missing required parameter : zone code";
+    }
+
+    $arr = array(
+      'status' => $sc === TRUE ? 'success' : 'failed',
+      'message' => $sc === TRUE ? 'success' : $this->error,
+      'data' => $sc === TRUE ? $zone : NULL
+    );
+
+    echo json_encode($arr);
+  }
 
 
   public function get_new_code($date)

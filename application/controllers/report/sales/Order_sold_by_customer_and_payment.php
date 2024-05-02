@@ -12,6 +12,8 @@ class Order_sold_by_customer_and_payment extends PS_Controller
     parent::__construct();
     $this->home = base_url().'report/sales/order_sold_by_customer_and_payment';
     $this->load->model('report/sales/sales_report_model');
+    $this->load->helper('channels');
+    $this->load->helper('payment_method');
   }
 
   public function index()
@@ -29,6 +31,10 @@ class Order_sold_by_customer_and_payment extends PS_Controller
     $fromDate = $this->input->get('fromDate');
     $toDate = $this->input->get('toDate');
 
+    $channels = $this->input->get('channels');
+    $payments = $this->input->get('payments');
+    $options = $this->input->get('options');
+
     //---  Report title
     $sc['reportDate'] = thai_date($fromDate, FALSE, '/').' - '.thai_date($toDate, FALSE, '/');
     $sc['cusList']   = $allCustomer == 1 ? 'ทั้งหมด' : '('.$cusFrom.') - ('.$cusTo.')';
@@ -40,7 +46,10 @@ class Order_sold_by_customer_and_payment extends PS_Controller
       'cusFrom' => $cusFrom,
       'cusTo' => $cusTo,
       'fromDate' => from_date($fromDate),
-      'toDate' => to_date($toDate)
+      'toDate' => to_date($toDate),
+      'channels' => $channels,
+      'payments' => $payments,
+      'options' => $options
     );
 
     $result = $this->sales_report_model->get_order_sold_by_customer_and_payment($ds);
@@ -57,6 +66,7 @@ class Order_sold_by_customer_and_payment extends PS_Controller
       {
         $paid = ($rs->paid === NULL && $rs->balance === NULL) ? $rs->total_amount : $rs->paid;
         $balance = $rs->total_amount - $paid;
+        $balance = $balance > 0 ? $balance : 0;
         $cusName = empty($rs->customer_ref) ? $rs->customer_name : $rs->customer_name . "({$rs->customer_ref})";
         $arr = array(
           'no' => number($no),
@@ -67,7 +77,7 @@ class Order_sold_by_customer_and_payment extends PS_Controller
           'payments' => $rs->payment,
           'amount' => number($rs->total_amount, 2),
           'paid' =>  number($paid, 2),
-          'balance' => number($rs->balance, 2)
+          'balance' => number($balance, 2)
         );
 
         array_push($bs, $arr);
@@ -108,9 +118,12 @@ class Order_sold_by_customer_and_payment extends PS_Controller
 
     $fromDate = $this->input->post('fromDate');
     $toDate = $this->input->post('toDate');
+    $channels = $this->input->get('channels');
+    $payments = $this->input->get('payments');
+    $options = $this->input->get('options');
 
     //---  Report title
-    $report_title = 'รายงานยอดขาย แยกตามลูกค้า แสดงรายการสินค้า';
+    $report_title = 'รายงานยอดขาย แยกตามลูกค้า แสดงยอดค้างรับ';
     $date_title = 'วันที่ : '.thai_date($fromDate, FALSE, '/').' - '.thai_date($toDate, FALSE, '/');
     $cus_title = 'ลูกค้า :  '. ($allCustomer == 1 ? 'ทั้งหมด' : $cusFrom.' - '.$cusTo);
 
@@ -119,7 +132,7 @@ class Order_sold_by_customer_and_payment extends PS_Controller
     $this->load->library('excel');
 
     $this->excel->setActiveSheetIndex(0);
-    $this->excel->getActiveSheet()->setTitle('Sales By Customer Show Items');
+    $this->excel->getActiveSheet()->setTitle('Sales By Customer Show Payments');
 
     //--- set report title header
     $this->excel->getActiveSheet()->setCellValue('A1', $report_title);
@@ -134,11 +147,11 @@ class Order_sold_by_customer_and_payment extends PS_Controller
     $this->excel->getActiveSheet()->setCellValue('B4', 'วันที่');
     $this->excel->getActiveSheet()->setCellValue('C4', 'ลูกค้า');
     $this->excel->getActiveSheet()->setCellValue('D4', 'เลขที่เอกสาร');
-    $this->excel->getActiveSheet()->setCellValue('E4', 'สินค้า');
-    $this->excel->getActiveSheet()->setCellValue('F4', 'ราคา');
-    $this->excel->getActiveSheet()->setCellValue('G4', 'ส่วนลด');
-    $this->excel->getActiveSheet()->setCellValue('H4', 'จำนวน');
-    $this->excel->getActiveSheet()->setCellValue('I4', 'มูลค่า');
+    $this->excel->getActiveSheet()->setCellValue('E4', 'ช่องทาง');
+    $this->excel->getActiveSheet()->setCellValue('F4', 'การชำระเงิน');
+    $this->excel->getActiveSheet()->setCellValue('G4', 'มูลค่า');
+    $this->excel->getActiveSheet()->setCellValue('H4', 'รับแล้ว');
+    $this->excel->getActiveSheet()->setCellValue('I4', 'ค้างรับ');
 
     $row = 5;
 
@@ -147,7 +160,10 @@ class Order_sold_by_customer_and_payment extends PS_Controller
       'cusFrom' => $cusFrom,
       'cusTo' => $cusTo,
       'fromDate' => from_date($fromDate),
-      'toDate' => to_date($toDate)
+      'toDate' => to_date($toDate),
+      'channels' => $channels,
+      'payments' => $payments,
+      'options' => $options
     );
 
     $result = $this->sales_report_model->get_order_sold_by_date_upd($ds);
@@ -157,15 +173,20 @@ class Order_sold_by_customer_and_payment extends PS_Controller
       $no = 1;
       foreach($result as $rs)
       {
+        $paid = ($rs->paid === NULL && $rs->balance === NULL) ? $rs->total_amount : $rs->paid;
+        $balance = $rs->total_amount - $paid;
+        $balance = $balance > 0 ? $balance : 0;
+        $cusName = empty($rs->customer_ref) ? $rs->customer_name : $rs->customer_name . "({$rs->customer_ref})";
+
         $this->excel->getActiveSheet()->setCellValue('A'.$row, $no);
         $this->excel->getActiveSheet()->setCellValue('B'.$row, thai_date($rs->date_upd, FALSE, '/'));
-        $this->excel->getActiveSheet()->setCellValue('C'.$row, $rs->customer_name);
+        $this->excel->getActiveSheet()->setCellValue('C'.$row, $cusName);
         $this->excel->getActiveSheet()->setCellValue('D'.$row, $rs->reference);
-        $this->excel->getActiveSheet()->setCellValue('E'.$row, $rs->product_code);
-        $this->excel->getActiveSheet()->setCellValue('F'.$row, number($rs->price, 2));
-        $this->excel->getActiveSheet()->setCellValue('G'.$row, $rs->discount_label);
-        $this->excel->getActiveSheet()->setCellValue('H'.$row, number($rs->qty));
-        $this->excel->getActiveSheet()->setCellValue('I'.$row, number($rs->total_amount));
+        $this->excel->getActiveSheet()->setCellValue('E'.$row, $rs->channels);
+        $this->excel->getActiveSheet()->setCellValue('F'.$row, $rs->payment);
+        $this->excel->getActiveSheet()->setCellValue('G'.$row, $rs->total_amount);
+        $this->excel->getActiveSheet()->setCellValue('H'.$row, $paid);
+        $this->excel->getActiveSheet()->setCellValue('I'.$row, $balance);
         $no++;
         $row++;
       }
@@ -173,18 +194,14 @@ class Order_sold_by_customer_and_payment extends PS_Controller
       $res = $row -1;
 
       $this->excel->getActiveSheet()->setCellValue('A'.$row, 'รวม');
-      $this->excel->getActiveSheet()->mergeCells('A'.$row.':G'.$row);
+      $this->excel->getActiveSheet()->mergeCells('A'.$row.':F'.$row);
+      $this->excel->getActiveSheet()->setCellValue('G'.$row, '=SUM(G5:G'.$res.')');
       $this->excel->getActiveSheet()->setCellValue('H'.$row, '=SUM(H5:H'.$res.')');
       $this->excel->getActiveSheet()->setCellValue('I'.$row, '=SUM(I5:I'.$res.')');
 
       $this->excel->getActiveSheet()->getStyle('A'.$row)->getAlignment()->setHorizontal('right');
-      $this->excel->getActiveSheet()->getStyle('F5:F'.$row)->getAlignment()->setHorizontal('right');
-      $this->excel->getActiveSheet()->getStyle('F5:F'.$row)->getNumberFormat()->setFormatCode('#,##0');
-      $this->excel->getActiveSheet()->getStyle('G5:G'.$row)->getAlignment()->setHorizontal('center');
-      $this->excel->getActiveSheet()->getStyle('G5:G'.$row)->getNumberFormat()->setFormatCode('#,##0.00');
-      $this->excel->getActiveSheet()->getStyle('H5:I'.$row)->getAlignment()->setHorizontal('right');
-      $this->excel->getActiveSheet()->getStyle('H5:H'.$row)->getNumberFormat()->setFormatCode('0');
-      $this->excel->getActiveSheet()->getStyle('I5:I'.$row)->getNumberFormat()->setFormatCode('#,##0.00');
+      $this->excel->getActiveSheet()->getStyle('G5:I'.$row)->getAlignment()->setHorizontal('right');
+      $this->excel->getActiveSheet()->getStyle('G5:I'.$row)->getNumberFormat()->setFormatCode('#,##0.00');
     }
 
 
