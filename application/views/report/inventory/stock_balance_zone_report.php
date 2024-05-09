@@ -49,6 +49,7 @@
 		<input type="text" class="form-control input-sm text-center" id="date" name="date" readonly value="<?php echo date("d-m-Y"); ?>">
   </div>
 
+	<div class="divider-hidden"></div>
 	<div class="col-lg-1-harf col-md-2 col-sm-2-harf col-xs-4 padding-5">
 		<label>โซน</label>
 		<div class="btn-group width-100">
@@ -57,7 +58,7 @@
     </div>
 	</div>
 
-	<div class="col-sm-4 padding-5">
+	<div class="col-lg-4 col-md-4 col-sm-4 col-xs-8 padding-5">
 		<label class="display-block not-show">zone</label>
 		<input type="text" class="form-control input-sm" id="zone" name="zone" disabled>
 	</div>
