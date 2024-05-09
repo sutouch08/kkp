@@ -150,6 +150,7 @@ class Move extends PS_Controller
     }
 
     $details = $this->move_model->get_details($code);
+
     if(!empty($details))
     {
       foreach($details as $rs)
@@ -674,6 +675,7 @@ class Move extends PS_Controller
           'no' => $no,
           'barcode' => $rs->barcode,
           'products' => $rs->product_code,
+          'product_name' => $rs->product_name,
           'from_zone' => $this->zone_model->get_name($rs->from_zone),
           'to_zone' => $this->zone_model->get_name($rs->to_zone),
           'qty' => number($rs->qty),
@@ -752,6 +754,7 @@ class Move extends PS_Controller
               'no' => $no,
               'barcode' => $this->products_model->get_barcode($rs->product_code),
               'products' => $rs->product_code,
+              'product_name' => $rs->product_name,
               'qty' => $qty
             );
 

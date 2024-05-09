@@ -1,23 +1,28 @@
-<?php $this->load->view('include/header'); ?>
+<?php $this->load->view("include/header"); ?>
 <div class="row hidden-print">
-	<div class="col-sm-6 padding-5">
-    <h3 class="title">
-      <i class="fa fa-bar-chart"></i>
-      <?php echo $this->title; ?>
-    </h3>
-    </div>
-		<div class="col-sm-6 padding-5">
-			<p class="pull-right top-p">
-        <button type="button" class="btn btn-sm btn-success" onclick="getReport()"><i class="fa fa-bar-chart"></i> รายงาน</button>
-				<button type="button" class="btn btn-sm btn-primary" onclick="doExport()"><i class="fa fa-file-excel-o"></i> ส่งออก</button>
-				<button type="button" class="btn btn-sm btn-info" onclick="print()"><i class="fa fa-print"></i> พิมพ์</button>
-			</p>
-		</div>
+	<div class="col-lg-6 col-md-6 col-sm-6 hidden-xs padding-5">
+		<h3 class="title">
+			<i class="fa fa-bar-chart"></i>
+			<?php echo $this->title; ?>
+		</h3>
+	</div>
+	<div class="col-xs-12 visible-xs padding-5">
+		<h3 class="title-xs">
+			<i class="fa fa-bar-chart"></i>
+			<?php echo $this->title; ?>
+		</h3>
+	</div>
+	<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 padding-5">
+		<p class="pull-right top-p">
+			<button type="button" class="btn btn-sm btn-success" onclick="getReport()"><i class="fa fa-bar-chart"></i> รายงาน</button>
+			<button type="button" class="btn btn-sm btn-primary" onclick="doExport()"><i class="fa fa-file-excel-o"></i> ส่งออก</button>			
+		</p>
+	</div>
 </div><!-- End Row -->
 <hr class="padding-5 hidden-print"/>
 <form class="hidden-print" id="reportForm" method="post" action="<?php echo $this->home; ?>/do_export">
 <div class="row">
-	<div class="col-sm-1 col-1-harf padding-5">
+	<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-5 padding-5">
 		<label class="display-block">สินค้า</label>
     <div class="btn-group width-100">
       <button type="button" class="btn btn-sm btn-primary width-50" id="btn-pd-all" onclick="toggleAllProduct(1)">ทั้งหมด</button>
@@ -25,16 +30,16 @@
     </div>
 	</div>
 
-	<div class="col-sm-2 padding-5">
+	<div class="col-lg-2 col-md-2 col-sm-2 col-xs-3-harf padding-5">
     <label class="display-block not-show">เริ่มต้น</label>
     <input type="text" class="form-control input-sm text-center" id="fromProduct" name="fromProduct" placeholder="เริ่มต้น" disabled>
   </div>
-  <div class="col-sm-2 padding-5">
+  <div class="col-lg-2 col-md-2 col-sm-2 col-xs-3-harf padding-5">
     <label class="display-block not-show">สิ้นสุด</label>
     <input type="text" class="form-control input-sm text-center" id="toProduct" name="toProduct" placeholder="สิ้นสุด" disabled>
   </div>
 
-	<div class="col-sm-1 col-1-harf padding-5">
+	<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-5 padding-5">
 		<label class="display-block">ลูกค้า</label>
     <div class="btn-group width-100">
       <button type="button" class="btn btn-sm btn-primary width-50" id="btn-cust-all" onclick="toggleAllCustomer(1)">ทั้งหมด</button>
@@ -42,16 +47,16 @@
     </div>
 	</div>
 
-	<div class="col-sm-2 padding-5">
+	<div class="col-lg-2 col-md-2 col-sm-2 col-xs-3-harf padding-5">
     <label class="display-block not-show">เริ่มต้น</label>
     <input type="text" class="form-control input-sm text-center" id="fromCustomer" name="fromCustomer" placeholder="เริ่มต้น" disabled>
   </div>
-  <div class="col-sm-2 padding-5">
+  <div class="col-lg-2 col-md-2 col-sm-2 col-xs-3-harf padding-5">
     <label class="display-block not-show">สิ้นสุด</label>
     <input type="text" class="form-control input-sm text-center" id="toCustomer" name="toCustomer" placeholder="สิ้นสุด" disabled>
   </div>
 
-	<div class="col-sm-2 padding-5">
+	<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-5 padding-5">
 		<label class="display-block">วันที่</label>
     <div class="btn-group width-100">
       <button type="button" class="btn btn-sm btn-primary width-50" id="btn-date-all" onclick="toggleAllDate(1)">ทั้งหมด</button>
@@ -59,7 +64,7 @@
     </div>
 	</div>
 
-	<div class="col-sm-2 padding-5">
+	<div class="col-lg-2 col-md-2-harf col-sm-3 col-xs-7 padding-5">
     <label class="display-block not-show">เริ่มต้น</label>
 		<div class="input-daterange input-group width-100">
       <input type="text" class="form-control input-sm width-50 text-center from-date" name="fromDate" id="fromDate" placeholder="เริ่มต้น" disabled />
@@ -67,7 +72,7 @@
     </div>
   </div>
 
-	<div class="col-sm-1 col-1-harf padding-5">
+	<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-4 padding-5">
 		<label class="display-block">ช่องทางขาย</label>
     <div class="btn-group width-100">
       <button type="button" class="btn btn-sm btn-primary width-50" id="btn-ch-all" onclick="toggleAllChannels(1)">ทั้งหมด</button>
@@ -75,7 +80,7 @@
     </div>
 	</div>
 
-	<div class="col-sm-1 col-1-harf padding-5">
+	<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-4 padding-5">
 		<label class="display-block">การชำระเงิน</label>
     <div class="btn-group width-100">
       <button type="button" class="btn btn-sm btn-primary width-50" id="btn-pm-all" onclick="toggleAllPayment(1)">ทั้งหมด</button>
@@ -83,7 +88,7 @@
     </div>
 	</div>
 
-	<div class="col-sm-1 col-1-harf padding-5">
+	<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-4 padding-5">
 		<label class="display-block">สินค้าไม่นับสต็อก</label>
     <div class="btn-group width-100">
       <button type="button" class="btn btn-sm btn-primary width-50" id="btn-count-yes" onclick="toggleIsCount(1)">รวม</button>
@@ -102,77 +107,80 @@
 	<input type="hidden" id="token" name="token" value="<?php echo uniqid(); ?>" />
 
 
-	<div class="modal fade" id="channels-modal" tabindex='-1' role='dialog' aria-labelledby='myModalLabel' aria-hidden='true'>
-		<div class='modal-dialog' id='modal' style="width:500px;">
-	        <div class='modal-content'>
-	            <div class='modal-header'>
-	                <button type='button' class='close' data-dismiss='modal' aria-hidden='true'>&times;</button>
-	                <h4 class='title' id='modal_title'>ช่องทางการขาย</h4>
-	            </div>
-	            <div class='modal-body' id='modal_body' style="padding:0px;">
-	        <?php if(!empty($channelsList)) : ?>
-	          <?php foreach($channelsList as $rs) : ?>
-	            <div class="col-sm-12">
-	              <label>
-	                <input type="checkbox" class="chk" id="<?php echo $rs->code; ?>" name="channels[]" value="<?php echo $rs->code; ?>" style="margin-right:10px;" />
-	                <?php echo $rs->code; ?> | <?php echo $rs->name; ?>
-	              </label>
-	            </div>
-	          <?php endforeach; ?>
-	        <?php endif;?>
+	<div class="modal fade" id="channels-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog" id="modal" style="width:500px; max-width:95vw;">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+					<h4 class="title">ช่องทางการขาย</h4>
+				</div>
+				<div class="modal-body">
+					<div class="row">
+						<?php if(!empty($channelsList)) : ?>
+							<?php foreach($channelsList as $rs) : ?>
+								<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+									<label>
+										<input type="checkbox" class="chk" id="<?php echo $rs->code; ?>" name="channels[]" value="<?php echo $rs->code; ?>" style="margin-right:10px;" />
+										<?php echo $rs->code; ?> | <?php echo $rs->name; ?>
+									</label>
+								</div>
+							<?php endforeach; ?>
+						<?php endif;?>
+					</div>
 
-	        		<div class="divider" ></div>
-	            </div>
-	            <div class='modal-footer'>
-	                <button type='button' class='btn btn-default btn-block' data-dismiss='modal'>ตกลง</button>
-	            </div>
-	        </div>
-	    </div>
+					<div class="divider" ></div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default btn-block" data-dismiss="modal">ตกลง</button>
+				</div>
+			</div>
+		</div>
 	</div>
 
 
-	<div class="modal fade" id="payment-modal" tabindex='-1' role='dialog' aria-labelledby='myModalLabel' aria-hidden='true'>
-		<div class='modal-dialog' id='pm-modal' style="width:500px;">
-	        <div class='modal-content'>
-	            <div class='modal-header'>
-	                <button type='button' class='close' data-dismiss='modal' aria-hidden='true'>&times;</button>
-	                <h4 class='title'>ช่องทางการชำระเงิน</h4>
-	            </div>
-	            <div class='modal-body' id='modal_body' style="padding:0px;">
-	        <?php if(!empty($paymentList)) : ?>
-	          <?php foreach($paymentList as $rs) : ?>
-	            <div class="col-sm-12">
-	              <label>
-	                <input type="checkbox" class="pm" id="<?php echo $rs->code; ?>" name="payment[]" value="<?php echo $rs->code; ?>" style="margin-right:10px;" />
-	                <?php echo $rs->code; ?> | <?php echo $rs->name; ?>
-	              </label>
-	            </div>
-	          <?php endforeach; ?>
-	        <?php endif;?>
 
-	        		<div class="divider" ></div>
-	            </div>
-	            <div class='modal-footer'>
-	                <button type='button' class='btn btn-default btn-block' data-dismiss='modal'>ตกลง</button>
-	            </div>
-	        </div>
-	    </div>
+	<div class="modal fade" id="payment-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog" id="pm-modal" style="width:500px; max-width:95vw;">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+					<h4 class="title">ช่องทางการชำระเงิน</h4>
+				</div>
+				<div class="modal-body">
+					<div class="row">
+						<?php if(!empty($paymentList)) : ?>
+							<?php foreach($paymentList as $rs) : ?>
+								<div class="col-sm-12">
+									<label>
+										<input type="checkbox" class="pm" id="<?php echo $rs->code; ?>" name="payment[]" value="<?php echo $rs->code; ?>" style="margin-right:10px;" />
+										<?php echo $rs->code; ?> | <?php echo $rs->name; ?>
+									</label>
+								</div>
+							<?php endforeach; ?>
+						<?php endif;?>
+					</div>
+					<div class="divider" ></div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default btn-block" data-dismiss="modal">ตกลง</button>
+				</div>
+			</div>
+		</div>
 	</div>
-
 
 </form>
 
-<div class="row">
-	<div class="col-sm-12 col-xs-12 padding-5" id="rs">
 
-    </div>
+<div class="row">
+	<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5 table-responsive" id="rs">
+
+	</div>
 </div>
 
 
 
-
 <script id="template" type="text/x-handlebars-template">
-  <table class="table border-1">
+  <table class="table border-1 visible-print">
 		<tr>
 			<td colspan="3" class="text-center">รายงานสินค้าค้างส่ง วันที่ {{reportDate}}</td>
 		</tr>
@@ -190,10 +198,10 @@
 	<table class="table table-bordered table-striped">
 		<thead>
 			<tr class="font-size-12">
-	      <th class="width-5 middle text-center">#</th>
+	      <th class="fix-width-40 middle text-center">#</th>
 	      <th class="width-20 middle">สินค้า</th>
 				<th class="width-10 middle">ออเดอร์</th>
-	      <th class="middle-15">ลูกค้า</th>
+	      <th class="width-15">ลูกค้า</th>
 				<th class="width-10 middle">ช่องทาง</th>
 				<th class="width-10 middle">การชำระเงิน</th>
 				<th class="width-10 middle">สถานะ</th>
@@ -233,5 +241,5 @@
 </table>
 </script>
 
-<script src="<?php echo base_url(); ?>scripts/report/follow/product_backlogs.js?v=<?php echo date('YmdH'); ?>"></script>
-<?php $this->load->view('include/footer'); ?>
+<script src="<?php echo base_url(); ?>scripts/report/follow/product_backlogs.js?v=<?php echo date("YmdH"); ?>"></script>
+<?php $this->load->view("include/footer"); ?>

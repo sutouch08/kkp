@@ -113,7 +113,9 @@ function getReport(){
     }else{
       $('#pdTo').removeClass('has-error');
     }
-  }else{
+
+  }
+  else {
     $('#pdFrom').removeClass('has-error');
     $('#pdTo').removeClass('has-error');
   }
@@ -126,19 +128,6 @@ function getReport(){
       $('#wh-modal').modal('show');
       return false;
     }
-  }
-
-  if(currentDate == 0){
-    if(date == ''){
-      $('#date').addClass('has-error');
-      return false;
-    }else{
-      $('#date').removeClass('has-error');
-    }
-  }
-  else
-  {
-    $('#date').removeClass('has-error');
   }
 
   var data = [
@@ -249,15 +238,8 @@ function doExport(){
     });
   }
 
-  $('#reportForm').submit();
-  //
-  // data = $.param(data);
-  //
-  // var token = new Date().getTime();
-  // var target = HOME + 'do_export';
-  // target += '&'+data;
-  // target += '&token='+token;
-  // get_download(token);
-  // window.location.href = target;
+  var token = $('#token').val();
+  get_download(token);
 
+  $('#reportForm').submit();
 }

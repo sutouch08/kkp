@@ -67,6 +67,7 @@ class Order_sold_by_customer_and_product extends PS_Controller
           'reference' => $rs->reference,
           'cusName' => $rs->customer_name,
           'pdCode' => $rs->product_code,
+          'pdName' => $rs->product_name,
           'price' => number($rs->price, 2),
           'discount' => $rs->discount_label,
           'qty' => number($rs->qty),
@@ -135,11 +136,12 @@ class Order_sold_by_customer_and_product extends PS_Controller
     $this->excel->getActiveSheet()->setCellValue('B4', 'วันที่');
     $this->excel->getActiveSheet()->setCellValue('C4', 'ลูกค้า');
     $this->excel->getActiveSheet()->setCellValue('D4', 'เลขที่เอกสาร');
-    $this->excel->getActiveSheet()->setCellValue('E4', 'สินค้า');
-    $this->excel->getActiveSheet()->setCellValue('F4', 'ราคา');
-    $this->excel->getActiveSheet()->setCellValue('G4', 'ส่วนลด');
-    $this->excel->getActiveSheet()->setCellValue('H4', 'จำนวน');
-    $this->excel->getActiveSheet()->setCellValue('I4', 'มูลค่า');
+    $this->excel->getActiveSheet()->setCellValue('E4', 'รหัส');
+    $this->excel->getActiveSheet()->setCellValue('F4', 'สินค้า');
+    $this->excel->getActiveSheet()->setCellValue('G4', 'ราคา');
+    $this->excel->getActiveSheet()->setCellValue('H4', 'ส่วนลด');
+    $this->excel->getActiveSheet()->setCellValue('I4', 'จำนวน');
+    $this->excel->getActiveSheet()->setCellValue('J4', 'มูลค่า');
 
     $row = 5;
 
@@ -163,10 +165,11 @@ class Order_sold_by_customer_and_product extends PS_Controller
         $this->excel->getActiveSheet()->setCellValue('C'.$row, $rs->customer_name);
         $this->excel->getActiveSheet()->setCellValue('D'.$row, $rs->reference);
         $this->excel->getActiveSheet()->setCellValue('E'.$row, $rs->product_code);
-        $this->excel->getActiveSheet()->setCellValue('F'.$row, number($rs->price, 2));
-        $this->excel->getActiveSheet()->setCellValue('G'.$row, $rs->discount_label);
-        $this->excel->getActiveSheet()->setCellValue('H'.$row, number($rs->qty));
-        $this->excel->getActiveSheet()->setCellValue('I'.$row, number($rs->total_amount));
+        $this->excel->getActiveSheet()->setCellValue('F'.$row, $rs->product_name);
+        $this->excel->getActiveSheet()->setCellValue('G'.$row, number($rs->price, 2));
+        $this->excel->getActiveSheet()->setCellValue('H'.$row, $rs->discount_label);
+        $this->excel->getActiveSheet()->setCellValue('I'.$row, number($rs->qty));
+        $this->excel->getActiveSheet()->setCellValue('J'.$row, number($rs->total_amount));
         $no++;
         $row++;
       }
@@ -175,17 +178,17 @@ class Order_sold_by_customer_and_product extends PS_Controller
 
       $this->excel->getActiveSheet()->setCellValue('A'.$row, 'รวม');
       $this->excel->getActiveSheet()->mergeCells('A'.$row.':G'.$row);
-      $this->excel->getActiveSheet()->setCellValue('H'.$row, '=SUM(H5:H'.$res.')');
       $this->excel->getActiveSheet()->setCellValue('I'.$row, '=SUM(I5:I'.$res.')');
+      $this->excel->getActiveSheet()->setCellValue('J'.$row, '=SUM(J5:J'.$res.')');
 
       $this->excel->getActiveSheet()->getStyle('A'.$row)->getAlignment()->setHorizontal('right');
       $this->excel->getActiveSheet()->getStyle('F5:F'.$row)->getAlignment()->setHorizontal('right');
       $this->excel->getActiveSheet()->getStyle('F5:F'.$row)->getNumberFormat()->setFormatCode('#,##0');
       $this->excel->getActiveSheet()->getStyle('G5:G'.$row)->getAlignment()->setHorizontal('center');
       $this->excel->getActiveSheet()->getStyle('G5:G'.$row)->getNumberFormat()->setFormatCode('#,##0.00');
-      $this->excel->getActiveSheet()->getStyle('H5:I'.$row)->getAlignment()->setHorizontal('right');
-      $this->excel->getActiveSheet()->getStyle('H5:H'.$row)->getNumberFormat()->setFormatCode('0');
-      $this->excel->getActiveSheet()->getStyle('I5:I'.$row)->getNumberFormat()->setFormatCode('#,##0.00');
+      $this->excel->getActiveSheet()->getStyle('I5:J'.$row)->getAlignment()->setHorizontal('right');
+      $this->excel->getActiveSheet()->getStyle('I5:I'.$row)->getNumberFormat()->setFormatCode('0');
+      $this->excel->getActiveSheet()->getStyle('J5:J'.$row)->getNumberFormat()->setFormatCode('#,##0.00');
     }
 
 

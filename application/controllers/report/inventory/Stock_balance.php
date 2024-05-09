@@ -33,10 +33,12 @@ class Stock_balance extends PS_Controller
     $allWhouse = $this->input->get('allWhouse');
     $warehouse = $this->input->get('warehouse');
 
-    $currentDate = $this->input->get('currentDate');
-    $date = $this->input->get('date');
+    $date = $this->input->get('date') ? from_date($this->input->get('date')) : from_date(now());
+    $today = from_date(now());
+    $currentDate = $date == $today ? 1 : 0;
 
     $wh_list = '';
+
     if(!empty($warehouse))
     {
       $i = 1;
@@ -114,6 +116,7 @@ class Stock_balance extends PS_Controller
 
   public function do_export()
   {
+    $token = $this->input->post('token');
     $allProduct = $this->input->post('allProduct');
     $pdFrom = $this->input->post('pdFrom');
     $pdTo = $this->input->post('pdTo');
@@ -121,10 +124,12 @@ class Stock_balance extends PS_Controller
     $allWhouse = $this->input->post('allWhouse');
     $warehouse = $this->input->post('warehouse');
 
-    $currentDate = $this->input->post('currentDate');
-    $date = $this->input->post('date');
+    $date = $this->input->post('date') ? from_date($this->input->post('date')) : from_date(now());
+    $today = from_date(now());
+    $currentDate = $date == $today ? 1 : 0;
 
     $wh_list = '';
+
     if(!empty($warehouse))
     {
       $i = 1;
@@ -204,6 +209,7 @@ class Stock_balance extends PS_Controller
       $this->excel->getActiveSheet()->getStyle('G5:G'.$row)->getNumberFormat()->setFormatCode('#,##0.00');
     }
 
+    setToken($token);
 
     $file_name = "Report Stock Balance.xlsx";
     header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'); /// form excel 2007 XLSX

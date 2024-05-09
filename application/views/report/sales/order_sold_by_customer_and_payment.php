@@ -1,18 +1,23 @@
 <?php $this->load->view('include/header'); ?>
 <div class="row hidden-print">
-	<div class="col-sm-6">
-    <h3 class="title">
-      <i class="fa fa-bar-chart"></i>
-      <?php echo $this->title; ?>
-    </h3>
-    </div>
-		<div class="col-sm-6">
-			<p class="pull-right top-p">
-        <button type="button" class="btn btn-sm btn-success" onclick="getReport()"><i class="fa fa-bar-chart"></i> <?php label('report'); ?></button>
-				<button type="button" class="btn btn-sm btn-primary" onclick="doExport()"><i class="fa fa-file-excel-o"></i> <?php label('export'); ?></button>
-				<button type="button" class="btn btn-sm btn-info" onclick="print()"><i class="fa fa-print"></i> <?php label('print'); ?></button>
-			</p>
-		</div>
+	<div class="col-lg-6 col-md-6 col-sm-7 hidden-xs padding-5">
+		<h4 class="title">
+			<i class="fa fa-bar-chart"></i>
+			<?php echo $this->title; ?>
+		</h4>
+	</div>
+	<div class="col-xs-12 visible-xs padding-5">
+		<h3 class="title-xs">
+			<i class="fa fa-bar-chart"></i>
+			<?php echo $this->title; ?>
+		</h3>
+	</div>
+	<div class="col-lg-6 col-md-6 col-sm-5 col-xs-12 padding-5">
+		<p class="pull-right top-p">
+			<button type="button" class="btn btn-sm btn-success" onclick="getReport()"><i class="fa fa-bar-chart"></i> รายงาน</button>
+			<button type="button" class="btn btn-sm btn-primary" onclick="doExport()"><i class="fa fa-file-excel-o"></i> ส่งออก</button>
+		</p>
+	</div>
 </div><!-- End Row -->
 <hr class="hidden-print"/>
 <form class="hidden-print" id="reportForm" method="post" action="<?php echo $this->home; ?>/do_export">
@@ -36,8 +41,8 @@
   <div class="col-lg-2 col-md-2-harf col-sm-3 col-xs-6 padding-5">
     <label>วันที่</label>
     <div class="input-daterange input-group">
-      <input type="text" class="form-control input-sm text-center width-50 from-date" name="fromDate" id="fromDate" value="" />
-      <input type="text" class="form-control input-sm text-center width-50" name="toDate" id="toDate" value="" />
+			<input type="text" class="form-control input-sm text-center width-50 from-date" name="fromDate" id="fromDate" value="<?php echo date('01-m-Y'); ?>" />
+      <input type="text" class="form-control input-sm text-center width-50" name="toDate" id="toDate" value="<?php echo date('t-m-Y'); ?>" />
     </div>
   </div>
 
@@ -67,6 +72,7 @@
 	</div>
 
   <input type="hidden" id="allCustomer" name="allCustomer" value="1">
+	<input type="hidden" id="token" name="token" value="<?php echo uniqid(); ?>" />
 </div>
 <hr>
 </form>
@@ -81,7 +87,7 @@
 
 
 <script id="template" type="text/x-handlebars-template">
-  <table class="table table-bordered table-striped">
+  <table class="table table-bordered table-striped" style="min-width:1120px;">
     <tr>
       <th colspan="9" class="text-center">รายงานยอดขาย แยกตามลูกค้า แสดงยอดค้างรับ </th>
     </tr>
@@ -92,15 +98,15 @@
       <th colspan="9" class="text-center"> ลูกค้า : {{ cusList }} </th>
     </tr>
     <tr class="font-size-12">
-      <th class="width-5 middle text-center">ลำดับ</th>
-      <th class="width-10 middle text-center">Update</th>
-      <th class="width-20 middle">ลูกค้า</th>
-      <th class="width-10 middle">เลขที่เอกสาร</th>
-			<th class="width-15 middle">ช่องทาง</th>
-			<th class="width-10 middle">การชำระเงิน</th>
-      <th class="width-10 text-right middle">มูลค่า</th>
-			<th class="width-10 text-right middle">รับแล้ว</th>
-			<th class="width-10 text-right middle">ค้างรับ</th>
+      <th class="fix-width-40 middle text-center">ลำดับ</th>
+      <th class="fix-width-100 middle text-center">Update</th>
+      <th class="min-width-200 middle">ลูกค้า</th>
+      <th class="fix-width-120 middle">เลขที่เอกสาร</th>
+			<th class="fix-width-150 middle">ช่องทาง</th>
+			<th class="fix-width-150 middle">การชำระเงิน</th>
+      <th class="fix-width-120 text-right middle">มูลค่า</th>
+			<th class="fix-width-120 text-right middle">รับแล้ว</th>
+			<th class="fix-width-120 text-right middle">ค้างรับ</th>
 
     </tr>
 {{#each bs}}

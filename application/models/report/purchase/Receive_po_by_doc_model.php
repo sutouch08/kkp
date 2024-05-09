@@ -13,17 +13,16 @@ class Receive_po_by_doc_model extends CI_Model
     if(!empty($ds))
     {
       $this->db
-      ->select('rp.code, rp.po_code, rp.invoice_code, rp.inv_code')
-      ->select('rp.vendor_code, rp.vendor_name, rp.date_add')
+      ->select('rp.code, rp.po_code, rp.invoice_code')
+      ->select('rp.vender_code, rp.vender_name, rp.date_add')
       ->select_sum('rd.qty')
       ->select_sum('rd.amount')
       ->from('receive_product_detail AS rd')
       ->join('receive_product AS rp', 'rd.receive_code = rp.code', 'left')
       ->where('rp.date_add >=', $ds['fromDate'])
       ->where('rp.date_add <=', $ds['toDate'])
-      ->where('rp.inv_code IS NOT NULL', NULL, FALSE)
       ->where('rp.status', 1)
-      ->where('rd.is_cancle', 0);
+      ->where('rd.status', 'S');
 
       if(empty($ds['allDoc']))
       {
@@ -38,8 +37,8 @@ class Receive_po_by_doc_model extends CI_Model
       {
         if(!empty($ds['vendorFrom']) && !empty($ds['vendorTo']))
         {
-          $this->db->where('rp.vendor_code >=', $ds['vendorFrom']);
-          $this->db->where('rp.vendor_code <=', $ds['vendorTo']);
+          $this->db->where('rp.vender_code >=', $ds['vendorFrom']);
+          $this->db->where('rp.vender_code <=', $ds['vendorTo']);
         }
       }
 
@@ -52,15 +51,6 @@ class Receive_po_by_doc_model extends CI_Model
         }
       }
 
-
-      if(empty($ds['allInvoice']))
-      {
-        if(!empty($ds['invoiceFrom']) && !empty($ds['invoiceTo']))
-        {
-          $this->db->where('rp.invoice_code >=', $ds['invoiceFrom']);
-          $this->db->where('rp.invoice_code <=', $ds['invoiceTo']);
-        }
-      }
 
       $this->db->group_by('rd.receive_code');
       $this->db->order_by('rp.code', 'ASC');

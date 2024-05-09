@@ -291,7 +291,9 @@ function doExport(){
     $('#date').removeClass('has-error');
   }
 
-  
+  var token = $('#token').val();
+  get_download(token);
+
   $('#reportForm').submit();
 
 }

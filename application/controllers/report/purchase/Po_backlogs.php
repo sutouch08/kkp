@@ -24,9 +24,11 @@ class Po_backlogs extends PS_Controller
   {
     if(!empty($this->input->get()))
     {
+      $from_date = $this->input->get('fromDate') ? $this->input->get('fromDate') : '2020-01-01';
+      $to_date = $this->input->get('toDate') ? $this->input->get('toDate') : now();
       $arr = array(
-        'from_date' => from_date($this->input->get('fromDate')),
-        'to_date' => to_date($this->input->get('toDate')),
+        'from_date' => from_date($from_date),
+        'to_date' => to_date($to_date),
         'all_po' => $this->input->get('allPo'),
         'po_from' => $this->input->get('poFrom'),
         'po_to' => $this->input->get('poTo'),
@@ -103,8 +105,8 @@ class Po_backlogs extends PS_Controller
   public function do_export()
   {
     $token = $this->input->post('token');
-    $from_date = $this->input->post('fromDate');
-    $to_date = $this->input->post('toDate');
+    $from_date = $this->input->post('fromDate') ? $this->input->post('fromDate') : '2020-01-01';
+    $to_date = $this->input->post('toDate') ? $this->input->post('toDate') : now();
 
     $all_po = $this->input->post('allPo');
     $po_from = $this->input->post('poFrom');

@@ -36,8 +36,9 @@ class Stock_balance_zone extends PS_Controller
     $allZone = $this->input->get('allZone');
     $zoneCode = $this->input->get('zoneCode');
 
-    $currentDate = $this->input->get('currentDate');
-    $date = $this->input->get('date');
+    $date = $this->input->get('date') ? from_date($this->input->get('date')) : from_date(now());
+    $today = from_date(now());
+    $currentDate = $date == $today ? 1 : 0;
 
     $wh_list = '';
     if(!empty($warehouse))
@@ -128,6 +129,7 @@ class Stock_balance_zone extends PS_Controller
 
   public function do_export()
   {
+    $token = $this->input->post('token');
     $allProduct = $this->input->post('allProduct');
     $pdFrom = $this->input->post('pdFrom');
     $pdTo = $this->input->post('pdTo');
@@ -138,8 +140,9 @@ class Stock_balance_zone extends PS_Controller
     $allZone = $this->input->post('allZone');
     $zoneCode = $this->input->post('zoneCode');
 
-    $currentDate = $this->input->post('currentDate');
-    $date = $this->input->post('date');
+    $date = $this->input->post('date') ? from_date($this->input->post('date')) : from_date(now());
+    $today = from_date(now());
+    $currentDate = $date == $today ? 1 : 0;
 
     $wh_list = '';
     if(!empty($warehouse))
@@ -236,7 +239,8 @@ class Stock_balance_zone extends PS_Controller
       $this->excel->getActiveSheet()->getStyle('G6:G'.$row)->getNumberFormat()->setFormatCode('#,##0.00');
     }
 
-
+    setToken($token);
+    
     $file_name = "Report Stock Balance Zone.xlsx";
     header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'); /// form excel 2007 XLSX
     header('Content-Disposition: attachment;filename="'.$file_name.'"');

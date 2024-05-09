@@ -23,11 +23,12 @@
           </tr>
 
           <tr>
-          	<th class="width-10 text-center">ลำดับ</th>
-            <th class="width-20 text-center">บาร์โค้ด</th>
-            <th class="width-40 text-center">สินค้า</th>
-            <th class="width-10 text-center">จำนวน</th>
-            <th class="width-10 text-center">ย้ายออก</th>
+          	<th class="fix-width-40 text-center">ลำดับ</th>
+            <th class="fix-width-100 text-center">บาร์โค้ด</th>
+						<th class="fix-width-100 text-center">รหัส</th>
+            <th class="min-width-150 text-center">สินค้า</th>
+            <th class="fix-width-100 text-center">จำนวน</th>
+            <th class="fix-width-120 text-center">ย้ายออก</th>
           </tr>
           </thead>
 
@@ -47,13 +48,14 @@
         </tr>
 
       	<tr>
-        	<th class="width-5 text-center">ลำดับ</th>
-          <th class="width-15">บาร์โค้ด</th>
-          <th class="width-20">สินค้า</th>
-          <th class="width-25">ต้นทาง</th>
-          <th class="width-25">ปลายทาง</th>
-          <th class="width-10 text-center">จำนวน</th>
-          <th class="width-5"></th>
+        	<th class="fix-width-40 text-center">ลำดับ</th>
+          <th class="fix-width-100">บาร์โค้ด</th>
+          <th class="fix-width-100">รหัส</th>
+					<th class="min-width-150">สินค้า</th>
+          <th class="fix-width-200">ต้นทาง</th>
+          <th class="fix-width-200">ปลายทาง</th>
+          <th class="fix-width-100 text-center">จำนวน</th>
+          <th class="fix-width-40"></th>
         </tr>
       </thead>
 
@@ -73,6 +75,9 @@
 					<!--- รหัสสินค้า -->
 	        <td class="middle">
 						<?php echo $rs->product_code; ?>
+					</td>
+					<td class="middle">
+						<?php echo $rs->product_name; ?>
 					</td>
 					<!--- โซนต้นทาง --->
 	        <td class="middle">
@@ -101,13 +106,13 @@
 <?php     $total_qty += $rs->qty; ?>
 <?php		endforeach;			?>
 				<tr>
-					<td colspan="5" class="middle text-right"><strong>รวม</strong></td>
+					<td colspan="6" class="middle text-right"><strong>รวม</strong></td>
 					<td class="middle text-center" id="total"><?php echo number($total_qty); ?></td>
 					<td></td>
 				</tr>
 <?php	else : ?>
  				<tr>
-        	<td colspan="7" class="text-center"><h4>ไม่พบรายการ</h4></td>
+        	<td colspan="8" class="text-center"><h4>ไม่พบรายการ</h4></td>
         </tr>
 <?php	endif; ?>
       </tbody>
@@ -119,7 +124,7 @@
 {{#each this}}
 	{{#if nodata}}
 		<tr>
-			<td colspan="6" class="text-center">
+			<td colspan="7" class="text-center">
 				<h4>ไม่พบสินค้าในโซน</h4>
 			</td>
 		</tr>
@@ -128,6 +133,7 @@
 			<td align="center">{{ no }}</td>
 		  <td align="center">{{ barcode }}</td>
 		  <td>{{ products }}</td>
+			<td>{{ product_name }}</td>
 		  <td align="center" class="qty-label">{{ qty }}</td>
 		  <td align="center">
 		  	<input type="number" class="form-control input-sm text-center input-qty" max="{{qty}}" id="{{products}}" />
@@ -148,7 +154,7 @@
 	{{else}}
 		{{#if @last}}
 			<tr>
-				<td colspan="5" class="text-right"><strong>รวม</strong></td>
+				<td colspan="6" class="text-right"><strong>รวม</strong></td>
 				<td class="middle text-center" id="total">{{ total }}</td>
 				<td></td>
 			</tr>
@@ -157,6 +163,7 @@
 			<td class="middle text-center no">{{ no }}</td>
 			<td class="middle">{{ barcode }}</td>
 			<td class="middle">{{ products }}</td>
+			<td class="middle">{{ product_name }}</td>
 			<td class="middle">{{ from_zone }}</td>
 			<td class="middle">{{{ to_zone }}}</td>
 			<td class="middle text-center qty">{{ qty }}</td>

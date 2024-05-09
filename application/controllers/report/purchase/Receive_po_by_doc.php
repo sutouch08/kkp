@@ -34,8 +34,8 @@ class Receive_po_by_doc extends PS_Controller
       $docFrom = $sp;
     }
 
-    $fromDate = $this->input->get('fromDate');
-    $toDate = $this->input->get('toDate');
+    $fromDate = $this->input->get('fromDate') ? $this->input->get('fromDate') : '2020-01-01';
+    $toDate = $this->input->get('toDate') ? $this->input->get('toDate') : now();
 
     $allVendor = $this->input->get('allVendor');
     $vendorFrom = $this->input->get('vendorFrom');
@@ -57,16 +57,6 @@ class Receive_po_by_doc extends PS_Controller
       $poFrom = $sp;
     }
 
-    $allInvoice = $this->input->get('allInvoice');
-    $invoiceFrom = $this->input->get('invoiceFrom');
-    $invoiceTo = $this->input->get('invoiceTo');
-
-    if($invoiceFrom > $invoiceTo){
-      $sp = $invoiceTo;
-      $invoiceTo = $invoiceFrom;
-      $invoiceFrom = $sp;
-    }
-
     $arr = array(
       'allDoc' => $allDoc,
       'docFrom' => $docFrom,
@@ -77,9 +67,6 @@ class Receive_po_by_doc extends PS_Controller
       'allPO' => $allPO,
       'poFrom' => $poFrom,
       'poTo' => $poTo,
-      'allInvoice' => $allInvoice,
-      'invoiceFrom' => $invoiceFrom,
-      'invoiceTo' => $invoiceTo,
       'fromDate' => from_date($fromDate),
       'toDate' => to_date($toDate)
     );
@@ -98,10 +85,9 @@ class Receive_po_by_doc extends PS_Controller
           'no' => number($no),
           'date' => thai_date($rs->date_add, FALSE, '/'),
           'code' => $rs->code,
-          'vendor' => $rs->vendor_code.' : '.$rs->vendor_name,
+          'vendor' => $rs->vender_code.' : '.$rs->vender_name,
           'invoice' => $rs->invoice_code,
           'po' => $rs->po_code,
-          'sapNo' => $rs->inv_code,
           'qty' => number($rs->qty),
           'amount' => number($rs->amount, 2)
         );
@@ -147,8 +133,8 @@ class Receive_po_by_doc extends PS_Controller
       $docFrom = $sp;
     }
 
-    $fromDate = $this->input->post('fromDate');
-    $toDate = $this->input->post('toDate');
+    $fromDate = $this->input->post('fromDate') ? $this->input->post('fromDate') : '2020-01-01';
+    $toDate = $this->input->post('toDate') ? $this->input->post('toDate') : now();
 
     $allVendor = $this->input->post('allVendor');
     $vendorFrom = $this->input->post('vendorFrom');
@@ -170,21 +156,10 @@ class Receive_po_by_doc extends PS_Controller
       $poFrom = $sp;
     }
 
-    $allInvoice = $this->input->post('allInvoice');
-    $invoiceFrom = $this->input->post('invoiceFrom');
-    $invoiceTo = $this->input->post('invoiceTo');
-
-    if($invoiceFrom > $invoiceTo){
-      $sp = $invoiceTo;
-      $invoiceTo = $invoiceFrom;
-      $invoiceFrom = $sp;
-    }
-
     $title = "รายงาน การรับสินค้า แยกตามเลขที่เอกสาร วันที่ (".thai_date($fromDate, FALSE, '/').") - (".thai_date($toDate, FALSE, '/').")";
     $document = $allDoc == 1 ? 'ทั้งหมด' : "{$docFrom} - {$docTo}";
     $vendor = $allVendor == 1 ? 'ทั้งหมด' : "{$vendorFrom} - {$vendorTo}";
     $po = $allPO == 1 ? 'ทั้งหมด' : "{$poFrom} - {$poTo}";
-    $invoice = $allInvoice == 1 ? 'ทั้งหมด' : "{$invoiceFrom} - {$invoiceTo}";
 
     $arr = array(
       'allDoc' => $allDoc,
@@ -196,9 +171,6 @@ class Receive_po_by_doc extends PS_Controller
       'allPO' => $allPO,
       'poFrom' => $poFrom,
       'poTo' => $poTo,
-      'allInvoice' => $allInvoice,
-      'invoiceFrom' => $invoiceFrom,
-      'invoiceTo' => $invoiceTo,
       'fromDate' => from_date($fromDate),
       'toDate' => to_date($toDate)
     );
@@ -219,9 +191,7 @@ class Receive_po_by_doc extends PS_Controller
     $this->excel->getActiveSheet()->setCellValue('A3', "รหัสผู้ขาย : {$vendor}");
     $this->excel->getActiveSheet()->mergeCells('A3:I3');
     $this->excel->getActiveSheet()->setCellValue('A4', "ใบสั่งซื้อ : {$po}");
-    $this->excel->getActiveSheet()->mergeCells('A4:I4');
-    $this->excel->getActiveSheet()->setCellValue('A5', "ใบส่งของ : {$invoice}");
-    $this->excel->getActiveSheet()->mergeCells('A5:I5');
+    $this->excel->getActiveSheet()->mergeCells('A4:I4');    
 
     //--- set Table header
     $this->excel->getActiveSheet()->setCellValue('A6', 'ลำดับ');
@@ -229,10 +199,9 @@ class Receive_po_by_doc extends PS_Controller
     $this->excel->getActiveSheet()->setCellValue('C6', 'เลขที่เอกสาร');
     $this->excel->getActiveSheet()->setCellValue('D6', 'ใบสั่งซื้อ');
     $this->excel->getActiveSheet()->setCellValue('E6', 'ใบส่งของ');
-    $this->excel->getActiveSheet()->setCellValue('F6', 'SAP No.');
-    $this->excel->getActiveSheet()->setCellValue('G6', 'ผู้ขาย');
-    $this->excel->getActiveSheet()->setCellValue('H6', 'จำนวน');
-    $this->excel->getActiveSheet()->setCellValue('I6', 'มูลค่า');
+    $this->excel->getActiveSheet()->setCellValue('F6', 'ผู้ขาย');
+    $this->excel->getActiveSheet()->setCellValue('G6', 'จำนวน');
+    $this->excel->getActiveSheet()->setCellValue('H6', 'มูลค่า');
 
     $row = 7;
     if(!empty($result))
@@ -247,10 +216,9 @@ class Receive_po_by_doc extends PS_Controller
         $this->excel->getActiveSheet()->setCellValue('C'.$row, $rs->code);
         $this->excel->getActiveSheet()->setCellValue('D'.$row, $rs->po_code);
         $this->excel->getActiveSheet()->setCellValue('E'.$row, $rs->invoice_code);
-        $this->excel->getActiveSheet()->setCellValue('F'.$row, $rs->inv_code); //--- SAP No.
-        $this->excel->getActiveSheet()->setCellValue('G'.$row, $rs->vendor_code.' : '.$rs->vendor_name);
-        $this->excel->getActiveSheet()->setCellValue('H'.$row, $rs->qty);
-        $this->excel->getActiveSheet()->setCellValue('I'.$row, $rs->amount);
+        $this->excel->getActiveSheet()->setCellValue('F'.$row, $rs->vender_code.' : '.$rs->vender_name);
+        $this->excel->getActiveSheet()->setCellValue('G'.$row, $rs->qty);
+        $this->excel->getActiveSheet()->setCellValue('H'.$row, $rs->amount);
         $totalQty += $rs->qty;
         $totalAmount += $rs->amount;
         $no++;
@@ -260,16 +228,14 @@ class Receive_po_by_doc extends PS_Controller
 
 
       $this->excel->getActiveSheet()->setCellValue('A'.$row, 'รวม');
-      $this->excel->getActiveSheet()->mergeCells('A'.$row.':G'.$row);
-      $this->excel->getActiveSheet()->setCellValue('H'.$row, $totalQty);
-      $this->excel->getActiveSheet()->setCellValue('I'.$row, $totalAmount);
+      $this->excel->getActiveSheet()->mergeCells('A'.$row.':F'.$row);
+      $this->excel->getActiveSheet()->setCellValue('G'.$row, $totalQty);
+      $this->excel->getActiveSheet()->setCellValue('H'.$row, $totalAmount);
 
       $this->excel->getActiveSheet()->getStyle('A'.$row)->getAlignment()->setHorizontal('right');
-      $this->excel->getActiveSheet()->getStyle('D6:D'.$row)->getNumberFormat()->setFormatCode('0');
-      $this->excel->getActiveSheet()->getStyle('F6:F'.$row)->getNumberFormat()->setFormatCode('0');
-      $this->excel->getActiveSheet()->getStyle('H6:I'.$row)->getAlignment()->setHorizontal('right');
-      $this->excel->getActiveSheet()->getStyle('H6:H'.$row)->getNumberFormat()->setFormatCode('#,##0');
-      $this->excel->getActiveSheet()->getStyle('I6:I'.$row)->getNumberFormat()->setFormatCode('#,##0.00');
+      $this->excel->getActiveSheet()->getStyle('G6:H'.$row)->getAlignment()->setHorizontal('right');
+      $this->excel->getActiveSheet()->getStyle('G6:G'.$row)->getNumberFormat()->setFormatCode('#,##0');
+      $this->excel->getActiveSheet()->getStyle('H6:H'.$row)->getNumberFormat()->setFormatCode('#,##0.00');
     }
 
     setToken($token);

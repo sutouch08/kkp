@@ -22,7 +22,7 @@ class stock_model extends CI_Model
 
         if(!empty($ds['pd_code']))
         {
-          $this->db->like('st.product_code', $ds['pd_code']);
+          $this->db->group_start()->like('st.product_code', $ds['pd_code'])->or_like('pd.name', $ds['pd_code'])->group_end();
         }
 
         if(!empty($ds['zone_code']))
@@ -58,11 +58,12 @@ class stock_model extends CI_Model
       {
         $this->db
         ->from('stock AS st')
-        ->join('zone', 'st.zone_code = zone.code', 'left');
+        ->join('zone', 'st.zone_code = zone.code', 'left')
+        ->join('products AS pd', 'st.product_code = pd.code', 'left');
 
         if(!empty($ds['pd_code']))
         {
-          $this->db->like('st.product_code', $ds['pd_code']);
+          $this->db->group_start()->like('st.product_code', $ds['pd_code'])->or_like('pd.name', $ds['pd_code'])->group_end();
         }
 
         if(!empty($ds['zone_code']))
@@ -251,9 +252,12 @@ class stock_model extends CI_Model
   public function get_all_stock_in_zone($zone_code)
   {
     $rs = $this->db
-    ->select('product_code, qty')
-    ->where('zone_code', $zone_code)
-    ->get('stock');
+    ->select('pd.code AS product_code, pd.name AS product_name')
+    ->select('st.qty')
+    ->from('stock AS st')
+    ->join('products AS pd', 'st.product_code = pd.code', 'left')
+    ->where('st.zone_code', $zone_code)
+    ->get();
 
     if($rs->num_rows() > 0)
     {

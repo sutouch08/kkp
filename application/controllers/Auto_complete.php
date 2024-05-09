@@ -434,11 +434,46 @@ public function get_active_item_code_and_name()
   }
 
 
+  public function get_receive_code($vendor = NULL)
+  {
+    $sc = array();
+
+    $txt = trim($_REQUEST['term']);
+    $this->db->select('code')->where_in('status', array('1', '2'));
+
+    if( ! empty($vendor))
+    {
+      $this->db->where('vender_code', $vendor);
+    }
+
+    if($txt != '*')
+    {
+      $this->db->like('code', $txt);
+    }
+
+    $grpo = $this->db->limit('100')->get('receive_product');
+
+    if($grpo->num_rows() > 0)
+    {
+      foreach($grpo->result() as $rs)
+      {
+        $sc[] = $rs->code;
+      }
+    }
+    else
+    {
+      $sc[] = 'Not found';
+    }
+
+    echo json_encode($sc);
+  }
+
+
 
   public function get_po_code($vendor = FALSE)
   {
     $sc = array();
-    $txt = $_REQUEST['term'];
+    $txt = trim($_REQUEST['term']);
     $this->db->select('code')->where_in('status', array('1', '2'));
     if($vendor !== FALSE)
     {

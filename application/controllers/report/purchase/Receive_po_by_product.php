@@ -98,11 +98,11 @@ class Receive_po_by_product extends PS_Controller
           'no' => number($no),
           'date' => thai_date($rs->date_add, FALSE, '/'),
           'code' => $rs->code,
-          'vendor' => $rs->vendor_code,
+          'vendor' => $rs->vender_code. ' : '.$rs->vender_name,
           'invoice' => $rs->invoice_code,
           'po' => $rs->po_code,
-          'sapNo' => $rs->inv_code,
           'product_code' => $rs->product_code,
+          'product_name' => $rs->product_name,
           'qty' => number($rs->qty),
           'amount' => number($rs->amount, 2)
         );
@@ -211,7 +211,7 @@ class Receive_po_by_product extends PS_Controller
     $this->load->library('excel');
 
     $this->excel->setActiveSheetIndex(0);
-    $this->excel->getActiveSheet()->setTitle('Receive PO BY Document');
+    $this->excel->getActiveSheet()->setTitle('Receive PO BY Product');
 
     //--- set report title header
     $this->excel->getActiveSheet()->setCellValue('A1', $title);
@@ -231,8 +231,8 @@ class Receive_po_by_product extends PS_Controller
     $this->excel->getActiveSheet()->setCellValue('C6', 'เลขที่เอกสาร');
     $this->excel->getActiveSheet()->setCellValue('D6', 'ใบสั่งซื้อ');
     $this->excel->getActiveSheet()->setCellValue('E6', 'ใบส่งของ');
-    $this->excel->getActiveSheet()->setCellValue('F6', 'SAP No.');
-    $this->excel->getActiveSheet()->setCellValue('G6', 'ผู้ขาย');
+    $this->excel->getActiveSheet()->setCellValue('F6', 'ผู้ขาย');
+    $this->excel->getActiveSheet()->setCellValue('G6', 'รหัส');
     $this->excel->getActiveSheet()->setCellValue('H6', 'สินค้า');
     $this->excel->getActiveSheet()->setCellValue('I6', 'จำนวน');
     $this->excel->getActiveSheet()->setCellValue('J6', 'มูลค่า');
@@ -250,9 +250,9 @@ class Receive_po_by_product extends PS_Controller
         $this->excel->getActiveSheet()->setCellValue('C'.$row, $rs->code);
         $this->excel->getActiveSheet()->setCellValue('D'.$row, $rs->po_code);
         $this->excel->getActiveSheet()->setCellValue('E'.$row, $rs->invoice_code);
-        $this->excel->getActiveSheet()->setCellValue('F'.$row, $rs->inv_code); //--- SAP No.
-        $this->excel->getActiveSheet()->setCellValue('G'.$row, $rs->vendor_code.' : '.$rs->vendor_name);
-        $this->excel->getActiveSheet()->setCellValue('H'.$row, $rs->product_code);
+        $this->excel->getActiveSheet()->setCellValue('F'.$row, $rs->vender_code.' : '.$rs->vender_name);
+        $this->excel->getActiveSheet()->setCellValue('G'.$row, $rs->product_code); //--- SAP No.
+        $this->excel->getActiveSheet()->setCellValue('H'.$row, $rs->product_name);
         $this->excel->getActiveSheet()->setCellValue('I'.$row, $rs->qty);
         $this->excel->getActiveSheet()->setCellValue('J'.$row, $rs->amount);
         $totalQty += $rs->qty;
@@ -269,8 +269,6 @@ class Receive_po_by_product extends PS_Controller
       $this->excel->getActiveSheet()->setCellValue('J'.$row, $totalAmount);
 
       $this->excel->getActiveSheet()->getStyle('A'.$row)->getAlignment()->setHorizontal('right');
-      $this->excel->getActiveSheet()->getStyle('D6:D'.$row)->getNumberFormat()->setFormatCode('0');
-      $this->excel->getActiveSheet()->getStyle('F6:F'.$row)->getNumberFormat()->setFormatCode('0');
       $this->excel->getActiveSheet()->getStyle('I6:J'.$row)->getAlignment()->setHorizontal('right');
       $this->excel->getActiveSheet()->getStyle('I6:I'.$row)->getNumberFormat()->setFormatCode('#,##0');
       $this->excel->getActiveSheet()->getStyle('J6:J'.$row)->getNumberFormat()->setFormatCode('#,##0.00');

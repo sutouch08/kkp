@@ -29,9 +29,13 @@
 	</style>
 	</head>
 	<body class="no-skin" onload="checkError()">
-		<div id="loader" style="position:absolute; padding: 15px 25px 15px 25px; background-color:#fff; opacity:0.0; box-shadow: 0px 0px 25px #CCC; top:-20px; display:none; z-index:10;">
-        <center><i class="fa fa-spinner fa-5x fa-spin blue"></i></center><center>กำลังทำงาน....</center>
+		
+		<div id="loader">
+        <div class="loader"></div>
 		</div>
+		<div id="loader-backdrop" style="position: fixed; width:100vw; height:100vh; background-color:white; opacity:0.3; display:none; z-index:9;">
+		</div>
+
 		<?php if($this->session->flashdata('error')) : ?>
 							<input type="hidden" id="error" value="<?php echo $this->session->flashdata('error'); ?>" />
 		<?php endif; ?>

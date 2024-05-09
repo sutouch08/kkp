@@ -1,21 +1,27 @@
 <?php $this->load->view('include/header'); ?>
 <div class="row hidden-print">
-	<div class="col-sm-6 col-xs-9 padding-5">
-    <h4 class="title">
-      <i class="fa fa-bar-chart"></i>
-      <?php echo $this->title; ?>
-    </h4>
-    </div>
-		<div class="col-sm-6 col-xs-3 padding-5">
-			<p class="pull-right top-p">
-				<button type="button" class="btn btn-sm btn-primary" onclick="doExport()"><i class="fa fa-file-excel-o"></i> ส่งออก</button>
-			</p>
-		</div>
+	<div class="col-lg-6 col-md-6 col-sm-7 hidden-xs padding-5">
+		<h4 class="title">
+			<i class="fa fa-bar-chart"></i>
+			<?php echo $this->title; ?>
+		</h4>
+	</div>
+	<div class="col-xs-12 visible-xs padding-5">
+		<h3 class="title-xs">
+			<i class="fa fa-bar-chart"></i>
+			<?php echo $this->title; ?>
+		</h3>
+	</div>
+	<div class="col-lg-6 col-md-6 col-sm-5 col-xs-12 padding-5">
+		<p class="pull-right top-p">
+			<button type="button" class="btn btn-sm btn-primary" onclick="doExport()"><i class="fa fa-file-excel-o"></i> ส่งออก</button>
+		</p>
+	</div>
 </div><!-- End Row -->
 <hr class="padding-5 hidden-print"/>
 <form class="hidden-print" id="reportForm" method="post" action="<?php echo $this->home; ?>/do_export">
 <div class="row">
-	<div class="col-sm-3 col-xs-12 padding-5">
+	<div class="col-lg-3 col-md-3 col-sm-4 col-xs-6 padding-5">
 		<label class="display-block">รูปแบบ</label>
     <div class="btn-group width-100">
       <button type="button" class="btn btn-sm btn-primary width-33" id="btn-all" onclick="toggleRole('all')">ทั้งหมด</button>
@@ -24,11 +30,11 @@
     </div>
 	</div>
 
-	<div class="col-sm-2 padding-5">
+	<div class="col-lg-2 col-md-2-harf col-sm-3 col-xs-6 padding-5">
     <label class="display-block">วันที่</label>
 		<div class="input-daterange input-group width-100">
-      <input type="text" class="form-control input-sm width-50 text-center from-date" name="fromDate" id="fromDate" placeholder="เริ่มต้น" readonly />
-      <input type="text" class="form-control input-sm width-50 text-center" name="toDate" id="toDate" placeholder="สิ้นสุด" readonly/>
+			<input type="text" class="form-control input-sm text-center width-50 from-date" name="fromDate" id="fromDate" value="<?php echo date('01-m-Y'); ?>" />
+      <input type="text" class="form-control input-sm text-center width-50" name="toDate" id="toDate" value="<?php echo date('t-m-Y'); ?>" />
     </div>
   </div>
 </div>

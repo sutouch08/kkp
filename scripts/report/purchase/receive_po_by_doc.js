@@ -89,7 +89,7 @@ function toggleAllInvoice(option){
 
 
 $('#vendorFrom').autocomplete({
-  source:BASE_URL + 'auto_complete/get_vendor_code_and_name',
+  source:BASE_URL + 'auto_complete/get_vender_code_and_name',
   autoFocus:true,
   close:function(){
     var rs = $.trim($(this).val());
@@ -112,7 +112,7 @@ $('#vendorFrom').autocomplete({
 
 
 $('#vendorTo').autocomplete({
-  source:BASE_URL + 'auto_complete/get_vendor_code_and_name',
+  source:BASE_URL + 'auto_complete/get_vender_code_and_name',
   autoFocus:true,
   close:function(){
     var rs = $.trim($(this).val());
@@ -132,6 +132,83 @@ $('#vendorTo').autocomplete({
 });
 
 
+$('#docFrom').autocomplete({
+  source:BASE_URL + 'auto_complete/get_receive_code',
+  autoFocus:true,
+  close:function() {
+    let code = $(this).val();
+
+    if(code.length) {
+      let toCode = $('#docTo').val();
+      if(toCode.length) {
+        if(code > toCode) {
+          $('#docTo').val(code);
+          $(this).val(toCode);
+        }
+      }
+    }
+
+    $('#docTo').focus();
+  }
+})
+
+
+$('#docTo').autocomplete({
+  source:BASE_URL + 'auto_complete/get_receive_code',
+  autoFocus:true,
+  close:function() {
+    let code = $(this).val();
+
+    if(code.length) {
+      let fromCode = $('#docFrom').val();
+      if(fromCode.length) {
+        if(code < fromCode) {
+          $('#docFrom').val(code);
+          $(this).val(fromCode);
+        }
+      }
+    }
+  }
+})
+
+
+$('#poFrom').autocomplete({
+  source:BASE_URL + 'auto_complete/get_all_po_code',
+  autoFocus:true,
+  close:function(){
+    var poFrom = $.trim($(this).val());
+    if(poFrom.length && poFrom != 'no_content'){
+      var poTo = $('#poTo').val();
+      if(poTo.length){
+        if(poFrom > poTo){
+          $('#poFrom').val(poTo)
+          $('#poTo').val(poFrom)
+        }
+      }
+    }
+
+    $('#poTo').focus();
+  }
+})
+
+
+
+$('#poTo').autocomplete({
+  source:BASE_URL + 'auto_complete/get_all_po_code',
+  autoFocus:true,
+  close:function(){
+    var poTo = $.trim($(this).val());
+    if(poTo.length && poTo != 'no_content'){
+      var poFrom = $('#poFrom').val();
+      if(poFrom.length){
+        if(poFrom > poTo){
+          $('#poFrom').val(poTo)
+          $('#poTo').val(poFrom)
+        }
+      }
+    }
+  }
+})
 
 
 //--- Date picker
@@ -166,10 +243,6 @@ function getReport(){
   var allPO = $('#allPO').val();
   var poFrom = $('#poFrom').val();
   var poTo = $('#poTo').val();
-
-  var allInvoice = $('#allInvoice').val();
-  var invoiceFrom = $('#invoiceFrom').val();
-  var invoiceTo = $('#invoiceTo').val();
 
   if(allDoc == 0){
     if(docFrom.length == 0){
@@ -235,45 +308,6 @@ function getReport(){
     $('#poTo').removeClass('has-error');
   }
 
-
-  if(allInvoice == 0){
-    if(invoiceFrom.length == 0){
-      $('#invoiceFrom').addClass('has-error');
-      swal('Error!', 'ใบส่งของไม่ถูกต้อง', 'error');
-      return false;
-    }else{
-      $('#invoiceFrom').removeClass('has-error');
-    }
-
-    if(poTo.length == 0){
-      $('#invoiceTo').addClass('has-error');
-      swal('Error!', 'ใบส่งของไม่ถูกต้อง', 'error');
-      return false;
-    }else{
-      $('#invoiceTo').removeClass('has-error');
-    }
-  }else{
-    $('#invoiceFrom').removeClass('has-error');
-    $('#invoiceTo').removeClass('has-error');
-  }
-
-
-  if(!isDate(fromDate)){
-    $('#fromDate').addClass('has-error');
-    swal('Error!', 'วันที่ไม่ถูกต้อง', 'error');
-    return false;
-  }else{
-    $('#fromDate').removeClass('has-error');
-  }
-
-  if(!isDate(toDate)){
-    $('#toDate').addClass('has-error');
-    swal('Error!', 'วันที่ไม่ถูกต้อง', 'error');
-    return false;
-  }else{
-    $('#toDate').removeClass('has-error');
-  }
-
   var data = [
     {'name' : 'allDoc', 'value' : allDoc},
     {'name' : 'docFrom', 'value' : docFrom},
@@ -285,10 +319,7 @@ function getReport(){
     {'name' : 'vendorTo', 'value' : vendorTo},
     {'name' : 'allPO', 'value' : allPO},
     {'name' : 'poFrom', 'value' : poFrom},
-    {'name' : 'poTo', 'value' : poTo},
-    {'name' : 'allInvoice', 'value' : allInvoice},
-    {'name' : 'invoiceFrom', 'value' : invoiceFrom},
-    {'name' : 'invoiceTo', 'value' : invoiceTo}
+    {'name' : 'poTo', 'value' : poTo}
   ];
 
   load_in();
@@ -329,10 +360,6 @@ function doExport(){
   var poFrom = $('#poFrom').val();
   var poTo = $('#poTo').val();
 
-  var allInvoice = $('#allInvoice').val();
-  var invoiceFrom = $('#invoiceFrom').val();
-  var invoiceTo = $('#invoiceTo').val();
-
   if(allDoc == 0){
     if(docFrom.length == 0){
       $('#docFrom').addClass('has-error');
@@ -397,44 +424,6 @@ function doExport(){
     $('#poTo').removeClass('has-error');
   }
 
-
-  if(allInvoice == 0){
-    if(invoiceFrom.length == 0){
-      $('#invoiceFrom').addClass('has-error');
-      swal('Error!', 'ใบส่งของไม่ถูกต้อง', 'error');
-      return false;
-    }else{
-      $('#invoiceFrom').removeClass('has-error');
-    }
-
-    if(poTo.length == 0){
-      $('#invoiceTo').addClass('has-error');
-      swal('Error!', 'ใบส่งของไม่ถูกต้อง', 'error');
-      return false;
-    }else{
-      $('#invoiceTo').removeClass('has-error');
-    }
-  }else{
-    $('#invoiceFrom').removeClass('has-error');
-    $('#invoiceTo').removeClass('has-error');
-  }
-
-
-  if(!isDate(fromDate)){
-    $('#fromDate').addClass('has-error');
-    swal('Error!', 'วันที่ไม่ถูกต้อง', 'error');
-    return false;
-  }else{
-    $('#fromDate').removeClass('has-error');
-  }
-
-  if(!isDate(toDate)){
-    $('#toDate').addClass('has-error');
-    swal('Error!', 'วันที่ไม่ถูกต้อง', 'error');
-    return false;
-  }else{
-    $('#toDate').removeClass('has-error');
-  }
 
   var token = $('#token').val();
   get_download(token);

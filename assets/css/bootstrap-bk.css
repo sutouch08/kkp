@@ -1111,6 +1111,12 @@ mark,
   background-color: #fcf8e3;
   padding: .2em;
 }
+.text-top {
+	vertical-align: top;
+}
+.text-bottom {
+	vertical-align: bottom;
+}
 .text-left {
   text-align: left;
 }
@@ -5432,11 +5438,11 @@ button.close {
   -webkit-appearance: none;
 }
 .modal-open {
-  overflow: auto;
+  overflow: hidden;
 }
 .modal {
   display: none;
-  overflow: auto;
+  overflow: hidden;
   position: fixed;
   top: 0;
   right: 0;

@@ -368,23 +368,6 @@ function getReport(){
     }
   }
 
-
-  if(!isDate(fromDate)){
-    $('#fromDate').addClass('has-error');
-    swal('Error!', 'วันที่ไม่ถูกต้อง', 'error');
-    return false;
-  }else{
-    $('#fromDate').removeClass('has-error');
-  }
-
-  if(!isDate(toDate)){
-    $('#toDate').addClass('has-error');
-    swal('Error!', 'วันที่ไม่ถูกต้อง', 'error');
-    return false;
-  }else{
-    $('#toDate').removeClass('has-error');
-  }
-
   var data = [
     {'name' : 'fromDate', 'value' : fromDate},
     {'name' : 'toDate', 'value' : toDate},
@@ -529,22 +512,6 @@ function doExport(){
     }
   }
 
-
-  if(!isDate(fromDate)){
-    $('#fromDate').addClass('has-error');
-    swal('Error!', 'วันที่ไม่ถูกต้อง', 'error');
-    return false;
-  }else{
-    $('#fromDate').removeClass('has-error');
-  }
-
-  if(!isDate(toDate)){
-    $('#toDate').addClass('has-error');
-    swal('Error!', 'วันที่ไม่ถูกต้อง', 'error');
-    return false;
-  }else{
-    $('#toDate').removeClass('has-error');
-  }
 
   var token = $('#token').val();
   get_download(token);

@@ -164,7 +164,7 @@ function doExport() {
   var cusFrom = $('#cusFrom').val();
   var cusTo = $('#cusTo').val();
   var fromDate = $('#fromDate').val();
-  var toDate = $('#toDate').val();  
+  var toDate = $('#toDate').val();
 
   if(allCustomer == 0){
     if(cusFrom.length == 0){
@@ -196,5 +196,7 @@ function doExport() {
     $('#toDate').removeClass('has-error');
   }
 
+  var token = $('#token').val();
+	get_download(token);
   $('#reportForm').submit();
 }

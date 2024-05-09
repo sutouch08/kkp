@@ -389,7 +389,12 @@ class Zone_model extends CI_Model
       $this->db->where('warehouse_code', $warehouse_code);
     }
 
-    $rs = $this->db->like('code', $txt)->or_like('name', $txt)->get('zone');
+    if($txt != '*')
+    {
+      $this->db->like('code', $txt)->or_like('name', $txt);
+    }
+
+    $rs = $this->db->order_by('code', 'ASC')->limit(100, 0)->get('zone');
 
     if($rs->num_rows() > 0)
     {

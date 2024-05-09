@@ -1,7 +1,7 @@
 <?php
 class Product_backlogs extends PS_Controller
 {
-	public $menu_code = 'REODBL';
+	public $menu_code = 'REPDBL';
 	public $menu_group_code = 'RE';
   public $menu_sub_group_code = 'REFL';
 	public $title = 'รายงาน สินค้าค้างส่ง';

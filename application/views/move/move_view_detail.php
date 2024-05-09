@@ -3,16 +3,16 @@
   	<table class="table table-striped border-1">
     	<thead>
       	<tr>
-        	<th colspan="6" class="text-center">รายการโอนย้าย</th>
+        	<th colspan="7" class="text-center">รายการโอนย้าย</th>
         </tr>
-
-      	<tr>
-        	<th class="width-5 text-center">ลำดับ</th>
-          <th class="width-15">บาร์โค้ด</th>
-          <th class="width-20">สินค้า</th>
-          <th class="width-25">ต้นทาง</th>
-          <th class="width-25">ปลายทาง</th>
-          <th class="width-15 text-right">จำนวน</th>
+				<tr>
+        	<th class="fix-width-40 text-center">ลำดับ</th>
+          <th class="fix-width-100">บาร์โค้ด</th>
+          <th class="fix-width-100">รหัส</th>
+					<th class="min-width-150">สินค้า</th>
+          <th class="fix-width-200">ต้นทาง</th>
+          <th class="fix-width-200">ปลายทาง</th>
+          <th class="fix-width-100 text-right">จำนวน</th>
         </tr>
       </thead>
 
@@ -33,6 +33,10 @@
 	        <td class="middle">
 						<?php echo $rs->product_code; ?>
 					</td>
+
+					<td class="middle">
+						<?php echo $rs->product_name; ?>
+					</td>
 					<!--- โซนต้นทาง --->
 	        <td class="middle">
 	      		<input type="hidden" class="row-zone-from" id="row-from-<?php echo $rs->id; ?>" value="<?php echo $rs->from_zone; ?>" />
@@ -50,12 +54,12 @@
 <?php     $total_qty += $rs->qty; ?>
 <?php		endforeach;			?>
 				<tr>
-					<td colspan="5" class="middle text-right"><strong>รวม</strong></td>
+					<td colspan="6" class="middle text-right"><strong>รวม</strong></td>
 					<td class="middle text-right"><strong><?php echo number($total_qty); ?></strong></td>
 				</tr>
 <?php	else : ?>
  				<tr>
-        	<td colspan="6" class="text-center"><h4>ไม่พบรายการ</h4></td>
+        	<td colspan="7" class="text-center"><h4>ไม่พบรายการ</h4></td>
         </tr>
 <?php	endif; ?>
       </tbody>

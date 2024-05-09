@@ -139,8 +139,87 @@ $('#pdTo').autocomplete({
 
 
 
+$('#poFrom').autocomplete({
+  source:BASE_URL + 'auto_complete/get_all_po_code',
+  autoFocus:true,
+  close:function(){
+    var poFrom = $.trim($(this).val());
+    if(poFrom.length && poFrom != 'no_content'){
+      var poTo = $('#poTo').val();
+      if(poTo.length){
+        if(poFrom > poTo){
+          $('#poFrom').val(poTo)
+          $('#poTo').val(poFrom)
+        }
+      }
+    }
+
+    $('#poTo').focus();
+  }
+})
+
+
+
+$('#poTo').autocomplete({
+  source:BASE_URL + 'auto_complete/get_all_po_code',
+  autoFocus:true,
+  close:function(){
+    var poTo = $.trim($(this).val());
+    if(poTo.length && poTo != 'no_content'){
+      var poFrom = $('#poFrom').val();
+      if(poFrom.length){
+        if(poFrom > poTo){
+          $('#poFrom').val(poTo)
+          $('#poTo').val(poFrom)
+        }
+      }
+    }
+  }
+})
+
+
+
+$('#docFrom').autocomplete({
+  source:BASE_URL + 'auto_complete/get_receive_code',
+  autoFocus:true,
+  close:function() {
+    let code = $(this).val();
+
+    if(code.length) {
+      let toCode = $('#docTo').val();
+      if(toCode.length) {
+        if(code > toCode) {
+          $('#docTo').val(code);
+          $(this).val(toCode);
+        }
+      }
+    }
+
+    $('#docTo').focus();
+  }
+})
+
+
+$('#docTo').autocomplete({
+  source:BASE_URL + 'auto_complete/get_receive_code',
+  autoFocus:true,
+  close:function() {
+    let code = $(this).val();
+
+    if(code.length) {
+      let fromCode = $('#docFrom').val();
+      if(fromCode.length) {
+        if(code < fromCode) {
+          $('#docFrom').val(code);
+          $(this).val(fromCode);
+        }
+      }
+    }
+  }
+})
+
 $('#vendorFrom').autocomplete({
-  source:BASE_URL + 'auto_complete/get_vendor_code_and_name',
+  source:BASE_URL + 'auto_complete/get_vender_code_and_name',
   autoFocus:true,
   close:function(){
     var rs = $.trim($(this).val());
@@ -163,7 +242,7 @@ $('#vendorFrom').autocomplete({
 
 
 $('#vendorTo').autocomplete({
-  source:BASE_URL + 'auto_complete/get_vendor_code_and_name',
+  source:BASE_URL + 'auto_complete/get_vender_code_and_name',
   autoFocus:true,
   close:function(){
     var rs = $.trim($(this).val());
