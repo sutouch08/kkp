@@ -64,7 +64,7 @@ class Order_invoice extends PS_Controller
 		$sc = TRUE;
 		$customer_code = $this->input->post('customer_code');
 		$customer = $this->customers_model->get($customer_code);
-		$customer_name = $this->customer_model->get_bill_name($customer_code);
+		$customer_name = $this->customers_model->get_bill_name($customer_code);
 		$doc_date = db_date($this->input->post('doc_date'));
 
 		if(!empty($customer))
@@ -670,7 +670,7 @@ class Order_invoice extends PS_Controller
 	public function print_billing_note($code)
 	{
 		$order = $this->order_invoice_model->get($code);
-		
+
 		if(!empty($order))
 		{
 			$this->load->library('printer');

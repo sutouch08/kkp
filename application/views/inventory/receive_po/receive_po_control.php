@@ -13,13 +13,13 @@
 		<label class="display-block not-show">ชื่อโซน</label>
 		<input type="text" class="form-control input-sm text-center" id="zone-name" value="" disabled/>
 	</div>
-	<div class="col-lg-1-harf col-md-1-harf col-sm-2 col-xs-6 padding-5">
-		<label>บาร์โค้ดสินค้า</label>
-		<input type="text" class="form-control input-sm text-center"  id="barcode-item" value="" disabled/>
-	</div>
 	<div class="col-lg-1 col-md-1 col-sm-1 col-xs-3 padding-5">
 		<label>จำนวน</label>
 		<input type="number" class="form-control input-sm text-center" id="item-qty" value="1" disabled/>
+	</div>
+	<div class="col-lg-1-harf col-md-1-harf col-sm-2 col-xs-6 padding-5">
+		<label>บาร์โค้ดสินค้า</label>
+		<input type="text" class="form-control input-sm text-center"  id="barcode-item" value="" disabled/>
 	</div>
 	<div class="col-lg-1 col-md-1 col-sm-1 col-xs-3 padding-5">
 		<label class="display-block not-show">get</label>

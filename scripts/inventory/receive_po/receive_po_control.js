@@ -388,6 +388,7 @@ function getZone() {
             $('#btn-add-zone').addClass('hide');
             $('#btn-change-zone').removeClass('hide');
             $('#barcode-item').removeAttr('disabled');
+            $('#item-qty').removeAttr('disabled');
             $('#btn-add-item').removeAttr('disabled');
             $('#barcode-item').focus();
           }
@@ -423,3 +424,9 @@ $('#barcode-item').keyup(function(e) {
     addItem();
   }
 });
+
+$('#item-qty').keyup(function(e) {
+  if(e.keyCode == 13) {
+    $('#barcode-item').focus();
+  }
+})
