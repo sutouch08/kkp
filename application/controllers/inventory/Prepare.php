@@ -15,6 +15,8 @@ class Prepare extends PS_Controller
     $this->load->model('inventory/prepare_model');
     $this->load->model('orders/orders_model');
     $this->load->model('orders/order_state_model');
+    $this->load->model('stock/stock_model');
+    $this->load->model('inventory/buffer_model');
   }
 
 
@@ -53,9 +55,6 @@ class Prepare extends PS_Controller
   }
 
 
-
-
-
   public function view_process()
   {
     $this->load->helper('channels');
@@ -70,22 +69,12 @@ class Prepare extends PS_Controller
 
 		$this->title = "ออเดอร์กำลังจัด";
 		//--- แสดงผลกี่รายการต่อหน้า
-		$perpage = ''; //get_rows();
-		//--- หาก user กำหนดการแสดงผลมามากเกินไป จำกัดไว้แค่ 300
-		// if($perpage > 300)
-		// {
-		// 	$perpage = 20;
-		// }
-
+		$perpage = 3000; //get_rows();
 		$segment  = 4; //-- url segment
-		//$rows     = $this->prepare_model->count_rows($filter, 4);
-		//--- ส่งตัวแปรเข้าไป 4 ตัว base_url ,  total_row , perpage = 20, segment = 3
-		//$init	    = pagination_config($this->home.'/view_process/', $rows, $perpage, $segment);
 		$orders   = $this->prepare_model->get_data($filter, $perpage, $this->uri->segment($segment), 4);
 
     $filter['orders'] = $orders;
 
-		//$this->pagination->initialize($init);
     $this->load->view('inventory/prepare/prepare_view_process', $filter);
   }
 
@@ -99,14 +88,20 @@ class Prepare extends PS_Controller
 
     if($state == 3)
     {
-      $rs = $this->orders_model->change_state($code, 4);
-      if($rs)
+      $arr = array(
+        'state' => 4,
+        'picked' => 2,
+        'update_user' => $this->_user->uname
+      );
+
+      if($this->orders_model->update($code, $arr))
       {
         $arr = array(
           'order_code' => $code,
           'state' => 4,
-          'update_user' => get_cookie('uname')
+          'update_user' => $this->_user->uname
         );
+
         $this->order_state_model->add_state($arr);
       }
     }
@@ -116,6 +111,7 @@ class Prepare extends PS_Controller
     $order->channels_name = $this->channels_model->get_name($order->channels_code);
 
     $uncomplete = $this->orders_model->get_unvalid_details($code);
+
     if(!empty($uncomplete))
     {
       foreach($uncomplete as $rs)
@@ -127,6 +123,7 @@ class Prepare extends PS_Controller
     }
 
     $complete = $this->orders_model->get_valid_details($code);
+
     if(!empty($complete))
     {
       foreach($complete as $rs)
@@ -156,7 +153,6 @@ class Prepare extends PS_Controller
     if($this->input->post('order_code'))
     {
       $this->load->model('masters/products_model');
-      $this->load->model('stock/stock_model');
       $this->load->model('masters/warehouse_model');
       $this->load->model('masters/zone_model');
 
@@ -190,35 +186,59 @@ class Prepare extends PS_Controller
               if( $bQty < $qty)
               {
                 $sc = FALSE;
-                $message = "สินค้าเกิน กรุณาคืนสินค้าแล้วจัดสินค้าใหม่อีกครั้ง";
+                $this->error = "สินค้าเกิน กรุณาคืนสินค้าแล้วจัดสินค้าใหม่อีกครั้ง";
               }
               else
               {
                 $is_enough = $this->stock_model->is_enough($zone_code, $ds->product_code, $qty);
                 $auz = getConfig('AlLOW_UNDER_ZERO') == 1 ? TRUE : $this->warehouse_model->is_auz($zone->warehouse_code);
 
-                if(!$is_enough && !$auz)
+                if( ! $is_enough && ! $auz)
                 {
                   $sc = FALSE;
-                  $message = "สินค้าไม่เพียงพอ กรุณากำหนดจำนวนสินค้าใหม่";
+                  $this->error = "สินค้าไม่เพียงพอ กรุณากำหนดจำนวนสินค้าใหม่";
                 }
                 else
                 {
-                  $this->db->trans_start();
-                  $this->stock_model->update_stock_zone($zone_code, $ds->product_code, $qty * -1);
-                  $this->prepare_model->update_buffer($ds->order_code, $ds->product_code, $zone_code, $qty);
-                  $this->prepare_model->update_prepare($ds->order_code, $ds->product_code, $zone_code, $qty);
-                  $this->db->trans_complete();
+                  $this->db->trans_begin();
 
-                  if($this->db->trans_status() === FALSE)
+                  if( ! $this->stock_model->update_stock_zone($zone_code, $ds->product_code, $qty * -1))
                   {
                     $sc = FALSE;
-                    $message = 'ทำรายการไม่สำเร็จ';
+                    $this->error = "ตัดสต็อกไม่สำเร็จ";
+                  }
+
+                  if($sc === TRUE)
+                  {
+                    if( ! $this->prepare_model->update_buffer($ds->order_code, $ds->product_code, $zone_code, $qty))
+                    {
+                      $sc = FALSE;
+                      $this->error = "เพิ่ม buffer ไม่สำเร็จ";
+                    }
+                  }
+
+                  if($sc === TRUE)
+                  {
+                    if( ! $this->prepare_model->update_prepare($ds->order_code, $ds->product_code, $zone_code, $qty))
+                    {
+                      $sc = FALSE;
+                      $this->error = "เพิ่ม prepare history ไม่สำเร็จ";
+                    }
+                  }
+
+                  if($sc === TRUE)
+                  {
+                    $this->db->trans_commit();
+                  }
+                  else
+                  {
+                    $this->db->trans_rollback();
                   }
 
                   if($sc === TRUE)
                   {
                     $preparedQty = $this->get_prepared($ds->order_code, $ds->product_code);
+
                     if($preparedQty == $ds->qty)
                     {
                       $this->orders_model->valid_detail($ds->id);
@@ -227,36 +247,34 @@ class Prepare extends PS_Controller
                   }
                 }
               }
-
             }
             else
             {
               $sc = FALSE;
-              $message = 'สินค้าไม่ตรงกับออเดอร์';
+              $this->error = 'สินค้าไม่ตรงกับออเดอร์';
             }
           }
           else
           {
             $sc = FALSE;
-            $message = 'สินค้าไม่นับสต็อก ไม่จำเป็นต้องจัดสินค้านี้';
+            $this->error = 'สินค้าไม่นับสต็อก ไม่จำเป็นต้องจัดสินค้านี้';
           }
         }
         else
         {
           $sc = FALSE;
-          $message = 'บาร์โค้ดไม่ถูกต้อง กรุณาตรวจสอบ';
+          $this->error = 'บาร์โค้ดไม่ถูกต้อง กรุณาตรวจสอบ';
         }
       }
       else
       {
         $sc = FALSE;
-        $message = 'สถานะออเดอร์ถูกเปลี่ยน ไม่สามารถจัดสินค้าต่อได้';
+        $this->error = 'สถานะออเดอร์ถูกเปลี่ยน ไม่สามารถจัดสินค้าต่อได้';
       }
     }
 
-    echo $sc === TRUE ? json_encode(array("id" => $ds->id, "qty" => $qty, "valid" => $valid)) : $message;
+    echo $sc === TRUE ? json_encode(array("id" => $ds->id, "qty" => $qty, "valid" => $valid)) : $this->error;
   }
-
 
 
   public function get_barcode($item_code)
@@ -272,20 +290,26 @@ class Prepare extends PS_Controller
   }
 
 
-
-
   public function get_prepared_from_zone($order_code, $item_code, $is_count)
   {
     if($is_count == 1)
     {
       $sc = 'ไม่พบข้อมูล';
+
       $buffer = $this->prepare_model->get_prepared_from_zone($order_code, $item_code);
+
       if(!empty($buffer))
       {
         $sc = '';
         foreach($buffer as $rs)
         {
-          $sc .= $rs->name.' : '.number($rs->qty).'<br/>';
+          $sc .= '<span class="display-block font-size-12">';
+          $sc .= $rs->name.' : '.number($rs->qty);
+          $sc .= '<a href="#" id="buffer-'.$rs->id.'" onclick="removeBuffer('.$rs->id.')" ';
+          $sc .= ' data-order="'.$order_code.'" data-item="'.$item_code.'" ';
+          $sc .= ' data-zonecode="'.$rs->zone_code.'" data-zonename="'.$rs->name.'" data-qty="'.number($rs->qty).'">';
+          $sc .= '<i class="fa fa-trash fa-lg red margin-left-10"></i></a>';
+          $sc .= '</span>';
         }
       }
     }
@@ -303,15 +327,13 @@ class Prepare extends PS_Controller
   public function get_stock_in_zone($item_code)
   {
     $sc = "ไม่มีสินค้า";
-    $this->load->model('stock/stock_model');
     $stock = $this->stock_model->get_stock_in_zone($item_code);
     if(!empty($stock))
     {
       $sc = "";
       foreach($stock as $rs)
       {
-        $prepared = $this->prepare_model->get_buffer_zone($item_code, $rs->code);
-        $sc .= $rs->name.' : '.($rs->qty - $prepared).'<br/>';
+        $sc .= $rs->name.' : '.number($rs->qty).'<br/>';
       }
     }
 
@@ -325,68 +347,71 @@ class Prepare extends PS_Controller
     $this->input->set_cookie(array('name' => 'showZone', 'value' => $value, 'expire' => 3600 , 'path' => '/'));
   }
 
-
-
-
-
   public function finish_prepare()
   {
+    $sc = TRUE;
     $this->load->helper('order');
     $code = $this->input->post('order_code');
-    $use_qc = getConfig('USE_QC');
-    $sc = TRUE;
+    $use_qc = is_true(getConfig('USE_QC'));
 
     $state = $this->orders_model->get_state($code);
 
     //---	ถ้าสถานะเป็นกำลังจัด (บางทีอาจมีการเปลี่ยนสถานะตอนเรากำลังจัดสินค้าอยู่)
     if( $state == 4)
     {
-      $this->db->trans_start();
+      $new_state = $use_qc ? 5 : 7;
+
+      $this->db->trans_begin();
 
       //--- mark all detail as valid
-      $this->orders_model->valid_all_details($code);
-
-      if($use_qc == 1)
+      if( ! $this->orders_model->valid_all_details($code))
       {
-        //---	เปลียน state ของออเดอร์ เป็น รอแพ็คสินค้า
-        $this->orders_model->change_state($code, 5);
+        $sc = FALSE;
+        $this->error = "Failed to set valid for order rows";
+      }
 
+      if($sc === TRUE)
+      {
+        $arr = array(
+          'state' => $new_state,
+          'picked' => 1,
+          'update_user' => $this->_user->uname
+        );
+
+        if( ! $this->orders_model->update($code, $arr))
+        {
+          $sc = FALSE;
+          $this->error = "Failed to change order state";
+        }
+      }
+
+      if($sc === TRUE)
+      {
         $arr = array(
           'order_code' => $code,
-          'state' => 5,
-          'update_user' => get_cookie('uname')
+          'state' => $new_state,
+          'update_user' => $this->_user->uname
         );
+
+        if( ! $this->order_state_model->add_state($arr))
+        {
+          $sc = FALSE;
+          $this->error = "Failed to add state logs";
+        }
+      }
+
+      if($sc === TRUE)
+      {
+        $this->db->trans_commit();
       }
       else
       {
-        //---	เปลียน state ของออเดอร์ เป็น รอแพ็คสินค้า
-        $this->orders_model->change_state($code, 7);
-        $arr = array(
-          'order_code' => $code,
-          'state' => 7,
-          'update_user' => get_cookie('uname')
-        );
+        $this->db->trans_rollback();
       }
-
-      //--- add state event
-      $this->order_state_model->add_state($arr);
-
-      //--- recalulate total_amount
-      update_order_total_amount($code); //-- order_helper
-
-      $this->db->trans_complete();
-
-      if($this->db->trans_status() === FALSE)
-      {
-        $sc = FALSE;
-        $message = "ปิดออเดอร์ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง";
-      }
-
     }
 
-    echo $sc === TRUE ? 'success' : $message;
+    echo $sc === TRUE ? 'success' : $this->error;
   }
-
 
 
   public function check_state()
@@ -416,6 +441,77 @@ class Prepare extends PS_Controller
     echo 'success';
   }
 
+  function remove_buffer()
+  {
+    $sc = TRUE;
+
+    $order_code = $this->input->post('order_code');
+    $item_code = $this->input->post('product_code');
+    $zone_code = $this->input->post('zone_code');
+    $buffer_id = $this->input->post('buffer_id');
+    $buffer = $this->buffer_model->get($buffer_id);
+
+    $detail_id = $this->orders_model->get_order_detail_id($order_code, $item_code);
+
+    if( ! empty($detail_id))
+    {
+      $this->db->trans_begin();
+
+      if( ! empty($buffer))
+      {
+        if( ! $this->buffer_model->remove_buffer($order_code, $item_code, $zone_code))
+        {
+          $sc = FALSE;
+          $this->error = "Failed to delete buffer";
+        }
+        else
+        {
+          //--- roll back stock
+          if( ! $this->stock_model->update_stock_zone($buffer->zone_code, $buffer->product_code, $buffer->qty))
+          {
+            $sc = FALSE;
+            $this->error = "Failed to rollback stock zone";
+          }
+        }
+      }
+
+      if( $sc === TRUE)
+      {
+        if( ! $this->prepare_model->remove_prepare($order_code, $item_code, $zone_code))
+        {
+          $sc = FALSE;
+          $this->error = "Failed to delete prepare logs";
+        }
+      }
+
+
+
+      if($sc === TRUE)
+      {
+        if( ! $this->orders_model->unvalid_detail($detail_id) )
+        {
+          $sc = FALSE;
+          $this->error = "Failed to rollback item status (unvalid)";
+        }
+      }
+
+      if($sc === TRUE)
+      {
+        $this->db->trans_commit();
+      }
+      else
+      {
+        $this->db->trans_rollback();
+      }
+    }
+    else
+    {
+      $sc = FALSE;
+      $this->error = "ไม่พบรายการสินค้า";
+    }
+
+    echo $sc === TRUE ? 'success' : $this->error;
+  }
 
 
 	public function sold_order()

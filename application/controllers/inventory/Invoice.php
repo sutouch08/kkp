@@ -33,6 +33,7 @@ class Invoice extends PS_Controller
 			'is_inv'        => get_filter('is_inv', 'is_inv', 'all'),
       'channels'      => get_filter('channels', 'channels', 'all'),
       'payment'       => get_filter('payment', 'payment', 'all'),
+      'user' => get_filter('user', 'user', 'all'),
       'from_date'     => get_filter('from_date', 'from_date', ''),
       'to_date'       => get_filter('to_date', 'to_date', '')
     );
@@ -49,10 +50,11 @@ class Invoice extends PS_Controller
 		$rows     = $this->delivery_order_model->count_rows($filter, 8);
 		//--- ส่งตัวแปรเข้าไป 4 ตัว base_url ,  total_row , perpage = 20, segment = 3
 		$init	    = pagination_config($this->home.'/index/', $rows, $perpage, $segment);
-		$orders   = $this->delivery_order_model->get_data($filter, $perpage, $this->uri->segment($segment), 8);
+		$orders   = $this->delivery_order_model->get_list($filter, $perpage, $this->uri->segment($segment), 8);
+
 
     $filter['orders'] = $orders;
-
+    
 		$this->pagination->initialize($init);
     $this->load->view('inventory/order_closed/closed_list', $filter);
   }
@@ -69,7 +71,6 @@ class Invoice extends PS_Controller
     $this->load->model('masters/sender_model');
 
     $use_qc = getConfig('USE_QC') == 1 ? TRUE : FALSE;
-		$use_prepare = getConfig('USE_PREPARE') == 1 ? TRUE : FALSE;
     $order = $this->orders_model->get($code);
     $order->customer_name = $this->customers_model->get_name($order->customer_code);
 
@@ -84,13 +85,34 @@ class Invoice extends PS_Controller
     $order->payment_role = $this->payment_methods_model->get_role($order->payment_code);
     $order->sender_name = $this->sender_model->get_name($order->sender_id);
 
-    $details = $this->invoice_model->get_billed_detail($code, $use_qc);
+    $details = $this->invoice_model->get_billed_detail($code, $order->picked, $use_qc);
+
+    if( ! empty($details))
+    {
+      foreach($details as $rs)
+      {
+        if($rs->is_count == 0)
+        {
+          $rs->line_total = $rs->order_qty * $rs->final_price;
+          $rs->line_discount = $rs->order_qty * $rs->discount_amount;
+          $rs->price_amount = $rs->order_qty * $rs->price;
+        }
+        else
+        {
+          $sell_qty = $rs->sold;
+          $rs->line_total = $sell_qty * $rs->final_price;
+          $rs->line_discount = $sell_qty * $rs->discount_amount;
+          $rs->price_amount = $sell_qty * $rs->price;
+        }
+      }
+    }
+
     $box_list = $use_qc ? $this->qc_model->get_box_list($code) : FALSE;
+
     $ds['order'] = $order;
     $ds['details'] = $details;
     $ds['box_list'] = $box_list;
     $ds['use_qc'] = $use_qc;
-		$ds['use_prepare'] = $use_prepare;
     $this->load->view('inventory/order_closed/closed_detail', $ds);
   }
 
@@ -161,6 +183,7 @@ class Invoice extends PS_Controller
       'role',
       'channels',
       'payment',
+      'user',
       'from_date',
       'to_date'
     );

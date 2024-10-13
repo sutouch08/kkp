@@ -40,7 +40,7 @@ class Prepare_model extends CI_Model
     else
     {
       return $this->db
-      ->set("qty", "qty + ({$qty})", FALSE)
+      ->set("qty", "qty + {$qty}", FALSE)
       ->where("order_code", $order_code)
       ->where("product_code", $product_code)
       ->where("zone_code", $zone_code)
@@ -83,10 +83,12 @@ class Prepare_model extends CI_Model
     }
     else
     {
-      $qr  = "UPDATE prepare SET qty = qty + {$qty} ";
-      $qr .= "WHERE order_code = '{$order_code}' ";
-      $qr .= "AND product_code = '{$product_code}' ";
-      $qr .= "AND zone_code = '{$zone_code}' ";
+      return $this->db
+      ->set("qty", "qty + {$qty}", FALSE)
+      ->where('order_code', $order_code)
+      ->where('product_code', $product_code)
+      ->where('zone_code', $zone_code)
+      ->update('prepare');
 
       return $this->db->query($qr);
     }
@@ -167,7 +169,14 @@ class Prepare_model extends CI_Model
   }
 
 
-
+  public function remove_prepare($order_code, $item_code, $zone_code)
+  {
+    return $this->db
+    ->where('order_code', $order_code)
+    ->where('product_code', $item_code)
+    ->where('zone_code', $zone_code)
+    ->delete('prepare');
+  }
 
 
   public function get_buffer_zone($item_code, $zone_code)

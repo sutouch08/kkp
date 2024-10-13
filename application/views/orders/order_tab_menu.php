@@ -1,7 +1,7 @@
 <div class="row">
 	<div class="col-sm-12 col-xs-12 padding-5" >
 		<div class="tabbable tabs-left" style="display:flex;">
-			<ul class="nav nav-tabs" id="myTab3" style="width:100px; height:200px;">
+			<ul class="nav nav-tabs" id="myTab3" style="width:100px; border-bottom:0;">
 				<li class="active">
 					<a data-toggle="tab" href="#top" aria-expanded="true" onclick="getOrderTabs(0)">
 						TOP LEVEL
@@ -18,16 +18,16 @@
 		<?php endif; ?>
 			</ul>
 
-			<div class="tab-content width-100 margin-bottom-10" style="height:300px; overflow-y:scroll;">
+			<div class="tab-content width-100 margin-bottom-10" style="max-height:300px; overflow-y:auto;">
 				<div id="top" class="tab-pane active">
 		<?php	$qs = $this->product_tab_model->get_style_in_tab(0); ?>
 		<?php if(!empty($qs)) : ?>
 			<?php foreach($qs as $rs) : ?>
-				<div class="col-sm-2 col-xs-6 padding-0 center">
+				<div class="item-card padding-0 center">
 					<div class="product padding-5">
 						<div class="image">
 							<a href="javascript:void(0)" onclick="getOrderGrid('<?php echo $rs->code; ?>')">
-								<img class="img-responsive border-1" src="<?php echo get_cover_image($rs->code, 'default'); ?>" />
+								<img class="img-responsive border-1" src="<?php echo get_cover_image($rs->code, 'mini'); ?>" />
 							</a>
 						</div>
 						<div class="discription" style="font-size:10px; min-height:50px;">

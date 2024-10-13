@@ -9,7 +9,7 @@
   <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 padding-5">
     <p class="pull-right top-p">
       <button type="button" class="btn btn-sm btn-warning" onclick="goBack()"><i class="fa fa-arrow-left"></i> กลับ</button>
-			<?php if($order->state == 8 && empty($order->invoice_code)) : ?>
+			<?php if($order->role == 'S' && $order->state == 8 && empty($order->invoice_code)) : ?>
 				<button type="button" class="btn btn-sm btn-primary" onclick="open_invoice('<?php echo $order->code; ?>')">เปิดใบกำกับ</button>
 			<?php endif; ?>
     </p>

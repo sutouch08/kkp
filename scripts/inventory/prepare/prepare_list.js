@@ -11,6 +11,9 @@ function clearFilter(){
 }
 
 
+function clearProcessFilter() {
+  $.get(HOME + '/clear_filter', function(){ goProcess(); });
+}
 
 
 
@@ -125,6 +128,13 @@ function soldOrder() {
 						window.location.reload();
 					}, 1200);
 				}
+        else {
+          swal({
+            title:'Error!',
+            text:rs,
+            type:'error'
+          })
+        }
 			}
 		});
 	}

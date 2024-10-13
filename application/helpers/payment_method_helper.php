@@ -54,4 +54,23 @@ function select_pos_payment_method($code = "")
 	return $sc;
 }
 
+function payment_method_array()
+{
+  $sc = array();
+  $ci =& get_instance();
+
+  $ci->load->model('masters/payment_methods_model');
+  $list = $ci->payment_methods_model->get_list();
+
+  if( ! empty($list))
+  {
+    foreach($list as $rs)
+    {
+      $sc[$rs->code] = $rs;
+    }
+  }
+
+  return $sc;
+}
+
  ?>

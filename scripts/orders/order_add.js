@@ -38,7 +38,7 @@ function update_detail(id) {
 	var total_amount = parseDefaultValue($('#line_total_'+id).val(), 0, 'float');
 
 	$.ajax({
-		url:HOME + 'update_detail',
+		url:BASE_URL + 'orders/orders/update_detail',
 		type:'POST',
 		cache:false,
 		data:{
@@ -513,7 +513,7 @@ function countInput(){
 function validUpdate(){
 	var date_add = $("#date").val();
 	var customer_code = $("#customerCode").val();
-  var customer_name = $('#customer').val();
+  var customer_name = $('#customerName').val();
 	var channels_code = $("#channels").val();
 	var payment_code = $("#payment").val();
   var recal = 0;
@@ -557,7 +557,7 @@ function updateOrder(recal){
 	var order_code = $("#order_code").val();
 	var date_add = $("#date").val();
 	var customer_code = $("#customerCode").val();
-  var customer_name = $("#customer").val();
+  var customer_name = $("#customerName").val();
   var customer_ref = $('#customer_ref').val();
 	var channels_code = $("#channels").val();
 	var payment_code = $("#payment").val();
@@ -576,6 +576,7 @@ function updateOrder(recal){
       "order_code" : order_code,
   		"date_add"	: date_add,
   		"customer_code" : customer_code,
+      "customer_name" : customer_name,
       "customer_ref" : customer_ref,
   		"channels_code" : channels_code,
   		"payment_code" : payment_code,

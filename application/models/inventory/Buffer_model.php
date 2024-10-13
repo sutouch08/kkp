@@ -7,13 +7,27 @@ class Buffer_model extends CI_Model
   }
 
 
+  public function get($id)
+  {
+    $rs = $this->db->where('id', $id)->get('buffer');
+
+    if($rs->num_rows() === 1)
+    {
+      return $rs->row();
+    }
+
+    return NULL;
+  }
+
   public function get_data(array $ds = array(), $perpage = NULL, $offset = NULL)
   {
     $this->db
     ->select('buffer.*')
+    ->select('products.name AS product_name')
     ->select('zone.name AS zone_name')
     ->select('order_state.name AS state_name')
     ->from('buffer')
+    ->join('products', 'buffer.product_code = products.code', 'left')
     ->join('zone', 'buffer.zone_code = zone.code', 'left')
     ->join('orders', 'buffer.order_code = orders.code', 'left')
     ->join('order_state', 'orders.state = order_state.state');
@@ -25,7 +39,11 @@ class Buffer_model extends CI_Model
 
     if(!empty($ds['pd_code']))
     {
-      $this->db->like('buffer.product_code', $ds['pd_code']);
+      $this->db
+      ->group_start()
+      ->like('products.code', $ds['pd_code'])
+      ->or_like('products.name', $ds['pd_code'])
+      ->group_end();
     }
 
     if(!empty($ds['zone_code']))
@@ -63,6 +81,7 @@ class Buffer_model extends CI_Model
   {
     $this->db
     ->from('buffer')
+    ->join('products', 'buffer.product_code = products.code', 'left')
     ->join('zone', 'buffer.zone_code = zone.code', 'left')
     ->join('orders', 'buffer.order_code = orders.code', 'left')
     ->join('order_state', 'orders.state = order_state.state');
@@ -74,7 +93,11 @@ class Buffer_model extends CI_Model
 
     if(!empty($ds['pd_code']))
     {
-      $this->db->like('buffer.product_code', $ds['pd_code']);
+      $this->db
+      ->group_start()
+      ->like('products.code', $ds['pd_code'])
+      ->or_like('products.name', $ds['pd_code'])
+      ->group_end();
     }
 
     if(!empty($ds['zone_code']))
@@ -118,7 +141,7 @@ class Buffer_model extends CI_Model
       return $rs->result();
     }
 
-    return FALSE;
+    return NULL;
   }
 
 
@@ -156,6 +179,12 @@ class Buffer_model extends CI_Model
     return $this->db->query($qr);
   }
 
+  public function update_by_id($id, $qty)
+  {
+    $this->db->set("qty", "qty + {$qty}", FALSE)->where('id', $id);
+
+    return $this->db->update('buffer');
+  }
 
   public function delete($id)
   {
@@ -194,11 +223,38 @@ class Buffer_model extends CI_Model
   }
 
 
+  public function remove_buffer($order_code, $item_code, $zone_code)
+  {
+    return $this->db
+    ->where('order_code', $order_code)
+    ->where('product_code', $item_code)
+    ->where('zone_code', $zone_code)
+    ->delete('buffer');
+  }
+
+
 	public function get_sum_order_qty($code)
 	{
 		$rs = $this->db->select_sum('qty')->where('order_code', $code)->get('buffer');
 
 		return intval($rs->row()->qty);
 	}
+
+
+  public function get_product_buffer_zone($zone_code, $product_code)
+  {
+    $rs = $this->db
+    ->select_sum('qty')
+    ->where('zone_code', $zone_code)
+    ->where('product_code', $product_code)
+    ->get('buffer');
+
+    if($rs->num_rows() === 1)
+    {
+      return $rs->row()->qty > 0 ? $rs->row()->qty : 0;
+    }
+
+    return 0;
+  }
 }
  ?>

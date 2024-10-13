@@ -228,7 +228,7 @@
 
     <tr class="font-size-12">
       <td style="border-left:solid 1px #CCC;"><b>มูลค่ารวม</b></td>
-      <td class="text-right" id="order-amount"><b>{{ order_amount }}</b></td>
+      <td class="text-right" id="total-order"><b>{{ order_amount }}</b></td>
       <td class="text-center"><b>THB.</b></td>
     </tr>
 

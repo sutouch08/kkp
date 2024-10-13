@@ -84,6 +84,59 @@ class Cancle extends PS_Controller
   }
 
 
+  public function move_cancle_back_to_stock()
+  {
+    $sc = TRUE;
+    $this->load->model('stock/stock_model');
+
+    $ids = $this->input->post('ids');
+
+    if( ! empty($ids))
+    {
+      foreach($ids as $id)
+      {
+        $cn = $this->cancle_model->get($id);
+
+        if( ! empty($cn))
+        {
+          $rs = TRUE;
+
+          $this->db->trans_begin();
+
+          if( ! $this->stock_model->update_stock_zone($cn->zone_code, $cn->product_code, $cn->qty))
+          {
+            $rs = FALSE;
+          }
+
+          if($rs === TRUE)
+          {
+            if( ! $this->cancle_model->delete($id))
+            {
+              $rs = FALSE;
+            }
+          }
+
+          if($rs === TRUE)
+          {
+            $this->db->trans_commit();
+          }
+          else
+          {
+            $this->db->trans_rollback();
+          }
+        }
+      }
+    }
+    else
+    {
+      $sc = FALSE;
+      $this->error = "Missing required parameter";
+    }    
+
+    echo $sc === TRUE ? 'success' : $this->error;
+  }
+
+
   //--- Just delete
   public function delete($id)
   {

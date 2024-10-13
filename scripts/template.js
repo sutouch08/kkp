@@ -189,19 +189,24 @@ $('#set_rows').keyup(function(e){
 
 
 
-
-function reIndex(){
-	//let no = parseDefault(parseInt($('#no').val()), 0);
-	let no = 0;
-  $('.no').each(function(index, el) {
-    no += 1;
-    $(this).text(addCommas(no));
-  });
+function reIndex(className){
+  if(className === undefined || className === null) {
+    $('.no').each(function(index, el) {
+      no = index +1;
+      $(this).text(addCommas(no));
+    });
+  }
+  else {
+    $('.'+className).each(function(index, el) {
+      no = index +1;
+      $(this).text(addCommas(no));
+    })
+  }
 }
 
 
-
 var downloadTimer;
+
 function get_download(token)
 {
 	load_in();

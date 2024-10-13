@@ -15,8 +15,8 @@
 			<p class="pull-right top-p">
 				<?php if($pm->can_add OR $pm->can_edit) : ?>
 					<?php $inv_option = $use_vat ? 'tax_invoice' : 'do_invoice'; ?>
-					<button type="button" class="btn btn-sm btn-primary top-btn" onclick="create_each_invoice('<?php echo $inv_option; ?>')">เปิดใบกำกับแยกออเดอร์</button>
-					<button type="button" class="btn btn-sm btn-success top-btn" onclick="create_one_invoice('<?php echo $inv_option; ?>')">เปิดใบกำกับรวมออเดอร์</button>
+					<button type="button" class="btn btn-xs btn-primary top-btn" onclick="create_each_invoice('<?php echo $inv_option; ?>')">เปิดใบกำกับแยกออเดอร์</button>
+					<button type="button" class="btn btn-xs btn-success top-btn" onclick="create_one_invoice('<?php echo $inv_option; ?>')">เปิดใบกำกับรวมออเดอร์</button>
 				<?php endif; ?>
 			</p>
 		</div>
@@ -48,7 +48,7 @@
 		</select>
   </div>
 
-	<div class="col-lg-1-harf col-md-2 col-sm-3 col-xs-6 padding-5">
+	<div class="col-lg-2 col-md-2 col-sm-3 col-xs-6 padding-5">
     <label>การชำระเงิน</label>
 		<select class="form-control input-sm" name="payment" onchange="getSearch()">
 			<option value="all">ทั้งหมด</option>
@@ -57,18 +57,27 @@
   </div>
 
 
-	<div class="col-lg-1-harf col-md-2 col-sm-3 col-xs-6 padding-5 hide">
+	<div class="col-lg-2 col-md-2 col-sm-3 col-xs-6 padding-5">
     <label>รูปแบบ</label>
 		<select class="form-control input-sm" name="role" onchange="getSearch()">
       <option value="all">ทั้งหมด</option>
+			<?php echo select_order_role($role); ?>
     </select>
   </div>
 
-	<div class="col-lg-1-harf col-md-2 col-sm-3 col-xs-6 padding-5">
+	<div class="col-lg-2 col-md-2 col-sm-3 col-xs-6 padding-5">
     <label>ช่องทางขาย</label>
 		<select class="form-control input-sm" name="channels" onchange="getSearch()">
       <option value="all">ทั้งหมด</option>
       <?php echo select_channels($channels); ?>
+    </select>
+  </div>
+
+	<div class="col-lg-2-harf col-md-2 col-sm-3 col-xs-6 padding-5">
+    <label>พนักงาน</label>
+		<select class="width-100" name="user" id="user" onchange="getSearch()">
+      <option value="all">ทั้งหมด</option>
+      <?php echo select_user($user); ?>
     </select>
   </div>
 
@@ -95,7 +104,7 @@
 <?php echo $this->pagination->create_links(); ?>
 <div class="row">
   <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5 table-responsive">
-    <table class="table table-striped border-1" style="min-width:1000px;">
+    <table class="table table-striped border-1" style="min-width:1100px;">
       <thead>
         <tr>
 					<th class="fix-width-40 text-center"></th>
@@ -104,16 +113,18 @@
           <th class="fix-width-100 text-center">วันที่</th>
           <th class="fix-width-120">เลขที่เอกสาร</th>
 					<th class="fix-width-120">ใบกำกับ</th>
-          <th class="min-width-200">ลูกค้า/ผู้รับ/ผู้เบิก</th>
+          <th class="fix-width-200">ลูกค้า/ผู้รับ/ผู้เบิก</th>
           <th class="fix-width-100 text-right">ยอดเงิน</th>
-          <th class="fix-width-100 text-center">การชำระเงิน</th>
-          <th class="fix-width-100">พนักงาน</th>
+          <th class="fix-width-150 text-center">การชำระเงิน</th>
+          <th class="fix-width-150">พนักงาน</th>
         </tr>
       </thead>
       <tbody>
 <?php if(!empty($orders))  : ?>
 <?php $no = $this->uri->segment(4) + 1; ?>
+<?php $payments = payment_method_array(); ?>
 <?php   foreach($orders as $rs)  : ?>
+	<?php $payment = empty($payments[$rs->payment_code]) ? NULL : $payments[$rs->payment_code]; ?>
         <tr class="font-size-12" <?php echo (empty($rs->invoice_code) ? "" : 'style="background-color:#e8f3f1"'); ?>>
 					<td class="middle text-center">
 						<?php if($rs->role === 'S' && empty($rs->invoice_code)) : ?>
@@ -138,7 +149,7 @@
           <td class="middle" >
             <?php echo $rs->code; ?>
             <?php echo ($rs->reference != '' ? ' ['.$rs->reference.']' : ''); ?>
-						<?php if($rs->payment_role == 4 && $rs->is_paid == 0) : ?>
+						<?php if( ! empty($payment) && $payment->role == 4 && $rs->is_paid == 0) : ?>
 							<span class="label label-danger">รอเงินเข้า</span>
 						<?php endif; ?>
 						<input type="hidden" id="orderCode-<?php echo $no; ?>" value="<?php echo $rs->code; ?>" />
@@ -161,7 +172,7 @@
           </td>
 
           <td class="middle text-center" >
-            <?php echo $rs->payment_name; ?>
+            <?php echo ( ! empty($payment) ? $payment->name : ''); ?>
           </td>
 
           <td class="middle hide-text" >
@@ -180,6 +191,9 @@
   </div>
 </div>
 
+<script>
+	$('#user').select2();
+</script>
 <script src="<?php echo base_url(); ?>scripts/inventory/order_closed/closed.js?v=<?php echo date('Ymd'); ?>"></script>
 <script src="<?php echo base_url(); ?>scripts/inventory/order_closed/closed_list.js?v=<?php echo date('Ymd'); ?>"></script>
 

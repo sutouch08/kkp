@@ -6,32 +6,35 @@ function update_order_total_amount($code)
 	$CI->load->model('oders/orders_model');
 	$order = $CI->orders_model->get($code);
 	$amount = 0;
-	if($order->state > 3)
-	{
-		$CI->load->model('inventory/delivery_order_model');
-		$use_qc = getConfig('USER_QC') == 1 ? TRUE : FALSE;
-		$details = $CI->delivery_order_model->get_bill_detail($code, $use_qc);
-		if(!empty($details))
-		{
-			foreach($details as $rs)
-			{
-				if($use_qc)
-				{
-					$row_amount = $rs->is_count == 0 ? ($rs->final_price * $rs->order_qty) : ($rs->final_price * $rs->qc);
-				}
-				else
-				{
-					$row_amount = $rs->is_count == 0 ? ($rs->final_price * $rs->order_qty) : ( $rs->final_price * $rs->prepared);
-				}
 
-				$amount += $row_amount;
-			}
-		}
-	}
-	else
-	{
-		$amount = $CI->orders_model->get_order_total_amount($code);
-	}
+	// if($order->state == 8)
+	// {
+	// 	$CI->load->model('inventory/delivery_order_model');
+	// 	$use_qc = getConfig('USER_QC') == 1 ? TRUE : FALSE;
+	// 	$details = $CI->delivery_order_model->get_bill_detail($code, $use_qc);
+	// 	if(!empty($details))
+	// 	{
+	// 		foreach($details as $rs)
+	// 		{
+	// 			if($use_qc)
+	// 			{
+	// 				$row_amount = $rs->is_count == 0 ? ($rs->final_price * $rs->order_qty) : ($rs->final_price * $rs->qc);
+	// 			}
+	// 			else
+	// 			{
+	// 				$row_amount = $rs->is_count == 0 ? ($rs->final_price * $rs->order_qty) : ( $rs->final_price * $rs->prepared);
+	// 			}
+	//
+	// 			$amount += $row_amount;
+	// 		}
+	// 	}
+	// }
+	// else
+	// {
+	// 	$amount = $CI->orders_model->get_order_total_amount($code);
+	// }
+
+	$amount = $CI->orders_model->get_order_total_amount($code);
 
 	$amount += $order->shipping_fee;
 	$amount += $order->service_fee;
@@ -182,7 +185,8 @@ function select_order_role($role = '')
 {
 	$sc = '';
 	$CI =& get_instance();
-	$rs = $CI->db->query("SELECT * FROM order_role");
+	$rs = $CI->db->where('active', 1)->order_by('position', 'ASC')->get('order_role');
+
 	if($rs->num_rows() > 0)
 	{
 		foreach($rs->result() as $ro)

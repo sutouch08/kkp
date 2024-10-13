@@ -101,15 +101,8 @@
             <th class="width-35 text-center">สินค้า</th>
             <th class="width-8 text-center">ราคา</th>
             <th class="width-8 text-center">ออเดอร์</th>
-
-					<?php if($use_prepare): ?>
             <th class="width-8 text-center">จัด</th>
-					<?php endif; ?>
-
-          <?php if($use_qc) : ?>
             <th class="width-8 text-center">ตรวจ</th>
-          <?php endif; ?>
-
             <th class="width-8 text-center">เปิดบิล</th>
             <th class="width-10 text-center">ส่วนลด</th>
             <th class="width-10 text-center">มูลค่า</th>
@@ -127,105 +120,58 @@
           $totalPrice = 0;
   ?>
   <?php   foreach($details as $rs) :  ?>
-    <?php
-          $color = '';
-
-          if($use_qc)
+  <?php   $color = "";
+          if($order->picked == 0)
           {
-            $color = ($rs->order_qty == $rs->qc OR $rs->is_count == 0) ? '' : 'red';
+            $color = $rs->order_qty != $rs->sold ? 'red' : $color;
           }
           else
           {
-						if($use_prepare)
-						{
-							$color = ($rs->order_qty == $rs->prepared OR $rs->is_count == 0) ? '' : 'red';
-						}
+            if($use_qc)
+            {
+              $color = (($rs->qc != $rs->order_qty) OR ($rs->qc != $rs->prepqred)) ? 'red' : $color;
+            }
+            else
+            {
+              $color = $rs->prepared != $rs->order_qty ? 'red' : $color;
+            }
           }
-    ?>
+  ?>
             <tr class="font-size-12 <?php echo $color; ?>">
-              <td class="text-center">
-                <?php echo $no; ?>
-              </td>
+              <td class="text-center"><?php echo $no; ?></td>
 
               <!--- รายการสินค้า ที่มีการสั่งสินค้า --->
-              <td>
-                <?php echo limitText($rs->product_code.' : '. $rs->product_name, 100); ?>
-              </td>
+              <td><?php echo limitText($rs->product_code.' : '. $rs->product_name, 100); ?></td>
 
               <!--- ราคาสินค้า  --->
-              <td class="text-center">
-                <?php echo number($rs->price, 2); ?>
-              </td>
+              <td class="text-center"><?php echo number($rs->price, 2); ?></td>
 
               <!---   จำนวนที่สั่ง  --->
-              <td class="text-center">
-                <?php echo number($rs->order_qty); ?>
-              </td>
+              <td class="text-center"><?php echo number($rs->order_qty); ?></td>
 
               <!--- จำนวนที่จัดได้  --->
-						<?php if($use_prepare) : ?>
-              <td class="text-center">
-                <?php echo $rs->is_count == 0 ? number($rs->order_qty) : number($rs->prepared); ?>
-              </td>
-						<?php endif; ?>
-
+              <td class="text-center"><?php echo number($rs->prepared); ?></td>
               <!--- จำนวนที่ตรวจได้ --->
-            <?php if($use_qc) : ?>
-              <td class="text-center">
-                <?php echo $rs->is_count == 0 ? number($rs->order_qty) : number($rs->qc); ?>
-              </td>
-            <?php endif; ?>
-
+              <td class="text-center"><?php echo number($rs->qc); ?></td>
               <!--- จำนวนที่บันทึกขาย --->
-              <td class="text-center">
-                <?php echo number($rs->sold); ?>
-              </td>
+              <td class="text-center"><?php echo number($rs->sold); ?></td>
 
               <!--- ส่วนลด  --->
-              <td class="text-center">
-                <?php echo discountLabel($rs->discount1, $rs->discount2, $rs->discount3); ?>
-              </td>
+              <td class="text-center"><?php echo discountLabel($rs->discount1, $rs->discount2, $rs->discount3); ?></td>
 
-              <td class="text-right">
-                <?php
-                  if($use_qc)
-                  {
-                    echo $rs->is_count == 0 ? number($rs->final_price * $rs->order_qty, 2) : number( $rs->final_price * $rs->qc , 2);
-                  }
-                  else
-                  {
-										if($use_prepare)
-										{
-											echo $rs->is_count == 0 ? number($rs->final_price * $rs->order_qty, 2) : number( $rs->final_price * $rs->prepared , 2);
-										}
-										else
-										{
-											echo number($rs->final_price * $rs->order_qty, 2);
-										}
-                  }
-                ?>
-              </td>
+              <td class="text-right"><?php echo number($rs->line_total, 2); ?></td>
 
             </tr>
-    <?php
-          $totalQty += $rs->order_qty;
-
-					if($use_prepare)
-					{
-						$totalPrepared += ($rs->is_count == 0 ? $rs->order_qty : $rs->prepared);
-					}
-
-          if($use_qc)
-          {
-            $totalQc += ($rs->is_count == 0 ? $rs->order_qty : $rs->qc);
-          }
-
-          $totalSold += $rs->sold;
-          $totalDiscount += $rs->discount_amount * $rs->sold;
-          $totalAmount += $rs->final_price * $rs->sold;
-          $totalPrice += $rs->price * $rs->sold;
-          $no++;
-    ?>
+    <?php            
+            $totalQty += $rs->order_qty;
+            $totalPrepared += $rs->prepared;
+            $totalQc += $rs->qc;
+            $totalSold += $rs->sold;
+            $totalDiscount += $rs->line_discount;
+            $totalAmount += $rs->line_total;
+            $totalPrice += $rs->price_amount;
+            $no++;
+            ?>
   <?php   endforeach; ?>
           <tr class="font-size-12">
             <td colspan="3" class="text-right font-size-14">
@@ -235,18 +181,12 @@
             <td class="text-center">
               <?php echo number($totalQty); ?>
             </td>
-
-					<?php if($use_prepare) : ?>
             <td class="text-center">
               <?php echo number($totalPrepared); ?>
             </td>
-					<?php endif; ?>
-
-            <?php if($use_qc) : ?>
             <td class="text-center">
               <?php echo number($totalQc); ?>
             </td>
-            <?php endif; ?>
 
             <td class="text-center">
               <?php echo number($totalSold); ?>
@@ -261,7 +201,7 @@
             </td>
           </tr>
 
-          <?php $colspan = $use_qc ? 3 : ($use_prepare ? 2 : 1); ?>
+          <?php $colspan = 3; ?>
           <tr>
             <td colspan="4" rowspan="3">
               หมายเหตุ : <?php echo $order->remark; ?>

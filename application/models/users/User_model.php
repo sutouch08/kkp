@@ -6,6 +6,17 @@ class User_model extends CI_Model
     parent::__construct();
   }
 
+  public function get_all()
+  {
+    $rs = $this->db->get('user');
+
+    if($rs->num_rows() > 0)
+    {
+      return $rs->result();
+    }
+
+    return NULL;
+  }
 
 	public function add(array $ds = array())
 	{

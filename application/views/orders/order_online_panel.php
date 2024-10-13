@@ -35,7 +35,7 @@
           <!-- Tab panes -->
       <div class="tab-content" style="margin:0px; padding:0px;">
 				<div role="tabpanel" class="tab-pane fade" id="address">
-          <div class='row'>
+          <div class='row' style="margin-left:-6px; margin-right:-6px;">
             <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
               <div class="table-responsive">
                 <table class="table table-bordered" style="margin-bottom:0px; border-collapse:collapse; border:0;">

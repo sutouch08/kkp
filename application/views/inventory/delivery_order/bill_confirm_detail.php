@@ -52,15 +52,16 @@
 <div class="row">
   <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5 text-right">
     <?php if( $this->pm->can_edit || $this->pm->can_add ) : ?>
-      <?php if($order->is_term == 1 OR $order->balance <= 0 OR $order->payment_role == 4) : ?>
-				<?php if($use_prepare === FALSE && $has_default_zone === FALSE) : ?>
-							<div class="alert alert-danger text-center margin-bottom-10">กรุณากำหนดค่า โซนขายสินค้าเริ่มต้น</div>
-				<?php else : ?>
-      				<button type="button" class="btn btn-sm btn-primary" id="btn-confirm-order" onclick="confirmOrder()">เปิดบิลและตัดสต็อก</button>
-				<?php endif; ?>
+
+      <?php //if($order->is_term == 1 OR $order->balance <= 0 OR $order->payment_role == 4) : ?>
+      <?php //else : ?>
+        <?php if($order->role == 'S' && $order->is_term == 0 && $order->balance > 0 && $order->payment_role != 4) : ?>
+        <span class="red" style="padding-right:10px;">มียอดค้างชำระ : <?php echo number($order->balance,2); ?></span>
+      <?php endif; ?>
+      <?php if($use_prepare === FALSE && $has_default_zone === FALSE) : ?>
+        <div class="alert alert-danger text-center margin-bottom-10" style="padding-right:10px;">กรุณากำหนดค่า โซนขายสินค้าเริ่มต้น</div>
       <?php else : ?>
-        <span class="red">มียอดค้างชำระ : <?php echo number($order->balance,2); ?></span>
-      <button type="button" class="btn btn-sm btn-info" onclick="refresh()"><i class="fa fa-refresh"></i> รีเฟรช</button>
+        <button type="button" class="btn btn-sm btn-primary" id="btn-confirm-order" onclick="confirmOrder()">เปิดบิลและตัดสต็อก</button>
       <?php endif; ?>
     <?php endif; ?>
   </div>
@@ -76,9 +77,7 @@
           <th class="width-35 text-center">สินค้า</th>
           <th class="width-10 text-center">ราคา</th>
           <th class="width-10 text-center">ออเดอร์</th>
-				<?php if($use_prepare) : ?>
           <th class="width-10 text-center">จัด</th>
-				<?php endif; ?>
         <?php if($use_qc) : ?>
           <th class="width-10 text-center">ตรวจ</th>
         <?php endif; ?>
@@ -97,111 +96,38 @@
         $totalPrice = 0;
 ?>
 <?php   foreach($details as $rs) :  ?>
-  <?php  $color = ''; ?>
-<?php     if($use_qc)
-          {
-            $color = ($rs->order_qty == $rs->qc OR $rs->is_count == 0) ? '' : 'red';
-          }
-          else
-          {
-						if($use_prepare)
-						{
-							$color = ($rs->order_qty == $rs->prepared OR $rs->is_count == 0) ? '' : 'red';
-						}
-          }
-?>
+  <?php  $color = (($rs->order_qty != $rs->qc) OR ($rs->order_qty != $rs->prepared)) ? 'red' : ''; ?>
         <tr class="font-size-12 <?php echo $color; ?>">
-          <td class="text-center">
-            <?php echo $no; ?>
-          </td>
+          <td class="text-center"><?php echo $no; ?></td>
 
           <!--- รายการสินค้า ที่มีการสั่งสินค้า --->
-          <td>
-            <?php echo limitText($rs->product_code.' : '. $rs->product_name, 100); ?>
-          </td>
+          <td><?php echo limitText($rs->product_code.' : '. $rs->product_name, 100); ?></td>
 
           <!--- ราคาสินค้า  --->
-          <td class="text-center">
-            <?php echo number($rs->price, 2); ?>
-          </td>
+          <td class="text-center"><?php echo number($rs->price, 2); ?></td>
 
           <!---   จำนวนที่สั่ง  --->
-          <td class="text-center">
-            <?php echo number($rs->order_qty); ?>
-          </td>
+          <td class="text-center"><?php echo number($rs->order_qty); ?></td>
 
           <!--- จำนวนที่จัดได้  --->
-				<?php if($use_prepare) : ?>
-          <td class="text-center">
-            <?php echo $rs->is_count == 0 ? number($rs->order_qty) : number($rs->prepared); ?>
-          </td>
-				<?php endif; ?>
+          <td class="text-center"><?php echo number($rs->prepared); ?></td>
+
         <?php if($use_qc) : ?>
           <!--- จำนวนที่ตรวจได้ --->
-          <td class="text-center">
-            <?php echo $rs->is_count == 0 ? number($rs->order_qty) : number($rs->qc); ?>
-          </td>
+          <td class="text-center"><?php echo number($rs->qc); ?></td>
       <?php endif; ?>
           <!--- ส่วนลด  --->
-          <td class="text-center">
-            <?php echo discountLabel($rs->discount1, $rs->discount2, $rs->discount3); ?>
-          </td>
+          <td class="text-center"><?php echo discountLabel($rs->discount1, $rs->discount2, $rs->discount3); ?></td>
 
-          <td class="text-right">
-				<?php if($use_qc)
-							{
-								echo $rs->is_count == 0 ? number($rs->final_price * $rs->order_qty, 2) : number( $rs->final_price * $rs->qc , 2);
-							}
-							else
-							{
-								if($use_prepare)
-								{
-									echo $rs->is_count == 0 ? number($rs->final_price * $rs->order_qty) : number( $rs->final_price * $rs->prepared , 2);
-								}
-								else
-								{
-									echo number($rs->final_price * $rs->order_qty, 2);
-								}
-							}
-				?>
-          </td>
-
+          <td class="text-right"><?php echo number($rs->line_total, 2); ?></td>
         </tr>
 <?php
       $totalQty += $rs->order_qty;
-
-			if($use_prepare)
-			{
-				$totalPrepared += ($rs->is_count == 0 ? $rs->order_qty : $rs->prepared);
-			}
-
-			if($use_qc)
-			{
-				$totalQc += ($rs->is_count == 0 ? $rs->order_qty : $rs->qc);
-			}
-
-      if($use_qc)
-      {
-        $totalDiscount += ($rs->is_count == 0 ? $rs->discount_amount * $rs->order_qty : $rs->discount_amount * $rs->qc);
-        $totalAmount += ($rs->is_count == 0 ? $rs->final_price * $rs->order_qty : $rs->final_price * $rs->qc);
-        $totalPrice += ($rs->is_count == 0 ? $rs->price * $rs->order_qty : $rs->price * $rs->qc);
-      }
-      else
-      {
-				if($use_prepare)
-				{
-					$totalDiscount += ($rs->is_count == 0 ? $rs->discount_amount * $rs->order_qty : $rs->discount_amount * $rs->prepared);
-					$totalAmount += ($rs->is_count == 0 ? $rs->final_price * $rs->order_qty : $rs->final_price * $rs->prepared);
-					$totalPrice += ($rs->is_count == 0 ? $rs->price * $rs->order_qty : $rs->price * $rs->prepared);
-				}
-				else
-				{
-					$totalDiscount += $rs->discount_amount * $rs->order_qty;
-					$totalAmount += $rs->final_price * $rs->order_qty;
-					$totalPrice += $rs->price * $rs->order_qty;
-				}
-      }
-
+      $totalPrepared += $rs->prepared;
+      $totalQc += $rs->qc;
+      $totalDiscount += $rs->line_discount;
+      $totalAmount += $rs->line_total;
+      $totalPrice += $rs->price_amount;
       $no++;
 ?>
 <?php   endforeach; ?>
@@ -231,7 +157,7 @@
 
         </tr>
 
-        <?php $colspan = $use_qc ? 3 : ($use_prepare ? 2 : 1); ?>
+        <?php $colspan = $use_qc ? 3 : 2; ?>
         <tr>
           <td colspan="3" rowspan="6">
 

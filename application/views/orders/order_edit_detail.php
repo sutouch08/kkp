@@ -81,17 +81,7 @@ $delete = $this->pm->can_delete;
 
 <?php
 
-if(getConfig('USE_PRODUCT_TAB') == 1)
-{
-	if(getConfig('PRODUCT_TAB_TYPE') === 'item')
-	{
-		$this->load->view('orders/item_tab_menu');
-	}
-	else
-	{
-		$this->load->view('orders/order_tab_menu');
-	}
-}
+$this->load->view('orders/order_tab_menu');
 
 ?>
 
@@ -99,21 +89,27 @@ if(getConfig('USE_PRODUCT_TAB') == 1)
 
 
 <form id="orderForm">
-<div class="modal fade" id="orderGrid" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-	<div class="modal-dialog" id="modal" style="min-width:250px; max-width:1000px;">
-		<div class="modal-content">
-  			<div class="modal-header">
-				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-				<h4 class="modal-title" id="modalTitle" >title</h4>
-			 </div>
-			 <div class="modal-body text-center" id="modalBody"></div>
-			 <div class="modal-footer">
-				<button type="button" class="btn btn-default" data-dismiss="modal">ปิด</button>
-				<button type="button" class="btn btn-primary" onClick="addToOrder()" >เพิ่มในรายการ</button>
-			 </div>
-		</div>
-	</div>
-</div>
+  <div class="modal fade" id="orderGrid" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog" id="modal" style="min-width:250px; max-width:95vw;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title" id="modalTitle" >title</h4>
+        </div>
+        <div class="modal-body text-center" >
+          <div class="row">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="max-height:60vh; padding:0; overflow:auto;" id="modalBody">
+
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">ปิด</button>
+          <button type="button" class="btn btn-primary" onClick="addToOrder()" >เพิ่มในรายการ</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </form>
 
 <form id="orderItemForm">

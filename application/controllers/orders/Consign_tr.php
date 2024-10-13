@@ -88,59 +88,69 @@ class Consign_tr extends PS_Controller
 
   public function add()
   {
-    if($this->input->post('customerCode'))
+    $sc = TRUE;
+
+    $ds = json_decode($this->input->post('data'));
+
+    if( ! empty($ds))
     {
       $book_code = getConfig('BOOK_CODE_CONSIGN_TR');
-      $date_add = db_date($this->input->post('date'));
+      $role = 'N';
+      $date_add = db_date($ds->date);
       $code = $this->get_new_code($date_add);
-      $role = 'N'; //--- C = ฝากขายโอนคลัง
-      $zone = $this->zone_model->get($this->input->post('zone_code'));
-      if(!empty($zone))
+      $zone = $this->zone_model->get($ds->zone_code);
+
+      if( ! empty($zone))
       {
-        $ds = array(
+        $arr = array(
           'code' => $code,
           'role' => $role,
           'bookcode' => $book_code,
-          'customer_code' => $this->input->post('customerCode'),
-          'gp' => $this->input->post('gp'),
-          'user' => get_cookie('uname'),
-          'remark' => $this->input->post('remark'),
+          'customer_code' => $ds->customer_code,
+          'customer_name' => $ds->customer_name,
+          'gp' => empty($ds->gp) ? 0 : $ds->gp,
+          'user' => $this->_user->uname,
+          'remark' => get_null($ds->remark),
           'zone_code' => $zone->code,
           'warehouse_code' => NULL
         );
 
-        if($this->orders_model->add($ds) === TRUE)
+        if($this->orders_model->add($arr))
         {
           $arr = array(
             'order_code' => $code,
             'state' => 1,
-            'update_user' => get_cookie('uname')
+            'update_user' => $this->_user->uname
           );
 
           $this->order_state_model->add_state($arr);
-
-          redirect($this->home.'/edit_detail/'.$code);
         }
         else
         {
-          set_error('เพิ่มเอกสารไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
-          redirect($this->home.'/add_new');
+          $sc = FALSE;
+          $this->error = "เพิ่มเอกสารไม่สำเร็จ";
         }
       }
       else
       {
-        set_error('ไม่พบโซนฝากขาย');
-        redirect($this->home.'/add_new');
+        $sc = FALSE;
+        $this->error = "ไม่พบโซนฝากขาย";
       }
-
     }
     else
     {
-      set_error('ไม่พบข้อมูลลูกค้า กรุณาตรวจสอบ');
-      redirect($this->home.'/add_new');
+      $sc = FALSE;
+      $this->error = "Missing required parameter";
     }
-  }
 
+    $arr = array(
+      'status' => $sc === TRUE ? 'success' : 'failed',
+      'message' => $sc === TRUE ? 'success' : $this->error,
+      'code' => $sc === TRUE ? $code : NULL
+    );
+
+    echo json_encode($arr);
+  }
 
 
 
@@ -204,43 +214,52 @@ class Consign_tr extends PS_Controller
   {
     $sc = TRUE;
 
-    if($this->input->post('order_code'))
+    $ds = json_decode($this->input->post('data'));
+
+    if( ! empty($ds))
     {
-      $code = $this->input->post('order_code');
-      $zone = $this->zone_model->get($this->input->post('zone_code'));
-      if(!empty($code))
+      $order = $this->orders_model->get($ds->code);
+
+      if( ! empty($order))
       {
-        $ds = array(
-          'customer_code' => $this->input->post('customer_code'),
-          'gp' => $this->input->post('gp'),
-          'date_add' => db_date($this->input->post('date_add')),
-          'remark' => $this->input->post('remark'),
-          'zone_code' => $zone->code,
-          'warehouse_code' => NULL
-        );
+        $zone = $this->zone_model->get($ds->zone_code);
 
-        $rs = $this->orders_model->update($code, $ds);
+        if( ! empty($zone))
+        {
+          $arr = array(
+            'date_add' => db_date($ds->date),
+            'customer_code' => $ds->customer_code,
+            'customer_name' => $ds->customer_name,
+            'gp' => empty($ds->gp) ? 0 : $ds->gp,
+            'zone_code' => $zone->code,
+            'remark' => get_null($ds->remark)
+          );
 
-        if($rs !== TRUE)
+          if( ! $this->orders_model->update($ds->code, $arr))
+          {
+            $sc = FALSE;
+            $this->error = "ปรับปรุงข้อมูลไม่สำเร็จ";
+          }
+        }
+        else
         {
           $sc = FALSE;
-          $message = 'ปรับปรุงข้อมูลไม่สำเร็จ';
+          $this->error = "Invalid zone code";
         }
       }
       else
       {
         $sc = FALSE;
-        $message = 'ไม่พบโซน';
+        $this->error = "Invalid order number";
       }
-
     }
     else
     {
       $sc = FALSE;
-      $message = 'ไม่พบเลขที่เอกสาร';
+      $this->error = "Missing required parameter";
     }
 
-    echo $sc === TRUE ? 'success' : $message;
+    echo $sc === TRUE ? 'success' : $this->error;
   }
 
 

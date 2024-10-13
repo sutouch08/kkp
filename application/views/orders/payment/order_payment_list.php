@@ -95,7 +95,7 @@
               <td class="middle text-center" style="font-size:12px;"><?php echo $rs->acc_no; ?></td>
               <td class="middle text-right">
                 <button type="button" class="btn btn-xs btn-info" onClick="viewDetail(<?php echo $rs->id; ?>)"><i class="fa fa-eye"></i></button>
-          <?php if($this->pm->can_delete && $rs->state < 8 && $rs->valid == 0) : ?>
+          <?php if($this->pm->can_delete && $rs->valid == 0) : ?>
                 <button type="button" class="btn btn-xs btn-danger" onClick="removePayment(<?php echo $rs->id; ?>, '<?php echo $rs->order_code; ?>')"><i class="fa fa-trash"></i></button>
           <?php endif; ?>
               </td>

@@ -6,31 +6,111 @@ class Invoice_model extends CI_Model
     parent::__construct();
   }
 
-  public function get_billed_detail($code, $use_qc = TRUE)
+  public function get_billed_detail($code, $picked = 1, $use_qc = TRUE)
   {
-    $qr = "SELECT o.id, o.product_code, o.product_name, o.qty AS order_qty, o.is_count, ";
-    $qr .= "o.price, o.discount1, o.discount2, o.discount3, ";
-    $qr .= "(o.discount_amount / o.qty) AS discount_amount, ";
-    $qr .= "(o.total_amount/o.qty) AS final_price, ";
-    $qr .= "(SELECT SUM(qty) FROM prepare WHERE order_code = '{$code}' AND product_code = o.product_code) AS prepared ";
+    //--- picked = 1 ผ่านการจัด, picked = 0 ไม่ผ่านการจัด
 
-    if($use_qc)
-    {
-      $qr .= ",(SELECT SUM(qty) FROM qc WHERE order_code = '{$code}' AND product_code = o.product_code) AS qc ";
-    }
+    $rs = $this->db
+    ->select("id, product_code, product_name, qty AS order_qty, is_count")
+    ->select("price, discount1, discount2, discount3")
+    ->select("(discount_amount / qty) AS discount_amount", FALSE)
+    ->select("(total_amount/qty) AS final_price")
+    ->where("order_code", $code)
+    ->get('order_details');
 
-    $qr .= ",(SELECT SUM(qty) FROM order_sold WHERE reference = '{$code}' AND product_code = o.product_code) AS sold ";
-    $qr .= "FROM order_details AS o ";
-    $qr .= "WHERE o.order_code = '{$code}' GROUP BY o.product_code";
-
-    $rs = $this->db->query($qr);
     if($rs->num_rows() > 0)
     {
-      return $rs->result();
+      $details = $rs->result();
+
+      foreach($details as $rs)
+      {
+        $rs->prepared = $picked == 0 ? 0 : ($rs->is_count == 0 ? $rs->order_qty : $this->get_sum_prepared($code, $rs->product_code));
+        $rs->qc = $picked == 0 ? 0 : ($use_qc ? ($rs->is_count == 0 ? $rs->order_qty : ($this->get_sum_prepared($code, $rs->product_code))) : $rs->prepared);
+        $rs->sold = $this->get_sum_sold($code, $rs->product_code);
+      }
+
+      return $details;
     }
 
-    return FALSE;
+    return NULL;
   }
+
+  public function get_sum_prepared($order_code, $product_code)
+  {
+    $rs = $this->db
+    ->select_sum('qty')
+    ->where('order_code', $order_code)
+    ->where('product_code', $product_code)
+    ->get('prepare');
+
+    if($rs->num_rows() > 0)
+    {
+      return $rs->row()->qty;
+    }
+
+    return 0;
+  }
+
+
+  public function get_sum_qc($order_code, $product_code)
+  {
+    $rs = $this->db
+    ->select_sum('qty')
+    ->where('order_code', $order_code)
+    ->where('product_code', $product_code)
+    ->get('qc');
+
+    if($rs->num_rows() > 0)
+    {
+      return $rs->row()->qty;
+    }
+
+    return 0;
+  }
+
+  public function get_sum_sold($order_code, $product_code)
+  {
+    $rs = $this->db
+    ->select_sum('qty')
+    ->where('reference', $order_code)
+    ->where('product_code', $product_code)
+    ->get('order_sold');
+
+
+    if($rs->num_rows() > 0)
+    {
+      return $rs->row()->qty;
+    }
+
+    return 0;
+  }
+
+  // public function get_billed_detail($code, $use_qc = TRUE)
+  // {
+  //   $qr = "SELECT o.id, o.product_code, o.product_name, o.qty AS order_qty, o.is_count, ";
+  //   $qr .= "o.price, o.discount1, o.discount2, o.discount3, ";
+  //   $qr .= "(o.discount_amount / o.qty) AS discount_amount, ";
+  //   $qr .= "(o.total_amount/o.qty) AS final_price ";
+  //   $qr .= "FROM order_details AS o ";
+  //
+  //   $qr .= "(SELECT SUM(qty) FROM prepare WHERE order_code = '{$code}' AND product_code = o.product_code) AS prepared ";
+  //
+  //   if($use_qc)
+  //   {
+  //     $qr .= ",(SELECT SUM(qty) FROM qc WHERE order_code = '{$code}' AND product_code = o.product_code) AS qc ";
+  //   }
+  //
+  //   $qr .= ",(SELECT SUM(qty) FROM order_sold WHERE reference = '{$code}' AND product_code = o.product_code) AS sold ";
+  //   $qr .= "WHERE o.order_code = '{$code}' GROUP BY o.product_code";
+  //
+  //   $rs = $this->db->query($qr);
+  //   if($rs->num_rows() > 0)
+  //   {
+  //     return $rs->result();
+  //   }
+  //
+  //   return FALSE;
+  // }
 
 
   public function get_details($code)

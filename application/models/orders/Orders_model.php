@@ -47,6 +47,7 @@ class Orders_model extends CI_Model
   public function update_deposit($code, $amount)
   {
     $rs = $this->db->set('deposit', "deposit + {$amount}", FALSE)->where('code', $code)->update('orders');
+
     if($rs)
     {
       return $this->recal_order_balance($code);
@@ -192,6 +193,7 @@ class Orders_model extends CI_Model
     ->where('order_code', $order_code)
     ->where('product_code', $item_code)
     ->get('order_details');
+
     if($rs->num_rows() == 1)
     {
       return $rs->row();
@@ -200,6 +202,22 @@ class Orders_model extends CI_Model
     return FALSE;
   }
 
+
+  public function get_order_detail_id($order_code, $item_code)
+  {
+    $rs = $this->db
+    ->select('id')
+    ->where('order_code', $order_code)
+    ->where('product_code', $item_code)
+    ->get('order_details');
+
+    if($rs->num_rows() > 0)
+    {
+      return $rs->row()->id;
+    }
+
+    return NULL;
+  }
 
 
   public function get_detail($id)
@@ -224,7 +242,7 @@ class Orders_model extends CI_Model
 		->join('products AS pd', 'od.product_code = pd.code', 'left')
 		->where('order_code', $code)
 		->get();
-    
+
     if($rs->num_rows() > 0)
     {
       return $rs->result();
@@ -255,10 +273,13 @@ class Orders_model extends CI_Model
 
   public function get_valid_details($code)
   {
-    $qr  = "SELECT * FROM order_details
-            WHERE order_code = '{$code}'
-            AND (valid = 1 OR is_count = 0)";
-    $rs = $this->db->query($qr);
+    $rs = $this->db
+    ->where('order_code', $code)
+    ->group_start()
+    ->where('valid', 1)
+    ->or_where('is_count', 0)
+    ->group_end()
+    ->get('order_details');
 
     if($rs->num_rows() > 0)
     {

@@ -114,7 +114,7 @@ class Orders extends PS_Controller
         $rs->payment_name  = $this->payment_methods_model->get_name($rs->payment_code);
         $rs->payment_role  = $this->payment_methods_model->get_role($rs->payment_code);
         $rs->customer_name = $this->customers_model->get_name($rs->customer_code);
-        $rs->total_amount  = $this->orders_model->get_order_total_amount($rs->code) + $rs->shipping_fee + $rs->service_fee;
+        $rs->total_amount  = $rs->total_amount + $rs->shipping_fee + $rs->service_fee;
         $rs->state_name    = get_state_name($rs->state);
         $ds[] = $rs;
       }
@@ -168,7 +168,8 @@ class Orders extends PS_Controller
 						'discount_amount' => $disc['discountAmount'] * $qty,
 						'total_amount' => $total_amount,
 						'id_rule' => NULL,
-						'update_user' => get_cookie('uname')
+						'update_user' => get_cookie('uname'),
+            'valid' => 0
 					);
 
 					if(!$this->orders_model->update_detail($id, $arr))
@@ -337,6 +338,7 @@ class Orders extends PS_Controller
     {
 			$role = 'S'; //--- S = ขาย
 			$limit = get_zero(getConfig('SYSTEM_ORDER_LIMIT'));
+
       if(! $this->orders_model->is_limit($role, $limit))
       {
         $this->load->model('inventory/invoice_model');
@@ -347,6 +349,7 @@ class Orders extends PS_Controller
         $code = $this->get_new_code($date_add);
 
 				$customer_code = trim($this->input->post('customerCode'));
+        $customer_name = trim($this->input->post('customerName'));
 				$customer_ref = trim($this->input->post('cust_ref'));
 
         $has_term = $this->payment_methods_model->has_term($this->input->post('payment'));
@@ -374,8 +377,9 @@ class Orders extends PS_Controller
             'bookcode' => $book_code,
   					'qt_no' => $quotation_no,
             'reference' => trim($this->input->post('reference')),
-            'customer_code' => trim($this->input->post('customerCode')),
-            'customer_ref' => trim($this->input->post('cust_ref')),
+            'customer_code' => $customer_code,
+            'customer_name' => $customer_name,
+            'customer_ref' => $customer_ref,
             'channels_code' => $this->input->post('channels'),
             'payment_code' => $this->input->post('payment'),
             'sale_code' => $sale_code,
@@ -393,7 +397,6 @@ class Orders extends PS_Controller
   					{
   						$this->load_quotation($code, $quotation_no);
   					}
-
 
             $arr = array(
               'order_code' => $code,
@@ -424,8 +427,6 @@ class Orders extends PS_Controller
       redirect($this->home.'/add_new');
     }
   }
-
-
 
 
 	//---- load quotation
@@ -833,15 +834,6 @@ class Orders extends PS_Controller
     $detail = $this->orders_model->get_detail($id);
     $item = $this->products_model->get($detail->product_code);
     $rs = $this->orders_model->remove_detail($id);
-    // if($rs)
-    // {
-    //   if($detail->is_count == 1 && $item->is_api == 1)
-    //   {
-    //     $this->update_api_stock($item->code);
-    //   }
-    //
-    // }
-
     echo $rs === TRUE ? 'success' : 'Can not delete please try again';
   }
 
@@ -911,6 +903,7 @@ class Orders extends PS_Controller
 			$this->load->model('address/address_model');
 
 			$customer_code = trim($this->input->post('customer_code'));
+      $customer_name = trim($this->input->post('customer_name'));
 			$customer_ref = trim($this->input->post('customer_ref'));
       $code = $this->input->post('order_code');
       $recal = $this->input->post('recal');
@@ -935,6 +928,7 @@ class Orders extends PS_Controller
         $ds = array(
           'reference' => trim($this->input->post('reference')),
           'customer_code' => $customer_code,
+          'customer_name' => $customer_name,
           'customer_ref' => $customer_ref,
           'channels_code' => $this->input->post('channels_code'),
           'payment_code' => $this->input->post('payment_code'),
@@ -1919,17 +1913,17 @@ class Orders extends PS_Controller
       foreach($details as $rs)
       {
         $arr = array(
-                "id"		=> $rs->id,
-                "no"	=> $no,
-                "imageLink"	=> get_product_image($rs->product_code, 'mini'),
-                "productCode"	=> $rs->product_code,
-                "productName"	=> $rs->product_name,
-                "cost"				=> $rs->cost,
-                "price"	=> $rs->price,
-                "qty"	=> $rs->qty,
-                "discount"	=> discountLabel($rs->discount1, $rs->discount2, $rs->discount3),
-                "amount"	=> $rs->total_amount
-                );
+          "id"		=> $rs->id,
+          "no"	=> $no,
+          "imageLink"	=> get_product_image($rs->product_code, 'mini'),
+          "productCode"	=> $rs->product_code,
+          "productName"	=> $rs->product_name,
+          "cost"				=> $rs->cost,
+          "price"	=> $rs->price,
+          "qty"	=> $rs->qty,
+          "discount"	=> discountLabel($rs->discount1, $rs->discount2, $rs->discount3),
+          "amount"	=> $rs->total_amount
+        );
         array_push($ds, $arr);
         $total_qty += $rs->qty;
         $total_discount += $rs->discount_amount;
@@ -1941,15 +1935,15 @@ class Orders extends PS_Controller
       $netAmount = ( $total_amount - $order->bDiscAmount ) + $order->shipping_fee + $order->service_fee;
 
       $arr = array(
-						"bDiscAmount" => $order->bDiscAmount,
-            "total_qty" => number($total_qty),
-            "order_amount" => number($total_order, 2),
-            "total_discount" => number($total_discount, 2),
-            "shipping_fee"	=> number($order->shipping_fee,2),
-            "service_fee"	=> number($order->service_fee, 2),
-            "total_amount" => number($total_amount, 2),
-            "net_amount"	=> number($netAmount,2)
-          );
+        "bDiscAmount" => $order->bDiscAmount,
+        "total_qty" => number($total_qty, 2),
+        "order_amount" => number($total_order, 2),
+        "total_discount" => number($total_discount, 2),
+        "shipping_fee"	=> number($order->shipping_fee,2),
+        "service_fee"	=> number($order->service_fee, 2),
+        "total_amount" => number($total_amount, 2),
+        "net_amount"	=> number($netAmount,2)
+      );
       array_push($ds, $arr);
       $sc = json_encode($ds);
     }
@@ -2245,7 +2239,7 @@ class Orders extends PS_Controller
         $this->load->model('address/address_model');
 				$code = empty($code) ? $order->customer_code : $code;
         $adrs = $this->address_model->get_shipping_address($code);
-				
+
         if(!empty($adrs))
         {
           foreach($adrs as $rs)
@@ -2419,6 +2413,7 @@ class Orders extends PS_Controller
           if($sc === TRUE && $order->state == 8)
           {
             $this->load->model('account/order_credit_model');
+            
             if($state < 8)
             {
               if( ! $this->roll_back_action($order))
@@ -2534,7 +2529,8 @@ class Orders extends PS_Controller
     $this->load->model('inventory/lend_model');
     $this->load->model('stock/stock_model');
 
-		$use_prepare = getConfig('USE_PREPARE') == 1 ? TRUE : FALSE;
+		$use_prepare = $order->picked == 1 ? TRUE : FALSE;
+
 		$default_zone = getConfig('DEFAULT_ZONE');
 
 		if(! $use_prepare && ($default_zone == "" OR $default_zone == NULL))
@@ -2589,7 +2585,7 @@ class Orders extends PS_Controller
 
 					if($rs->is_count == 1)
 					{
-						if($order->picked == 1)
+						if($use_prepare)
 						{
 							//---- restore_buffer
 							if($this->buffer_model->is_exists($rs->reference, $rs->product_code, $rs->zone_code) === TRUE)
@@ -2657,7 +2653,6 @@ class Orders extends PS_Controller
 					{
 						$this->lend_model->drop_backlogs_list($order->code);
 					}
-
 				} //--- end foreach
 			} //---- end sold
 		}
@@ -2882,57 +2877,72 @@ class Orders extends PS_Controller
 
   public function update_non_count_price()
   {
+    $sc = TRUE;
+
     $code = $this->input->post('order_code');
     $id = $this->input->post('id_order_detail');
-    $price = $this->input->post('price');
-    $user = get_cookie('uname');
+    $price = empty($this->input->post('price')) ? 0 : $this->input->post('price');
+    $user = $this->_user->uname;
 
     $order = $this->orders_model->get($code);
+
     if($order->state == 8) //--- ถ้าเปิดบิลแล้ว
     {
-      echo 'ไม่สามารถแก้ไขราคาได้ เนื่องจากออเดอร์ถูกเปิดบิลไปแล้ว';
+      $sc = FALSE;
+      $this->error = 'ไม่สามารถแก้ไขราคาได้ เนื่องจากออเดอร์ถูกเปิดบิลไปแล้ว';
     }
     else
     {
-        //----- ข้ามรายการที่ไม่ได้กำหนดค่ามา
-        if( $price != "" )
+      //--- ได้ Obj มา
+      $detail = $this->orders_model->get_detail($id);
+
+      //--- ถ้ารายการนี้มีอยู่
+      if( ! empty($detail))
+      {
+        //------ คำนวณส่วนลดใหม่
+        $price_c = $price;
+
+        $discAmount = 0;
+
+        $step = array($detail->discount1, $detail->discount2, $detail->discount3);
+
+        foreach($step as $discount)
         {
-          //--- ได้ Obj มา
-          $detail = $this->orders_model->get_detail($id);
+          $disc 	= explode('%', $discount);
+          $disc[0] = trim($disc[0]); //--- ตัดช่องว่างออก
+          $discount = count($disc) == 1 ? $disc[0] : $price_c * ($disc[0] * 0.01); //--- ส่วนลดต่อชิ้น
+          $discAmount += $discount;
+          $price_c -= $discount;
+        }
 
-          //--- ถ้ารายการนี้มีอยู่
-          if( $detail !== FALSE )
-          {
-            //------ คำนวณส่วนลดใหม่
-            $price_c = $price;
-  					$discAmount = 0;
-            $step = array($detail->discount1, $detail->discount2, $detail->discount3);
-            foreach($step as $discount)
-            {
-              $disc 	= explode('%', $discount);
-              $disc[0] = trim($disc[0]); //--- ตัดช่องว่างออก
-              $discount = count($disc) == 1 ? $disc[0] : $price_c * ($disc[0] * 0.01); //--- ส่วนลดต่อชิ้น
-              $discAmount += $discount;
-              $price_c -= $discount;
-            }
+        $total_discount = $detail->qty * $discAmount; //---- ส่วนลดรวม
+        $total_amount = ( $detail->qty * $price ) - $total_discount; //--- ยอดรวมสุดท้าย
 
-            $total_discount = $detail->qty * $discAmount; //---- ส่วนลดรวม
-  					$total_amount = ( $detail->qty * $price ) - $total_discount; //--- ยอดรวมสุดท้าย
+        $arr = array(
+          "price"	=> $price,
+          "discount_amount"	=> $total_discount,
+          "total_amount" => $total_amount,
+          "update_user" => $user
+        );
 
-            $arr = array(
-                  "price"	=> $price,
-                  "discount_amount"	=> $total_discount,
-                  "total_amount" => $total_amount,
-                  "update_user" => $user
-                );
-            $cs = $this->orders_model->update_detail($id, $arr);
-          }	//--- end if detail
-        } //--- End if value
-
-        $this->orders_model->set_status($code, 0);
-
-      echo 'success';
+        if( ! $this->orders_model->update_detail($id, $arr))
+        {
+          $sc = FALSE;
+          $this->error = "แก้ไขราคาไม่สำเร็จ";
+        }
+        else
+        {
+          update_order_total_amount($code);
+        }
+      }
+      else
+      {
+        $sc = FALSE;
+        $this->error = "ไม่พบรายการสินค้า";
+      }
     }
+
+    $this->response($sc);
   }
 
 
@@ -2999,6 +3009,7 @@ class Orders extends PS_Controller
   		} //--- End if value
   	}	//--- end foreach
 
+    update_order_total_amount($code);
     $this->orders_model->set_status($code, 0);
 
   	echo 'success';

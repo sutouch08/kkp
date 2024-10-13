@@ -1,3 +1,6 @@
+function viewBuffer() {
+  $('#buffer-form').submit();
+}
 
 //--- จัดสินค้า ตัดยอดออกจากโซน เพิ่มเข้า buffer
 function doPrepare(){
@@ -53,7 +56,7 @@ function doPrepare(){
           $("#barcode-item").val('');
 
 
-          if( rs.valid == '1'){
+          if( rs.valid == '1') {
             $("#complete-table").append($("#incomplete-" + rs.id));
             $("#incomplete-" + rs.id).removeClass('incomplete');
           }
@@ -72,11 +75,6 @@ function doPrepare(){
     }
   });
 }
-
-
-
-
-
 
 
 
@@ -245,6 +243,65 @@ function setZoneLabel(showZone){
   $.get(BASE_URL + 'inventory/prepare/set_zone_label/'+showZone);
 }
 
+
+
+function removeBuffer(id) {
+  let el = $('#buffer-'+id);
+  let order_code = el.data('order');
+  let product_code = el.data('item');
+  let zone_code = el.data('zonecode');
+
+  swal({
+    title:'ลบการจัด',
+    text:'ต้องการลบ '+el.data('item')+' : '+el.data('zonename')+' : '+el.data('qty')+' หรือไม่ ?',
+    type:'warning',
+    showCancelButton:true,
+    cancelButtonText:'No',
+    confirmButtonText:'Yes',
+    confirmButtonColor:'#dd5a43',
+    closeOnConfirm:true
+  }, function() {
+    setTimeout(() => {
+      load_in();
+
+      $.ajax({
+        url:HOME + '/remove_buffer',
+        type:'POST',
+        cache:false,
+        data:{
+          'order_code' : order_code,
+          'product_code' : product_code,
+          'zone_code' : zone_code,
+          'buffer_id' : id
+        },
+        success:function(rs) {
+          load_out();
+          if(rs.trim() === 'success') {
+            window.location.reload();
+          }
+          else {
+            swal({
+              title:'Error!',
+              text:rs,
+              type:'error',
+              html:true
+            })
+          }
+        },
+        error:function(rs) {
+          load_out();
+
+          swal({
+            title:'Error!',
+            text:rs.responseText,
+            type:'error',
+            html:true
+          })
+        }
+      })
+    }, 200);
+  })
+}
 
 
 var intv = setInterval(function(){

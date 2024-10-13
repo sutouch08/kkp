@@ -24,21 +24,16 @@ class Delivery_order_model extends CI_Model
 
   public function count_rows(array $ds = array(), $state = 7)
   {
-    $this->db
-    ->from('orders')
-    ->join('channels', 'channels.code = orders.channels_code','left')
-    ->join('payment_method', 'payment_method.code = orders.payment_code', 'left')
-    ->join('customers', 'customers.code = orders.customer_code', 'left')
-    ->where('orders.state', $state);
+    $this->db->where('state', $state);
 
-    if(!empty($ds['code']))
+    if( ! empty($ds['code']))
     {
-      $this->db->like('orders.code', $ds['code']);
+      $this->db->like('code', $ds['code']);
     }
 
 		if(!empty($ds['invoice_code']))
 		{
-			$this->db->like('orders.invoice_code', $ds['invoice_code']);
+			$this->db->like('invoice_code', $ds['invoice_code']);
 		}
 
 		if(isset($ds['is_inv']) && $ds['is_inv'] != "all")
@@ -53,48 +48,120 @@ class Delivery_order_model extends CI_Model
 			}
 		}
 
-
-    if(!empty($ds['customer']))
+    if( ! empty($ds['customer']))
     {
-      $this->db->group_start();
-      $this->db->like('customers.name', $ds['customer']);
-      $this->db->or_like('orders.customer_ref', $ds['customer']);
-      $this->db->group_end();
+      $this->db
+      ->group_start()
+      ->like('customer_code', $ds['customer'])
+      ->or_like('customer_name', $ds['customer'])
+      ->or_like('customer_ref', $ds['customer'])
+      ->group_end();
     }
 
     //---- user name / display name
-    if(!empty($ds['user']))
+    if( isset($ds['user']) && $ds['user'] != 'all')
     {
-      $users = user_in($ds['user']);
-      $this->db->where_in('user', $users);
+      $this->db->where('user', $ds['user']);
     }
 
-
-    if($ds['role'] != 'all')
+    if(isset($ds['role']) && $ds['role'] != 'all')
     {
-      $this->db->where('orders.role', $ds['role']);
+      $this->db->where('role', $ds['role']);
     }
-
 
     if($ds['channels'] != 'all')
     {
-      $this->db->where('orders.channels_code', $ds['channels']);
+      $this->db->where('channels_code', $ds['channels']);
     }
-
 
     if($ds['payment'] != 'all')
     {
-      $this->db->where('orders.payment_code', $ds['payment']);
+      $this->db->where('payment_code', $ds['payment']);
     }
-
 
     if($ds['from_date'] != '' && $ds['to_date'] != '')
     {
-      $this->db->where('orders.date_add >=', from_date($ds['from_date']));
-      $this->db->where('orders.date_add <=', to_date($ds['to_date']));
+      $this->db->where('date_add >=', from_date($ds['from_date']));
+      $this->db->where('date_add <=', to_date($ds['to_date']));
     }
 
-    return $this->db->count_all_results();
+    return $this->db->count_all_results('orders');
+  }
+
+
+  public function get_list(array $ds = array(), $perpage = 20, $offset = 0, $state = 7)
+  {
+    $this->db->where('state', $state);
+
+    if( ! empty($ds['code']))
+    {
+      $this->db->like('code', $ds['code']);
+    }
+
+		if(!empty($ds['invoice_code']))
+		{
+			$this->db->like('invoice_code', $ds['invoice_code']);
+		}
+
+		if(isset($ds['is_inv']) && $ds['is_inv'] != "all")
+		{
+			if($ds['is_inv'] == 1)
+			{
+				$this->db->where('invoice_code IS NOT NULL', NULL, FALSE);
+			}
+			else
+			{
+				$this->db->where('invoice_code IS NULL', NULL, FALSE);
+			}
+		}
+
+    if( ! empty($ds['customer']))
+    {
+      $this->db
+      ->group_start()
+      ->like('customer_code', $ds['customer'])
+      ->or_like('customer_name', $ds['customer'])
+      ->or_like('customer_ref', $ds['customer'])
+      ->group_end();
+    }
+
+    //---- user name / display name
+    if( isset($ds['user']) && $ds['user'] != 'all')
+    {
+      $this->db->where('user', $ds['user']);
+    }
+
+    if(isset($ds['role']) && $ds['role'] != 'all')
+    {
+      $this->db->where('role', $ds['role']);
+    }
+
+    if($ds['channels'] != 'all')
+    {
+      $this->db->where('channels_code', $ds['channels']);
+    }
+
+    if($ds['payment'] != 'all')
+    {
+      $this->db->where('payment_code', $ds['payment']);
+    }
+
+    if($ds['from_date'] != '' && $ds['to_date'] != '')
+    {
+      $this->db->where('date_add >=', from_date($ds['from_date']));
+      $this->db->where('date_add <=', to_date($ds['to_date']));
+    }
+
+		$this->db->order_by('date_add', 'DESC')->limit($perpage, $offset);
+
+    $rs = $this->db->get('orders');
+
+    if($rs->num_rows() > 0)
+    {
+      return $rs->result();
+    }
+
+    return NULL;
   }
 
 
@@ -190,29 +257,64 @@ class Delivery_order_model extends CI_Model
     //--- กรณีสินค้าเป็นสินค้าที่ไม่นับสต็อกจะบันทึกตามยอดที่สั่งมา
     public function get_billed_detail($code, $use_qc = TRUE)
     {
-      $qr = "SELECT o.product_code, o.product_name, o.qty AS order_qty, o.is_count, ";
+      $qr = "SELECT o.id, o.product_code, o.product_name, o.qty AS order_qty, o.is_count, ";
       $qr .= "o.price, o.discount1, o.discount2, o.discount3, ";
       $qr .= "(o.discount_amount / o.qty) AS discount_amount, ";
-      $qr .= "(o.total_amount/o.qty) AS final_price, ";
-      $qr .= "(SELECT SUM(qty) FROM prepare WHERE order_code = '{$code}' AND product_code = o.product_code) AS prepared ";
-
-      if($use_qc)
-      {
-        $qr .= ",(SELECT SUM(qty) FROM qc WHERE order_code = '{$code}' AND product_code = o.product_code) AS qc ";
-      }
-
+      $qr .= "(o.total_amount/o.qty) AS final_price ";
       $qr .= "FROM order_details AS o ";
-      $qr .= "WHERE o.order_code = '{$code}' GROUP BY o.product_code";
+      $qr .= "WHERE o.order_code = '{$code}'";
 
-      $rs = $this->db->query($qr);
-      if($rs->num_rows() > 0)
+      $qs = $this->db->query($qr);
+
+      if($qs->num_rows() > 0)
       {
-        return $rs->result();
+        $details = $qs->result();
+
+        foreach($details as $rs)
+        {
+          $rs->prepared = $rs->is_count == 0 ? $rs->order_qty : $this->get_sum_prepared($code, $rs->product_code);
+          $rs->qc = $use_qc ? ($rs->is_count == 0 ? $rs->order_qty : $this->get_sum_qc($code, $rs->product_code)) : $rs->prepared;
+        }
+
+        return $details;
       }
 
-      return FALSE;
+      return NULL;
     }
 
+
+    //------------- สำหรับใช้ในแสดงรายการก่อนการบันทึกขาย ---------//
+    //--- รายการสั้งซื้อ รายการจัดสินค้า รายการตรวจสินค้า
+    //--- เปรียบเทียบยอดที่มีการสั่งซื้อ และมีการตรวจสินค้า
+    //--- เพื่อให้ได้ยอดที่ต้องเปิดบิล บันทึกขายจริงๆ
+    //--- ผลลัพธ์จะไม่ได้ยอดที่มีการสั่งซื้อแต่ไม่มียอดตรวจ หรือ มียอดตรวจแต่ไม่มียอดสั่งซื้อ (กรณีมีการแก้ไขออเดอร์)
+
+    public function get_pre_bill_detail($code, $use_qc = TRUE)
+    {
+      $qr = "SELECT o.id, o.product_code, o.product_name, o.qty AS order_qty, o.is_count, ";
+      $qr .= "o.price, o.discount1, o.discount2, o.discount3, ";
+      $qr .= "(o.discount_amount / o.qty) AS discount_amount, ";
+      $qr .= "(o.total_amount/o.qty) AS final_price ";
+      $qr .= "FROM order_details AS o ";
+      $qr .= "WHERE o.order_code = '{$code}'";
+
+      $qs = $this->db->query($qr);
+
+      if($qs->num_rows() > 0)
+      {
+        $details = $qs->result();
+
+        foreach($details as $rs)
+        {
+          $rs->prepared = $rs->is_count == 0 ? $rs->order_qty : $this->get_sum_buffer($code, $rs->product_code);
+          $rs->qc = $use_qc ? ($rs->is_count == 0 ? $rs->order_qty : $this->get_sum_qc($code, $rs->product_code)) : $rs->prepared;
+        }
+
+        return $details;
+      }
+
+      return NULL;
+    }
 
 
     //------------- สำหรับใช้ในการบันทึกขาย ---------//
@@ -227,32 +329,29 @@ class Delivery_order_model extends CI_Model
       $qr .= "o.cost, o.price, o.discount1, o.discount2, o.discount3, ";
       $qr .= "o.id_rule, ru.id_policy, o.is_count, ";
       $qr .= "(o.discount_amount / o.qty) AS discount_amount, ";
-      $qr .= "(o.total_amount/o.qty) AS final_price, ";
-      $qr .= "(SELECT SUM(qty) FROM buffer WHERE order_code = '{$code}' AND product_code = o.product_code) AS prepared ";
-
-      if($use_qc)
-      {
-        $qr .= ",(SELECT SUM(qty) FROM qc WHERE order_code = '{$code}' AND product_code = o.product_code) AS qc ";
-      }
-
+      $qr .= "(o.total_amount/o.qty) AS final_price ";
       $qr .= "FROM order_details AS o ";
       $qr .= "LEFT JOIN discount_rule AS ru ON ru.id = o.id_rule ";
-      $qr .= "WHERE o.order_code = '{$code}' GROUP BY o.product_code ";
+      $qr .= "WHERE o.order_code = '{$code}' ";
+      $qr .= "AND o.is_count = 1 ";
 
-      if($use_qc)
+      $qs = $this->db->query($qr);
+
+      if($qs->num_rows() > 0)
       {
-        $qr .= "HAVING qc IS NOT NULL";
+        $details = $qs->result();
+
+        foreach($details as $rs)
+        {
+          $rs->prepared = $this->get_sum_buffer($code, $rs->product_code);
+          $rs->qc = $use_qc ? $this->get_sum_qc($code, $rs->product_code) : $rs->prepared;
+        }
+
+        return $details;
       }
 
-      $rs = $this->db->query($qr);
-      if($rs->num_rows() > 0)
-      {
-        return $rs->result();
-      }
-
-      return FALSE;
+      return NULL;
     }
-
 
 
 		//---- กรณีที่ มีการตั้งค่า ไม่จัดสินค้าไว้ ใช้ข้องมูลจาก function นี้ในการบันทึกขายเต็มจำนวนที่สั่งมา
@@ -262,7 +361,7 @@ class Delivery_order_model extends CI_Model
 			->select('o.id, o.style_code, o.product_code, o.product_name, o.qty AS order_qty')
 			->select('o.cost, o.price, o.discount1, o.discount2, o.discount3')
 			->select('o.id_rule, ru.id_policy, o.is_count')
-			->select('(o.total_amount/o.qty) AS discount_amount', FALSE)
+			->select('(o.discount_amount/o.qty) AS discount_amount', FALSE)
 			->select('(o.total_amount/o.qty) AS final_price', FALSE)
 			->from('order_details AS o')
 			->join('discount_rule AS ru', 'ru.id = o.id_rule', 'left')
@@ -279,9 +378,66 @@ class Delivery_order_model extends CI_Model
 		}
 
 
+    public function get_sum_buffer($order_code, $product_code)
+    {
+      $rs = $this->db
+      ->select_sum('qty')
+      ->where('order_code', $order_code)
+      ->where('product_code', $product_code)
+      ->get('buffer');
+
+      if($rs->num_rows() > 0)
+      {
+        return $rs->row()->qty;
+      }
+
+      return 0;
+    }
+
+    public function get_sum_prepared($order_code, $product_code)
+    {
+      $rs = $this->db
+      ->select_sum('qty')
+      ->where('order_code', $order_code)
+      ->where('product_code', $product_code)
+      ->get('prepare');
+
+      if($rs->num_rows() > 0)
+      {
+        return $rs->row()->qty;
+      }
+
+      return 0;
+    }
+
+
+    public function get_sum_qc($order_code, $product_code)
+    {
+      $rs = $this->db
+      ->select_sum('qty')
+      ->where('order_code', $order_code)
+      ->where('product_code', $product_code)
+      ->get('qc');
+
+      if($rs->num_rows() > 0)
+      {
+        return $rs->row()->qty;
+      }
+
+      return 0;
+    }
+
+
 		public function get_order_detail($id)
 		{
+      $rs = $this->db->where('id', $id)->get('order_details');
 
+      if($rs->num_rows() == 1)
+      {
+        return $rs->row();
+      }
+
+      return NULL;
 		}
 
 
@@ -300,6 +456,7 @@ class Delivery_order_model extends CI_Model
       $qr .= "AND o.is_count = 0 ";
 
       $rs = $this->db->query($qr);
+
       if($rs->num_rows() > 0)
       {
         return $rs->result();

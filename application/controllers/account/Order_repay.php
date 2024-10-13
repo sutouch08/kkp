@@ -14,6 +14,7 @@ class Order_repay extends PS_Controller
     $this->home = base_url().'account/order_repay';
     $this->load->model('account/order_repay_model');
     $this->load->model('account/order_credit_model');
+    $this->load->model('orders/orders_model');
     $this->load->model('account/payment_receive_model');
     $this->load->model('masters/customers_model');
     $this->load->helper('order_repay');
@@ -547,6 +548,15 @@ class Order_repay extends PS_Controller
                 $sc = FALSE;
                 $this->error = 'ยกเลิกรายการไม่สำเร็จ';
                 break;
+              }
+            }
+
+            if( $sc === TRUE)
+            {
+              if( ! $this->orders_model->update($detail->reference, array('is_paid' => 0)))
+              {
+                $sc = FALSE;
+                $this->error = "เปลี่ยนสถานะการชำระเงินบนออเดอร์ไม่สำเร็จ";
               }
             }
           }

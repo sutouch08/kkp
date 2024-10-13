@@ -1,42 +1,36 @@
-<link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/owlcarousel/owl.carousel.min.css">
-<link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/owlcarousel/owl.theme.default.min.css">
 <div class="row">
 	<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding:10px;">
-		<div class="owl-carousel">
-			<div class="text-center border-1" style="min-width:100px; height:35px;">
-				<a data-toggle="tab" style="display:block; padding:7px 12px 8px" href="#top" aria-expanded="true" onclick="getOrderTabs(0)">
-					HOME
-				</a>
-			</div>
-
-			<?php $tabs = $this->product_tab_model->getChild(0); ?>
-			<?php  if(!empty($tabs)) : ?>
-				<?php foreach($tabs as $rs) : ?>
-					<div class="text-center border-1" style="min-width:100px; height:35px; padding:7px 12px 8px">
-						<a data-toggle="tab" href="#cat-<?php echo $rs->id; ?>" aria-expanded="false" onclick="getItemTabs(<?php echo $rs->id; ?>)"><?php echo $rs->name; ?></a>
-					</div>
-				<?php endforeach; ?>
-			<?php endif; ?>
-
+		<button type="button" class="btn btn-white"></button>
+		<div class="text-center border-1" style="min-width:100px; height:35px;">
+			<a data-toggle="tab" style="display:block; padding:7px 12px 8px" href="#top" aria-expanded="true" onclick="getOrderTabs(0)">
+				HOME
+			</a>
 		</div>
+		<?php $tabs = $this->product_tab_model->getChild(0); ?>
+		<?php  if(!empty($tabs)) : ?>
+			<?php foreach($tabs as $rs) : ?>
+				<div class="text-center border-1" style="min-width:100px; height:35px; padding:7px 12px 8px">
+					<a data-toggle="tab" href="#cat-<?php echo $rs->id; ?>" aria-expanded="false" onclick="getItemTabs(<?php echo $rs->id; ?>)"><?php echo $rs->name; ?></a>
+				</div>
+			<?php endforeach; ?>
+		<?php endif; ?>
 	</div>
 </div>
 
 <div class="row">
-	<div class="col-sm-12 col-xs-12 padding-5" >
+	<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5" >
 		<div class="tabbable tabs-left" style="display:flex;">
-
 
 			<div class="tab-content width-100 margin-bottom-10" style="padding:0px; border:0px; min-height:300px; max-height: 800px; overflow-y:scroll;">
 				<div id="top" class="tab-pane active">
 		<?php	$qs = $this->product_tab_model->get_item_in_tab(0); ?>
 		<?php if(!empty($qs)) : ?>
 			<?php foreach($qs as $rs) : ?>
-				<div class="col-lg-2 col-md-3 col-sm-4 col-xs-6" style="padding:5px;">
+				<div class="col-lg-1-harf col-md-3 col-sm-4 col-xs-6" style="padding:5px;">
 					<div class="border-1" style="padding:10px;">
 						<div class="image">
 							<a href="javascript:void(0)" onclick="getOrderItemGrid('<?php echo $rs->code; ?>')">
-								<img class="img-responsive" src="<?php echo get_product_image($rs->code, 'default'); ?>" />
+								<img class="img-responsive" src="<?php echo get_product_image($rs->code, 'mini'); ?>" />
 							</a>
 						</div>
 						<div class="description" style="overflow: hidden; line-height: 18px; height:42px; font-size:16px; font-weight:400;">

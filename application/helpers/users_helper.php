@@ -88,7 +88,24 @@ function profile_name_in($text)
 }
 
 
+function select_user($uname = NULL)
+{
+  $sc = "";
+  $ci =& get_instance();
+  $ci->load->model('users/user_model');
 
+  $list = $ci->user_model->get_all();
+
+  if( ! empty($list))
+  {
+    foreach($list as $rs)
+    {
+      $sc .= '<option value="'.$rs->uname.'" '.is_selected($uname, $rs->uname).'>'.$rs->uname.' : '.$rs->name.'</option>';
+    }
+  }
+
+  return $sc;
+}
 
 function user_in($txt)
 {

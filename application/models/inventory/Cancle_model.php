@@ -24,9 +24,11 @@ class Cancle_model extends CI_Model
   {
     $this->db
     ->select('cancle.*')
+    ->select('products.name AS product_name')
     ->select('zone.name AS zone_name')
     ->select('order_state.name AS state_name')
     ->from('cancle')
+    ->join('products', 'cancle.product_code = products.code', 'left')
     ->join('zone', 'cancle.zone_code = zone.code', 'left')
     ->join('orders', 'cancle.order_code = orders.code', 'left')
     ->join('order_state', 'orders.state = order_state.state');
@@ -180,37 +182,74 @@ class Cancle_model extends CI_Model
 
   public function restore_buffer($code)
   {
-    $rs = $this->db->where('order_code', $code)->get('cancle');
-    if($rs->num_rows() > 0)
+    $sc = TRUE;
+
+    $details = $this->get_cancle_details($code);
+
+    if( ! empty($details))
     {
-      foreach($rs->result() as $rd)
+      foreach($details as $rs)
       {
-        if($this->is_buffer_exists($rd->order_code, $rd->product_code, $rd->zone_code) === TRUE)
+        if($sc === FALSE)
         {
-          $qr = "UPDATE buffer
-                  SET qty = (qty + {$rs->qty})
-                  WHERE order_code = '{$rd->order_code}'
-                  AND product_code = '{$rd->product_code}'
-                  AND zone_code = '{$rd->zone_code}'
-                  AND user = '{$rd->user}'";
-          $this->db->query($qr);
+          break;
+        }
+
+        if($this->is_buffer_exists($rs->order_code, $rs->product_code, $rs->zone_code))
+        {
+          $this->db
+          ->set("qty", "qty + {$rs->qty}", FALSE)
+          ->set("user", $rs->user)
+          ->where('order_code', $rs->order_code)
+          ->where('product_code', $rs->product_code)
+          ->where('zone_code', $rs->zone_code);
+
+          if( ! $this->db->update('buffer'))
+          {
+            $sc = FALSE;
+          }
         }
         else
         {
           $arr = array(
-            'order_code' => $rd->order_code,
-            'product_code' => $rd->product_code,
-            'warehouse_code' => $rd->warehouse_code,
-            'zone_code' => $rd->zone_code,
-            'qty' => $rd->qty,
-            'user' => $rd->user
+            'order_code' => $rs->order_code,
+            'product_code' => $rs->product_code,
+            'warehouse_code' => $rs->warehouse_code,
+            'zone_code' => $rs->zone_code,
+            'qty' => $rs->qty,
+            'user' => $rs->user
           );
 
-          $this->db->insert('buffer', $arr);
-          $this->delete($rd->id);
+          if( ! $this->db->insert('buffer', $arr))
+          {
+            $sc = FALSE;
+          }
+        }
+
+        if($sc === TRUE)
+        {
+          if( ! $this->delete($rs->id))
+          {
+            $sc = FALSE;
+          }
         }
       }
     }
+
+    return $sc;
+  }
+
+
+  public function get_cancle_details($code)
+  {
+    $rs = $this->db->where('order_code', $code)->get('cancle');
+
+    if($rs->num_rows() > 0)
+    {
+      return $rs->result();
+    }
+
+    return NULL;
   }
 
 
