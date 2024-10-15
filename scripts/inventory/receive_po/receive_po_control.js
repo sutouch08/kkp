@@ -115,6 +115,7 @@ function insert_item()
 function addItem()
 {
   let code = $('#code').val();
+  let receive_date = $('#receive-date').val();
 	let barcode = $('#barcode-item').val();
 	let zone_code = $('#zone-code').val();
   let zone_name = $('#zone-name').val();
@@ -137,7 +138,8 @@ function addItem()
         'code' : code,
 				'barcode' : barcode,
 				'zone_code' : zone_code,
-				'qty' : qty
+				'qty' : qty,
+        'receive_date' : receive_date
 			},
 			success:function(rs) {
 				$('#btn-add-item').removeAttr('disabled');
@@ -259,11 +261,18 @@ function insertPoItems()
 	$('#poGrid').modal('hide');
 
 	let code = $("#code").val();
+  let receive_date = $('#receive-date').val();
   let zone_code = $('#zone-code').val();
   let zone_name = $('#zone-name').val();
+  let zoneCode = $('#zoneCode').val();
 
   if(zone_code.length == 0 || zone_name.length == 0) {
     swal("กรุณาระบุโซนรับสินค้า");
+    return false;
+  }
+
+  if(zoneCode != zone_code) {
+    swal("โซนไม่ถูกต้อง");
     return false;
   }
 
@@ -271,11 +280,12 @@ function insertPoItems()
 
   $('.receive_qty').each(function() {
 		let pdCode = $(this).data('pdcode');
-    var qty = parseDefault(parseFloat($(this).val()),0);
+    let qty = parseDefault(parseFloat($(this).val()),0);
 
     if(qty > 0){
       var item = {
         'product_code' : pdCode,
+        'receive_date' : receive_date,
         'qty' : qty,
         'zone_code' : zone_code
       }
@@ -293,6 +303,7 @@ function insertPoItems()
 
     return false;
   }
+
   var data = JSON.stringify(items);
 
 	load_in();
@@ -367,7 +378,7 @@ function changeZone() {
 
 
 function getZone() {
-  let code = $.trim($('#zone-code').val());
+  let code = $('#zone-code').val().trim();
 
   if(code.length) {
     $.ajax({
@@ -384,15 +395,19 @@ function getZone() {
           if(ds.status == 'success') {
             $('#zone-code').val(ds.data.code);
             $('#zone-name').val(ds.data.name);
-            $('#zone-code').attr('disabled', 'disabled');
-            $('#btn-add-zone').addClass('hide');
-            $('#btn-change-zone').removeClass('hide');
-            $('#barcode-item').removeAttr('disabled');
-            $('#item-qty').removeAttr('disabled');
-            $('#btn-add-item').removeAttr('disabled');
+            $('#zoneCode').val(ds.data.code);
+            // $('#zone-code').attr('disabled', 'disabled');
+            // $('#btn-add-zone').addClass('hide');
+            // $('#btn-change-zone').removeClass('hide');
+            // $('#barcode-item').removeAttr('disabled');
+            // $('#item-qty').removeAttr('disabled');
+            // $('#btn-add-item').removeAttr('disabled');
+            $('#item-qty').val(1);
             $('#barcode-item').focus();
           }
           else {
+            $('#zoneCode').val('');
+
             swal({
               title:'Error!',
               text:ds.message,
@@ -411,6 +426,26 @@ function getZone() {
     })
   }
 }
+
+$('#zone-code').focus(function() {
+  $(this).select();
+});
+
+$('#zone-code').focusout(function() {
+  let code = $(this).val().trim();
+  let zone = $('#zondCode').val();
+
+  if(code.length > 0 && code != zone) {
+    getZone();
+  }
+
+  if(code.length == 0) {
+    $('#zone-name').val('');
+    $('#zoneCode').val('');
+  }
+});
+
+
 
 $("#zone-code").keyup(function(e) {
   if(e.keyCode === 13) {

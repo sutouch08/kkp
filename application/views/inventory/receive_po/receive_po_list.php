@@ -1,19 +1,14 @@
 <?php $this->load->view('include/header'); ?>
 <div class="row">
-	<div class="col-lg-6 col-md-6 col-sm-6 hidden-xs">
+	<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 padding-5">
     <h3 class="title">
-      <?php echo $this->title; ?>
-    </h3>
-  </div>
-	<div class="col-xs-12 visible-xs">
-    <h3 class="title-xs">
       <?php echo $this->title; ?>
     </h3>
   </div>
   <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
   	<p class="pull-right top-p">
     <?php if($this->pm->can_add) : ?>
-      <button type="button" class="btn btn-sm btn-success" onclick="goAdd()"><i class="fa fa-plus"></i> เพิ่มใหม่</button>
+      <button type="button" class="btn btn-sm btn-success" onclick="addNew()"><i class="fa fa-plus"></i> เพิ่มใหม่</button>
     <?php endif; ?>
     </p>
   </div>
@@ -123,6 +118,6 @@
 	</div>
 </div>
 
-<script src="<?php echo base_url(); ?>scripts/inventory/receive_po/receive_po.js"></script>
+<script src="<?php echo base_url(); ?>scripts/inventory/receive_po/receive_po.js?v=<?php echo date('Ymd');?>"></script>
 
 <?php $this->load->view('include/footer'); ?>

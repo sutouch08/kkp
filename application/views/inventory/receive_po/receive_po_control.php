@@ -1,45 +1,53 @@
 
 <div class="row">
-	<div class="col-lg-1-harf col-md-1-harf col-sm-2 col-xs-4 padding-5">
+	<div class="col-lg-1-harf col-md-1-harf col-sm-1-harf col-xs-4 padding-5">
+		<label>วันที่รับ</label>
+		<input type="text" class="form-control input-sm text-center" id="receive-date" value="<?php echo thai_date($doc->posting_date); ?>" readonly/>
+	</div>
+	<div class="col-lg-2 col-md-2-harf col-sm-3 col-xs-8 padding-5">
 		<label>โซน</label>
 		<input type="text" class="form-control input-sm" id="zone-code" placeholder="รหัสโซน" autofocus />
 	</div>
-	<div class="col-lg-1 col-md-1 col-sm-1 col-xs-3 padding-5">
+	<!-- <div class="col-lg-1 col-md-1-harf col-sm-1-harf col-xs-4 padding-5">
 		<label class="display-block not-show">get</label>
 		<button type="button" class="btn btn-xs btn-primary btn-block" id="btn-add-zone" onclick="getZone()">ตกลง</button>
 		<button type="button" class="btn btn-xs btn-info btn-block hide" id="btn-change-zone" onclick="changeZone()">เปลี่ยน</button>
+	</div> -->
+	<div class="col-lg-7 col-md-6-harf col-sm-6 col-xs-12 padding-5">
+		<label class="">ชื่อโซน</label>
+		<input type="text" class="form-control input-sm" id="zone-name" value="" readonly/>
 	</div>
-	<div class="col-lg-3 col-md-3 col-sm-3 col-xs-6 padding-5">
-		<label class="display-block not-show">ชื่อโซน</label>
-		<input type="text" class="form-control input-sm text-center" id="zone-name" value="" disabled/>
-	</div>
-	<div class="col-lg-1 col-md-1 col-sm-1 col-xs-3 padding-5">
+
+	<div class="divider"></div>
+
+	<div class="col-lg-1 col-md-1-harf col-sm-1-harf col-xs-3 padding-5">
 		<label>จำนวน</label>
-		<input type="number" class="form-control input-sm text-center" id="item-qty" value="1" disabled/>
+		<input type="number" class="form-control input-sm text-center" id="item-qty" value="1" />
 	</div>
-	<div class="col-lg-1-harf col-md-1-harf col-sm-2 col-xs-6 padding-5">
+	<div class="col-lg-2 col-md-2-harf col-sm-3 col-xs-6 padding-5">
 		<label>บาร์โค้ดสินค้า</label>
-		<input type="text" class="form-control input-sm text-center"  id="barcode-item" value="" disabled/>
+		<input type="text" class="form-control input-sm text-center"  id="barcode-item" value="" />
 	</div>
-	<div class="col-lg-1 col-md-1 col-sm-1 col-xs-3 padding-5">
+	<!-- <div class="col-lg-1 col-md-1-harf col-sm-1-harf col-xs-3 padding-5">
 		<label class="display-block not-show">get</label>
 		<button type="button" class="btn btn-xs btn-primary btn-block" id="btn-add-item" onclick="addItem()" disabled>เพิ่ม</button>
-	</div>
-	<div class="col-lg-1 col-md-1 col-sm-1 col-xs-6">
+	</div> -->
 
-	</div>
+	<div class="col-lg-7 col-md-3-harf col-sm-3 col-xs-12">&nbsp;</div>
+
 	<div class="col-lg-1 col-md-1-harf col-sm-1-harf col-xs-4 padding-5">
 		<label class="display-block not-show">get</label>
 		<button type="button" class="btn btn-xs btn-info btn-block" onclick="getData()">ดึงใบสั่งผลิต</button>
 	</div>
-  <div class="col-lg-1 col-md-1-harf col-sm-2 col-xs-4 padding-5">
+  <div class="col-lg-1 col-md-1-harf col-sm-1-harf col-xs-4 padding-5">
 		<label class="display-block not-show">get</label>
 		<button type="button" class="btn btn-xs btn-danger btn-block" onclick="removeAll()">ลบทั้งหมด</button>
   </div>
 </div>
 
-<hr class="margin-top-15">
+<input type="hidden" id="zoneCode"/>
 
+<hr class="margin-top-15">
 
 <form id="orderForm">
 	<div class="modal fade" id="orderGrid" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
@@ -98,26 +106,27 @@
 	{{#each this}}
 		{{#if nodata}}
 		<tr>
-			<td colspan="8" class="middle text-center">---- ไม่พบรายการ ----</td>
+			<td colspan="9" class="text-center">---- ไม่พบรายการ ----</td>
 		</tr>
 		{{else}}
 			{{#if @last}}
 				<tr>
-				<td colspan="5" class="middle text-right"><strong>รวม</strong></td>
-				<td class="middle text-right"><strong>{{total_qty}}</strong></td>
-				<td class="middle text-right"><strong>{{total_amount}}</strong></td>
+				<td colspan="6" class="text-right"><strong>รวม</strong></td>
+				<td class="text-right"><strong>{{total_qty}}</strong></td>
+				<td class="text-right"><strong>{{total_amount}}</strong></td>
 				<td></td>
 				</tr>
 			{{else}}
 					<tr>
-						<td class="middle text-center no">{{no}}</td>
-						<td class="moddle">{{product_code}}</td>
-						<td class="middle">{{product_name}}</td>
-						<td class="middle">{{zone_name}}</td>
-						<td class="middle text-right">{{price}}</td>
-						<td class="middle text-right">{{qty}}</td>
-						<td class="middle text-right">{{amount}}</td>
-						<td class="middle text-center">
+						<td class="text-center no">{{no}}</td>
+						<td class="">{{product_code}}</td>
+						<td class="">{{product_name}}</td>
+						<td class="">{{zone_name}}</td>
+						<td class="text-center">{{receive_date}}</td>
+						<td class="text-right">{{price}}</td>
+						<td class="text-right">{{qty}}</td>
+						<td class="text-right">{{amount}}</td>
+						<td class="text-center">
 							{{#if open}}
 								<button type="button" class="btn btn-minier btn-danger" onclick="removeRow({{id}}, '{{product_code}}')">
 									<i class="fa fa-trash"></i>

@@ -42,7 +42,7 @@ function goDelete(code){
 
 
 
-function goAdd(){
+function addNew(){
   window.location.href = HOME + 'add_new';
 }
 
@@ -53,7 +53,7 @@ function goEdit(code){
 
 
 function viewDetail(code){
-	window.location.href = HOME + 'view_detail/'+ code; 
+	window.location.href = HOME + 'view_detail/'+ code;
 }
 
 

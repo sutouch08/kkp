@@ -66,16 +66,13 @@ class Receive_po extends PS_Controller
 
   public function view_detail($code)
   {
-    $this->load->model('masters/zone_model');
     $this->load->model('masters/products_model');
+    $this->load->helper('warehouse');
 
     $doc = $this->receive_po_model->get($code);
-    if(!empty($doc))
-    {
-      $doc->zone_name = $this->zone_model->get_name($doc->zone_code);
-    }
 
     $details = $this->receive_po_model->get_details($code);
+    
     if(!empty($details))
     {
       foreach($details as $rs)
@@ -126,6 +123,7 @@ class Receive_po extends PS_Controller
 		$barcode = trim($this->input->post('barcode'));
     $zone_code = $this->input->post('zone_code');
     $qty = $this->input->post('qty');
+    $receive_date = db_date($this->input->post('receive_date'));
 
 		if( ! empty($code))
 		{
@@ -190,6 +188,7 @@ class Receive_po extends PS_Controller
                           'price' => $price,
                           'qty' => $qty,
                           'amount' => $price * $qty,
+                          'receive_date' => $receive_date,
                           'zone_code' => $zone->code,
                           'warehouse_code' => $zone->warehouse_code,
                           'status' => 'N'
@@ -212,6 +211,7 @@ class Receive_po extends PS_Controller
                       'price' => $item->cost,
                       'qty' => $qty,
                       'amount' => $item->cost * $qty,
+                      'receive_date' => $receive_date,
                       'zone_code' => $zone_code,
                       'status' => 'N'
                       );
@@ -335,9 +335,11 @@ class Receive_po extends PS_Controller
                 'price' => $price,
                 'qty' => $rs->qty,
                 'amount' => $price * $rs->qty,
+                'receive_date' => db_date($rs->receive_date),
                 'zone_code' => $zone->code,
                 'warehouse_code' => $zone->warehouse_code,
-                'status' => 'N'
+                'status' => 'N',
+                'user' => $this->_user->uname
               );
 
               if( ! $this->receive_po_model->add_detail($arr))
@@ -410,6 +412,7 @@ class Receive_po extends PS_Controller
               'price' => number($rs->price, 2),
               'qty' => number($rs->qty),
               'amount' => number($rs->amount, 2),
+              'receive_date' => empty($rs->receive_date) ? NULL : thai_date($rs->receive_date),
               'zone_code' => $rs->zone_code,
               'zone_name' => $rs->zone_name,
               'open' => $rs->status === 'N' ? TRUE : FALSE
@@ -876,6 +879,7 @@ class Receive_po extends PS_Controller
   public function edit($code)
   {
     $this->load->model('masters/zone_model');
+    $this->load->helper('warehouse');
 
     $document = $this->receive_po_model->get($code);
 
@@ -905,100 +909,97 @@ class Receive_po extends PS_Controller
   public function update()
   {
     $sc = TRUE;
+    $ds = json_decode($this->input->post('data'));
 
-    if($this->input->post('code'))
+    if( ! empty($ds))
     {
       $this->load->model('purchase/po_model');
       $this->load->model('masters/vender_model');
-      $this->load->model('masters/zone_model');
 
-      $date_add = db_date($this->input->post('date_add'), TRUE);
-      $invoice = $this->input->post('invoice');
-      $remark = $this->input->post('remark');
+      $doc = $this->receive_po_model->get($ds->code);
 
-      $vender = $this->vender_model->get($this->input->post('venderCode'));
-      $po = $this->po_model->get($this->input->post('poCode'));
-      $zone = $this->zone_model->get($this->input->post('zoneCode'));
-      $code = $this->input->post('code');
+      if( ! empty($doc))
+      {
+        if($doc->status == 0)
+        {
+          $vender = $this->vender_model->get($ds->venderCode);
 
-      if(empty($vender))
+          if( ! empty($vender))
+          {
+            $po = $this->po_model->get($ds->poCode);
+
+            if(!empty($po))
+            {
+              if($po->status == 0)
+              {
+                $sc = FALSE;
+                $this->error = 'ใบสั่งซื้อไม่ถูกต้อง : ยังไม่บันทึกใบสั่งซื้อ';
+              }
+              else if($po->status == 3)
+              {
+                $sc = FALSE;
+                $this->error = 'ใบสั่งซื้อไม่ถูกต้อง : ใบสั่งซื้อถูกปิดแล้ว';
+              }
+              else if($po->status == 4)
+              {
+                $sc = FALSE;
+                $this->error = 'ใบสั่งซื้อไม่ถูกต้อง : ใบสั่งซื้อถูกยกเลิกแล้ว';
+              }
+            }
+
+
+            if($sc === TRUE)
+            {
+              $arr = array(
+                'date_add' => db_date($ds->date_add, TRUE),
+                'posting_date' => db_date($ds->post_date),
+                'vender_code' => $vender->code,
+                'vender_name' => $vender->name,
+                'po_code' => empty($po) ? NULL : $po->code,
+                'invoice_code' => $ds->invoice,
+                'warehouse_code' => $ds->warehouse_code,
+                'remark' => get_null($ds->remark),
+                'update_user' => $this->_user->uname
+              );
+
+              if(!$this->receive_po_model->update($ds->code, $arr))
+              {
+                $sc = FALSE;
+                $this->error = 'update_failed';
+              }
+            }
+          }
+          else
+          {
+            $sc = FALSE;
+            $this->error = "รหัสผู้ขายไม่ถูกต้อง";
+          }
+        }
+        else
+        {
+          $sc = FALSE;
+          $this->error = "Invalid document status";
+        }
+      }
+      else
       {
         $sc = FALSE;
-        $this->error = 'รหัสผู้จำหน่ายไม่ถูกต้อง';
-      }
-
-      if(empty($invoice))
-      {
-        $sc = FALSE;
-        $this->error = 'กรุณาระบุใบส่งสินค้า';
-      }
-
-      if(!empty($po))
-      {
-        if($po->status == 0)
-        {
-          $sc = FALSE;
-          $this->error = 'ใบสั่งซื้อไม่ถูกต้อง : ยังไม่บันทึกใบสั่งซื้อ';
-        }
-        else if($po->status == 3)
-        {
-          $sc = FALSE;
-          $this->error = 'ใบสั่งซื้อไม่ถูกต้อง : ใบสั่งซื้อถูกปิดแล้ว';
-        }
-        else if($po->status == 4)
-        {
-          $sc = FALSE;
-          $this->error = 'ใบสั่งซื้อไม่ถูกต้อง : ใบสั่งซื้อถูกยกเลิกแล้ว';
-        }
-      }
-
-      if(empty($zone))
-      {
-        $sc = FALSE;
-        $this->error = 'รหัสโซนไม่ถูกต้อง';
-      }
-
-      if($sc === TRUE)
-      {
-        $arr = array(
-          'vender_code' => $vender->code,
-          'vender_name' => $vender->name,
-          'po_code' => empty($po) ? NULL : $po->code,
-          'invoice_code' => $invoice,
-          'zone_code' => $zone->code,
-          'warehouse_code' => $zone->warehouse_code,
-          'remark' => $remark,
-          'update_user' => get_cookie('uname')
-        );
-
-        if(!$this->receive_po_model->update($code, $arr))
-        {
-          $sc = FALSE;
-          $this->error = 'update_failed';
-        }
+        $this->error = "Invalid document number";
       }
     }
     else
     {
       $sc = FALSE;
-      $this->error = 'doc_not_found';
+      $this->error = "Missing required parameter";
     }
 
-    if($sc === TRUE)
-    {
-      $ds = array('status' => 'success', 'message' => $code);
-    }
-    else
-    {
-      $ds = array('status' => 'error', 'message' => $this->error);
-    }
-
-    echo json_encode($ds);
+    $this->response($sc);
   }
 
 
   public function add_new()
   {
+    $this->load->helper('warehouse');
     $this->load->view('inventory/receive_po/receive_po_add');
   }
 
@@ -1007,97 +1008,91 @@ class Receive_po extends PS_Controller
   {
     $sc = TRUE;
 
-    if($this->input->post('date_add'))
+    $ds = json_decode($this->input->post('data'));
+
+    if( ! empty($ds))
     {
       $this->load->model('purchase/po_model');
       $this->load->model('masters/vender_model');
-      $this->load->model('masters/zone_model');
 
-      $date_add = db_date($this->input->post('date_add'), TRUE);
-      $invoice = $this->input->post('invoice');
-      $remark = $this->input->post('remark');
+      $date_add = db_date($ds->date_add, TRUE);
+      $vender = $this->vender_model->get($ds->venderCode);
 
-      $vender = $this->vender_model->get($this->input->post('venderCode'));
-      $po = $this->po_model->get($this->input->post('poCode'));
-      $zone = $this->zone_model->get($this->input->post('zoneCode'));
-      $code = $this->get_new_code($date_add);
+      if( ! empty($vender))
+      {
+        if( ! empty($ds->invoice))
+        {
+          $po = $this->po_model->get($ds->poCode);
 
-      if(empty($vender))
+          if( ! empty($po))
+          {
+            if($po->status == 0)
+            {
+              $sc = FALSE;
+              $this->error = 'ใบสั่งซื้อไม่ถูกต้อง : ยังไม่บันทึกใบสั่งซื้อ';
+            }
+            else if($po->status == 3)
+            {
+              $sc = FALSE;
+              $this->error = 'ใบสั่งซื้อไม่ถูกต้อง : ใบสั่งซื้อถูกปิดแล้ว';
+            }
+            else if($po->status == 4)
+            {
+              $sc = FALSE;
+              $this->error = 'ใบสั่งซื้อไม่ถูกต้อง : ใบสั่งซื้อถูกยกเลิกแล้ว';
+            }
+          }
+
+          if($sc === TRUE)
+          {
+            $code = $this->get_new_code($date_add);
+
+            $arr = array(
+              'code' => $code,
+              'bookcode' => getConfig('BOOK_CODE_RECEIVE_PO'),
+              'vender_code' => $vender->code,
+              'vender_name' => $vender->name,
+              'po_code' => empty($po) ? NULL : $po->code,
+              'invoice_code' => $ds->invoice,
+              'warehouse_code' => $ds->warehouse_code,
+              'remark' => get_null($ds->remark),
+              'date_add' => $date_add,
+              'posting_date' => db_date($ds->post_date),
+              'user' => $this->_user->uname
+            );
+
+            if(!$this->receive_po_model->add($arr))
+            {
+              $sc = FALSE;
+              $this->error = "เพิ่มเอกสารไม่สำเร็จ";
+            }
+          }
+        }
+        else
+        {
+          $sc === TRUE;
+          $this->error = "กรุณาระบุใบส่งสินค้า";
+        }
+      }
+      else
       {
         $sc = FALSE;
-        $this->error = 'รหัสผู้จำหน่ายไม่ถูกต้อง';
-      }
-
-      if(empty($invoice))
-      {
-        $sc = FALSE;
-        $this->error = 'กรุณาระบุใบส่งสินค้า';
-      }
-
-      if(!empty($po))
-      {
-        if($po->status == 0)
-        {
-          $sc = FALSE;
-          $this->error = 'ใบสั่งซื้อไม่ถูกต้อง : ยังไม่บันทึกใบสั่งซื้อ';
-        }
-        else if($po->status == 3)
-        {
-          $sc = FALSE;
-          $this->error = 'ใบสั่งซื้อไม่ถูกต้อง : ใบสั่งซื้อถูกปิดแล้ว';
-        }
-        else if($po->status == 4)
-        {
-          $sc = FALSE;
-          $this->error = 'ใบสั่งซื้อไม่ถูกต้อง : ใบสั่งซื้อถูกยกเลิกแล้ว';
-        }
-      }
-
-      if(empty($zone))
-      {
-        $sc = FALSE;
-        $this->error = 'รหัสโซนไม่ถูกต้อง';
-      }
-
-      if($sc === TRUE)
-      {
-        $arr = array(
-          'code' => $code,
-          'bookcode' => getConfig('BOOK_CODE_RECEIVE_PO'),
-          'vender_code' => $vender->code,
-          'vender_name' => $vender->name,
-          'po_code' => empty($po) ? NULL : $po->code,
-          'invoice_code' => $invoice,
-          'zone_code' => $zone->code,
-          'warehouse_code' => $zone->warehouse_code,
-          'remark' => $remark,
-          'date_add' => $date_add,
-          'user' => get_cookie('uname')
-        );
-
-        if(!$this->receive_po_model->add($arr))
-        {
-          $sc = FALSE;
-          $this->error = 'doc_error';
-        }
+        $this->error = "รหัสผู้จำหน่ายไม่ถูกต้อง";
       }
     }
     else
     {
       $sc = FALSE;
-      $this->error = 'ไม่พบเลขที่เอกสาร';
+      $this->error = "Missing required parameter";
     }
 
-    if($sc === TRUE)
-    {
-      $ds = array('status' => 'success', 'message' => $code);
-    }
-    else
-    {
-      $ds = array('status' => 'error', 'message' => $this->error);
-    }
+    $arr = array(
+      'status' => $sc === TRUE ? 'success' : 'failed',
+      'message' => $sc === TRUE ? 'success' : $this->error,
+      'code' => $sc === TRUE ? $code : NULL
+    );
 
-    echo json_encode($ds);
+    echo json_encode($arr);
   }
 
 

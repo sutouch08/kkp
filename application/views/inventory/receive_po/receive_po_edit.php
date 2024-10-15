@@ -23,41 +23,42 @@
 <hr />
 
 <div class="row">
-  <div class="col-lg-1-harf col-md-1-harf col-sm-2 col-xs-4">
+  <div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-4">
   	<label><?php label('doc_num'); ?></label>
     <input type="text" class="form-control input-sm text-center" value="<?php echo $doc->code; ?>" disabled />
   </div>
-	<div class="col-lg-1-harf col-md-1-harf col-sm-2 col-xs-4">
+	<div class="col-lg-1 col-md-1-harf col-sm-1-harf col-xs-4">
 		<label><?php label('date'); ?></label>
-		<input type="text" class="form-control input-sm text-center edit" id="dateAdd" value="<?php echo thai_date($doc->date_add); ?>" readonly disabled/>
+		<input type="text" class="form-control input-sm text-center edit" id="date-add" value="<?php echo thai_date($doc->date_add); ?>" readonly disabled/>
 	</div>
-
-	<div class="col-lg-1-harf col-md-1-harf col-sm-2 col-xs-4">
+	<div class="col-lg-1 col-md-1-harf col-sm-1-harf col-xs-4">
+		<label>วันที่รับ</label>
+		<input type="text" class="form-control input-sm text-center edit" name="post_date" id="post-date" value="<?php echo thai_date($doc->posting_date); ?>" readonly disabled />
+	</div>
+	<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-4">
 			<label><?php label('vender_code'); ?></label>
 				<input type="text" class="form-control input-sm text-center edit" id="venderCode" value="<?php echo $doc->vender_code; ?>" placeholder="ค้นหารหัสผู้ผลิต" disabled/>
 	 </div>
-
-	 <div class="col-lg-4-harf col-md-4-harf col-sm-6 col-xs-12">
+	 <div class="col-lg-4 col-md-5 col-sm-5 col-xs-8">
 			<label><?php label('vender_name'); ?></label>
 				<input type="text" class="form-control input-sm edit" id="venderName" value="<?php echo $doc->vender_name; ?>" placeholder="ค้นหาชื่อผู้ผลิต" disabled/>
 	 </div>
-	<div class="col-lg-1-harf col-md-1-harf col-sm-2 col-xs-4">
+	<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6">
 			<label>ใบสั่งผลิต</label>
 			<input type="text" class="form-control input-sm text-center edit" id="poCode" value="<?php echo $doc->po_code; ?>" placeholder="ค้นหาใบสั่งผลิต" disabled/>
 	</div>
-	<div class="col-lg-1-harf col-md-1-harf col-sm-2 col-xs-4">
+	<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6">
 		<label><?php label('inv'); ?></label>
 		<input type="text" class="form-control input-sm text-center edit" id="invoice" value="<?php echo $doc->invoice_code; ?>" placeholder="อ้างอิงใบส่งสินค้า" disabled/>
 	</div>
-	<div class="col-lg-1-harf col-md-1-harf col-sm-2 col-xs-4">
-		<label><?php label('zone_code'); ?></label>
-		<input type="text" class="form-control input-sm text-center edit" id="zoneCode" value="<?php echo $doc->zone_code; ?>" placeholder="ค้นหารหัสโซน" disabled />
+	<div class="col-lg-3 col-md-3-harf col-sm-4 col-xs-6">
+		<label>คลัง</label>
+		<select class="form-control input-sm edit" id="warehouse" disabled>
+			<option value="">เลือก</option>
+			<?php echo select_warehouse($doc->warehouse_code); ?>
+		</select>
 	</div>
-	<div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
-		<label><?php label('zone_name'); ?></label>
-		<input type="text" class="form-control input-sm text-center edit" id="zoneName" value="<?php echo $doc->zone_name; ?>" placeholder="ค้นหาชื่อโซน" disabled />
-	</div>
-	<div class="col-lg-6-harf col-md-6 col-sm-10-harf col-xs-9">
+	<div class="col-lg-8 col-md-10-harf col-sm-10-harf col-xs-9">
 		<label><?php label('remark'); ?></label>
 		<input type="text" class="form-control input-sm edit" id="remark" value="<?php echo $doc->remark; ?>" placeholder="ระบุหมายเตุ(ถ้ามี)" disabled/>
 	</div>
@@ -88,6 +89,7 @@
                 <th class="fix-width-150 text-center">รหัสสินค้า</th>
                 <th class="min-width-200">ชื่อสินค้า</th>
 								<th class="fix-width-150">โซน</th>
+								<th class="fix-width-100 text-center">วันที่รับ</th>
 								<th class="fix-width-100 text-right">ราคา</th>
                 <th class="fix-width-100 text-right">จำนวน</th>
 								<th class="fix-width-120 text-right">มูลค่า</th>
@@ -101,14 +103,15 @@
 							<?php $total_amount = 0; ?>
 							<?php foreach($details as $rs) : ?>
 								<tr>
-									<td class="middle text-center no"><?php echo $no; ?></td>
-									<td class="moddle"><?php echo $rs->product_code; ?></td>
-									<td class="middle"><?php echo $rs->product_name; ?></td>
-									<td class="middle"><?php echo $rs->zone_name; ?></td>
-									<td class="middle text-right"><?php echo number($rs->price,2); ?></td>
-									<td class="middle text-right"><?php echo number($rs->qty); ?></td>
-									<td class="middle text-right"><?php echo number($rs->amount, 2); ?></td>
-									<td class="middle text-center">
+									<td class="text-center no"><?php echo $no; ?></td>
+									<td class=""><?php echo $rs->product_code; ?></td>
+									<td class=""><?php echo $rs->product_name; ?></td>
+									<td class=""><?php echo $rs->zone_name; ?></td>
+									<td class="text-center"><?php echo empty($rs->receive_date) ? "" : thai_date($rs->receive_date); ?></td>
+									<td class="text-right"><?php echo number($rs->price,2); ?></td>
+									<td class="text-right"><?php echo number($rs->qty); ?></td>
+									<td class="text-right"><?php echo number($rs->amount, 2); ?></td>
+									<td class="text-center">
 										<?php if($rs->status === 'N') : ?>
 											<button type="button" class="btn btn-minier btn-danger" onclick="removeRow(<?php echo $rs->id; ?>, '<?php echo $rs->product_code; ?>')">
 												<i class="fa fa-trash"></i>
@@ -121,14 +124,14 @@
 								<?php $total_amount += $rs->amount; ?>
 							<?php endforeach; ?>
 							<tr>
-								<td colspan="4" class="middle text-right"><strong><?php label('total'); ?></strong></td>
-								<td class="middle text-right"><strong><?php echo number($total_qty); ?></strong></td>
-								<td class="middle text-right"><strong><?php echo number($total_amount, 2); ?></strong></td>
+								<td colspan="6" class="text-right"><strong><?php label('total'); ?></strong></td>
+								<td class="text-right"><strong><?php echo number($total_qty); ?></strong></td>
+								<td class="text-right"><strong><?php echo number($total_amount, 2); ?></strong></td>
 								<td></td>
 							</tr>
 						<?php else : ?>
 							<tr id="pre_label">
-								<td align='center' colspan='7'><h4>-----  ไม่พบรายการ  -----</h4></td>
+								<td align='center' colspan='9'><h4>-----  ไม่พบรายการ  -----</h4></td>
 							</tr>
 						<?php endif; ?>
 			      </tbody>

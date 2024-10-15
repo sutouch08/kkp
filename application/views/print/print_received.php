@@ -55,7 +55,8 @@ $header['right'] = array();
 
 $header['right']['A'] = array(
 	array('label' => 'เลขที่', 'value' => $doc->code),
-	array('label' => 'วันที่', 'value' => thai_date($doc->date_add, FALSE, '/')),
+	array('label' => 'วันที่เอกสาร', 'value' => thai_date($doc->date_add, FALSE, '/')),
+	array('label' => 'วันที่รับของ', 'value' => empty($doc->posting_date) ? thai_date($doc->date_add, FALSE, '/') : thai_date($doc->posting_date, FALSE, '/')),
 	array('label' => 'ใบสั่งผลิต', 'value' => $doc->po_code),
 	array('label' => 'ใบส่งของ', 'value' => $doc->invoice_code)
 );
@@ -71,9 +72,10 @@ $total_vat = 0;
 	//**************  กำหนดหัวตาราง  ******************************//
 	$thead	= array(
 	          array("#", "width:5%; text-align:center;"),
-	          array("รายละเอียด", "width:50%; text-align:center;"),
-						array("จำนวน", "width:15%; text-align:right;"),
-	          array("ราคา/หน่วย", "width:15%; text-align:right;"),
+	          array("รายละเอียด", "width:45%; text-align:center;"),
+						array("วันที่รับ", "width:10%; text-align:center;"),
+						array("จำนวน", "width:12%; text-align:right;"),
+	          array("ราคา/หน่วย", "width:13%; text-align:right;"),
 	          array("มูลค่า", "width:15%; text-align:right;")
 	          );
 
@@ -83,6 +85,7 @@ $total_vat = 0;
 	$pattern = array(
 	            "text-align:center;",
 	            "text-align:left;",
+							"text-align:center;",
 	            "text-align:right;",
 	            "text-align:right;",
 	            "text-align:right;"
@@ -120,12 +123,15 @@ $total_vat = 0;
 				while($i < $row)
 	      {
 	        $rs = isset($details[$index]) ? $details[$index] : array();
+
 	        if(!empty($rs))
 	        {
 						$detail = $rs->product_code .' : '.$rs->product_name;
+
 	          $data = array(
 	            $n,
 	            inputRow($detail),
+							(empty($rs->receive_date) ? thai_date($rs->date_add, FALSE, '/') : thai_date($rs->receive_date, FALSE, '/')),
 							number($rs->qty).(empty($rs->unit_name) ? '' : ' '.$rs->unit_name),
 	            number($rs->price, 2),
 	            number($rs->amount, 2)
@@ -138,7 +144,7 @@ $total_vat = 0;
 	        }
 	        else
 	        {
-	          $data = array("", "", "", "","");
+	          $data = array("", "", "", "", "","");
 	        }
 
 	        $page .= $this->printer->print_row($data);

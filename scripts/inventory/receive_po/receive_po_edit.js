@@ -73,27 +73,28 @@ function editHeader(){
 	$('#btn-update').removeClass('hide');
 }
 
-function updated(){
-	window.location.reload();
-	//
-	// $('.edit').attr('disabled', 'disabled');
-	// $('#btn-update').addClass('hide');
-	// $('#btn-edit').removeClass('hide');
-}
 
-function updateHeader(){
-	var code = $('#code').val();
-	var date_add = $('#dateAdd').val();
-  var venderCode = $('#venderCode').val();
-  var poCode = $('#poCode').val();
-  var invoice = $('#invoice').val();
-  var zoneCode = $('#zoneCode').val();
-  var remark = $('#remark').val();
+function updateHeader() {
+	let h = {
+		'code' : $('#code').val(),
+		'date_add' : $('#date-add').val(),
+		'post_date' : $('#post-date').val(),
+		'venderCode' : $('#venderCode').val().trim(),
+		'poCode' : $('#poCode').val().trim(),
+		'invoice' : $('#invoice').val().trim(),
+		'warehouse_code' : $('#warehouse').val(),
+		'remark' : $('#remark').val().trim()
+	}
 
-  if(!isDate(date_add)){
+  if( ! isDate(h.date_add)){
     swal('วันที่ไม่ถูกต้อง');
     return false;
   }
+
+	if( ! isDate(h.post_date)) {
+		swal('วันที่รับไม่ถูกต้อง');
+		return false;
+	}
 
   if(venderCode.length == 0){
     swal('กรุณาระบุผู้ผลิต');
@@ -105,38 +106,45 @@ function updateHeader(){
     return false;
   }
 
-  if(zoneCode.length == 0){
-    swal('กรุณาระบุโซนรับสินค้า');
+  if(h.warehouse_code == "") {
+    swal('กรุณาเลือกคลัง');
     return false;
   }
 
   load_in();
+
   $.ajax({
     url:HOME + 'update',
     type:'POST',
     cache:false,
     data:{
-			'code' : code,
-      'date_add' : date_add,
-      'venderCode' : venderCode,
-      'poCode' : poCode,
-      'invoice' : invoice,
-      'zoneCode' : zoneCode,
-      'remark' : remark
+			'data' : JSON.stringify(h)
     },
     success:function(rs){
       load_out();
-      var arr = $.parseJSON(rs);
-      if(arr.status == 'error'){
-        swal({
-          title:'Error!!',
-          text:arr.message,
-          type:'error'
-        });
-      }else{
-        updated();
-      }
-    }
+
+			if(rs.trim() == 'success') {
+				window.location.reload();
+			}
+			else {
+				swal({
+					title:'Error!',
+					text:rs,
+					type:'error',
+					html:true
+				})
+			}
+    },
+		error:function(rs) {
+			load_out();
+
+			swal({
+				title:'Error!',
+				text:rs.responseText,
+				type:'error',
+				html:true
+			})
+		}
   })
 }
 

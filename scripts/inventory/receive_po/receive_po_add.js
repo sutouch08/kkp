@@ -75,65 +75,93 @@ $('#venderCode').keyup(function(e) {
 
 
 
-function addNew()
+function add()
 {
-  var date_add = $('#dateAdd').val();
-  var venderCode = $('#venderCode').val();
-  var poCode = $('#poCode').val();
-  var invoice = $('#invoice').val();
-  var zoneCode = $('#zoneCode').val();
-  var remark = $('#remark').val();
+  let h = {
+    'date_add' : $('#date-add').val(),
+    'post_date' : $('#post-date').val(),
+    'venderCode' : $('#venderCode').val().trim(),
+    'poCode' : $('#poCode').val().trim(),
+    'invoice' : $('#invoice').val().trim(),
+    'warehouse_code' : $('#warehouse').val(),
+    'remark' : $('#remark').val().trim()
+  };
 
-  if(!isDate(date_add)){
+  if( ! isDate(h.date_add)){
     swal('วันที่ไม่ถูกต้อง');
     return false;
   }
 
-  if(venderCode.length == 0){
-    swal('กรุณาระบุผู้ผลิต');
+  if( ! isDate(h.post_date)) {
+    swal('วันที่รับไม่ถูกต้อง');
     return false;
   }
 
-  if(poCode.length == 0){
+  if(h.venderCode.length == 0){
+    swal('กรุณาระบุผู้ขาย');
+    return false;
+  }
+
+  if(h.poCode.length == 0){
     swal('กรุณาระบุใบสั่งผลิต');
     return false;
   }
 
-  if(invoice.length == 0){
+  if(h.invoice.length == 0){
     swal('กรุณาระบุใบส่งสินค้า');
     return false;
   }
 
-  if(zoneCode.length == 0){
-    swal('กรุณาระบุโซนรับสินค้า');
+  if(h.warehouse_code == ""){
+    swal('กรุณาเลือกคลัง');
     return false;
   }
 
   load_in();
+
   $.ajax({
     url:HOME + 'add',
     type:'POST',
     cache:false,
     data:{
-      'date_add' : date_add,
-      'venderCode' : venderCode,
-      'poCode' : poCode,
-      'invoice' : invoice,
-      'zoneCode' : zoneCode,
-      'remark' : remark
+      'data' : JSON.stringify(h)
     },
-    success:function(rs){
+    success:function(rs) {
       load_out();
-      var arr = $.parseJSON(rs);
-      if(arr.status == 'error'){
-        swal({
-          title:'Error!!',
-          text:arr.message,
-          type:'error'
-        });
-      }else{
-        goEdit(arr.message);
+
+      if(isJson(rs)) {
+        let ds = JSON.parse(rs);
+
+        if(ds.status == 'success') {
+          goEdit(ds.code);
+        }
+        else {
+          swal({
+            title:'Error!',
+            text:ds.message,
+            type:'error',
+            html:true
+          });
+        }
       }
+      else {
+        swal({
+          title:'Error!',
+          text:rs,
+          type:'error',
+          html:true
+        });
+      }
+    },
+    error:function(rs) {
+      load_out();
+
+      swal({
+        title:'Error!',
+        text:rs.responseText,
+        type:'error',
+        html:true
+      })
     }
   })
 }
@@ -213,52 +241,6 @@ function updateVender(poCode){
 }
 
 
-$("#zoneCode").autocomplete({
-	source: BASE_URL + 'auto_complete/get_zone_code_and_name',
-	autoFocus: true,
-	open: function(event, ui) {
-		$(this).autocomplete("widget").css({
-						"width": "auto",
-						"min-width" : ($(this).width() + "px")
-				});
-		},
-	close: function(){
-		var rs = $(this).val();
-		var arr = rs.split(' | ');
-		if(arr.length == 2){
-			$('#zoneCode').val(arr[0]);
-			$('#zoneName').val(arr[1]);
-			$('#remark').focus();
-		}else{
-			$('#zoneCode').val('');
-			$('#zoneName').val('');
-		}
-	}
-});
-
-
-$("#zoneName").autocomplete({
-	source: BASE_URL + 'auto_complete/get_zone_code_and_name',
-	autoFocus: true,
-	open: function(event, ui) {
-		$(this).autocomplete("widget").css({
-						"width": "auto",
-						"min-width" : ($(this).width() + "px")
-				});
-		},
-	close: function(){
-		var rs = $(this).val();
-		var arr = rs.split(' | ');
-		if(arr.length == 2){
-			$('#zoneCode').val(arr[0]);
-			$('#zoneName').val(arr[1]);
-			$('#remark').focus();
-		}else{
-			$('#zoneCode').val('');
-			$('#zoneName').val('');
-		}
-	}
-});
-
-
-$("#dateAdd").datepicker({ dateFormat: 'dd-mm-yy'});
+$("#date-add").datepicker({ dateFormat: 'dd-mm-yy'});
+$('#post-date').datepicker({ dateFormat:'dd-mm-yy'});
+$('#receive-date').datepicker({ dateFormat:'dd-mm-yy'});
