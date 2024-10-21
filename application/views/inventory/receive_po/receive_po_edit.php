@@ -89,7 +89,7 @@
                 <th class="fix-width-150 text-center">รหัสสินค้า</th>
                 <th class="min-width-200">ชื่อสินค้า</th>
 								<th class="fix-width-150">โซน</th>
-								<th class="fix-width-100 text-center">วันที่รับ</th>
+								<th class="fix-width-100 text-center">Lot.</th>
 								<th class="fix-width-100 text-right">ราคา</th>
                 <th class="fix-width-100 text-right">จำนวน</th>
 								<th class="fix-width-120 text-right">มูลค่า</th>

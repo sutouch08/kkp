@@ -1,7 +1,7 @@
 
 <div class="row">
 	<div class="col-lg-1-harf col-md-1-harf col-sm-1-harf col-xs-4 padding-5">
-		<label>วันที่รับ</label>
+		<label>Lot.</label>
 		<input type="text" class="form-control input-sm text-center" id="receive-date" value="<?php echo thai_date($doc->posting_date); ?>" readonly/>
 	</div>
 	<div class="col-lg-2 col-md-2-harf col-sm-3 col-xs-8 padding-5">

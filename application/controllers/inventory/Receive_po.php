@@ -72,7 +72,7 @@ class Receive_po extends PS_Controller
     $doc = $this->receive_po_model->get($code);
 
     $details = $this->receive_po_model->get_details($code);
-    
+
     if(!empty($details))
     {
       foreach($details as $rs)
@@ -107,7 +107,8 @@ class Receive_po extends PS_Controller
 			'title' => "ใบรับสินค้า",
       'doc' => $doc,
 			'vender' => $this->vender_model->get($doc->vender_code),
-      'details' => $details
+      'details' => $details,
+      'form_no' => "FM-WH-011 แก้ไขครั้งที่ : 00 วันที่บังคับใช้ : 21/10/2024"
     );
 
     $this->load->view('print/print_received', $ds);

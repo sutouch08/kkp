@@ -81,7 +81,7 @@ if($doc->status == 2)
           <th class="fix-width-150"><?php label('item_code'); ?></th>
           <th class="min-width-250"><?php label('item_name'); ?></th>
 					<th class="fix-width-150">โซน</th>
-					<th class="fix-width-100 text-center">วันที่รับ</th>
+					<th class="fix-width-100 text-center">Lot.</th>
 					<th class="fix-width-100 text-right"><?php label('price'); ?></th>
           <th class="fix-width-100 text-right"><?php label('qty'); ?></th>
 					<th class="fix-width-120 text-right"><?php label('amount'); ?></th>

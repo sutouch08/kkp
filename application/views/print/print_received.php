@@ -73,7 +73,7 @@ $total_vat = 0;
 	$thead	= array(
 	          array("#", "width:5%; text-align:center;"),
 	          array("รายละเอียด", "width:45%; text-align:center;"),
-						array("วันที่รับ", "width:10%; text-align:center;"),
+						array("Lot.", "width:10%; text-align:center;"),
 						array("จำนวน", "width:12%; text-align:right;"),
 	          array("ราคา/หน่วย", "width:13%; text-align:right;"),
 	          array("มูลค่า", "width:15%; text-align:right;")
@@ -94,13 +94,51 @@ $total_vat = 0;
 	$this->printer->set_pattern($pattern);
 
 	//*******************************  กำหนดช่องเซ็นของ footer *******************************//
-	$footer	= array(
-		array("ผู้อนุมัติ", "","วันที่"),
-		array("ผู้ตรวจสอบ", "","วันที่"),
-	  array("ผู้จัดทำ", "","วันที่")
-	);
+	// $footer	= array(
+	// 	array("ผู้อนุมัติ", "","วันที่"),
+	// 	array("ผู้ตรวจสอบ", "","วันที่"),
+	//   array("ผู้จัดทำ", "","วันที่")
+	// );
+	//
+	// $this->printer->set_footer($footer);
 
-	$this->printer->set_footer($footer);
+	$footer = '';
+	$footer .= '<div style="width:190mm; height:40mm; margin:auto; position:absolute; bottom:15mm; left:5mm;">';
+	$footer .= '<div style="width:33%; height:40mm; text-align:center; float:right; padding-left:1mm; padding-right:1mm;">
+								<span style="font-size:10px; width:100%; height:10mm; text-align:center;">ผู้อนุมัติ</span>
+								<div style="font-size:10px; width:100%; height:30mm; text-align:center; padding-left:10px; padding-right:10px;">
+									<span style="font-size:10px; width:100%; height: 8mm; text-align:center;font-size:8px; float:left;"></span>
+									<span style="font-size:10px; width:100%; height: 10mm; text-align:center; padding-left:5px; padding-right:5px; border-bottom:dotted 1px #333; float:left; padding:10px;"></span>
+									<span style="font-size:10px; width:20%; height: 10mm; text-align:right; vertical-align:bottom; float:left; padding-top: 25px;">วันที่</span>
+									<span style="font-size:10px; width:70%; height: 10mm; text-align:left; float:left; padding-top: 10px; border-bottom:dotted 1px #333;"></span>
+								</div>
+							</div>';
+
+	$footer .= '<div style="width:33%; height:40mm; text-align:center; float:right; padding-left:1mm; padding-right:1mm;">
+								<span style="font-size:10px; width:100%; height:10mm; text-align:center;">ผู้ตรวจสอบ</span>
+								<div style="font-size:10px; width:100%; height:30mm; text-align:center; padding-left:10px; padding-right:10px;">
+									<span style="font-size:10px; width:100%; height: 8mm; text-align:center;font-size:8px; float:left;"></span>
+									<span style="font-size:10px; width:100%; height: 10mm; text-align:center; padding-left:5px; padding-right:5px; border-bottom:dotted 1px #333; float:left; padding:10px;"></span>
+									<span style="font-size:10px; width:20%; height: 10mm; text-align:right; vertical-align:bottom; float:left; padding-top: 25px;">วันที่</span>
+									<span style="font-size:10px; width:70%; height: 10mm; text-align:left; float:left; padding-top: 10px; border-bottom:dotted 1px #333;"></span>
+								</div>
+							</div>';
+
+	$footer .= '<div style="width:33%; height:40mm; text-align:center; float:right; padding-left:1mm; padding-right:1mm;">
+								<span style="font-size:10px; width:100%; height:10mm; text-align:center;">ผู้จัดทำ</span>
+								<div style="font-size:10px; width:100%; height:30mm; text-align:center; padding-left:10px; padding-right:10px;">
+									<span style="font-size:10px; width:100%; height: 8mm; text-align:center;font-size:8px; float:left;"></span>
+									<span style="font-size:10px; width:100%; height: 10mm; text-align:center; padding-left:5px; padding-right:5px; border-bottom:dotted 1px #333; float:left; padding:10px;"></span>
+									<span style="font-size:10px; width:20%; height: 10mm; text-align:right; vertical-align:bottom; float:left; padding-top: 25px;">วันที่</span>
+									<span style="font-size:10px; width:70%; height: 10mm; text-align:left; float:left; padding-top: 10px; border-bottom:dotted 1px #333;"></span>
+								</div>
+							</div>';
+
+	$footer .= '</div>';
+
+	$footer .= '<div class="text-right font-size-10" style="width:190mm; height:10mm; margin:auto; position:absolute; bottom:0mm;">'.$form_no.'</div>';
+
+	$this->printer->footer = $footer;
 
 	$n = 1;
   $index = 0;

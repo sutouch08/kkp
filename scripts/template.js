@@ -34,20 +34,6 @@ function toggle_layout(){
 }
 
 
-
-// function load_in(){
-// 	var x = ($(document).innerWidth()/2)-50;
-// 	$("#loader").css("display","");
-// 	$("#loader").css("left",x);
-// 	$("#loader").animate({opacity:0.8, top:300},300);
-// }
-//
-//
-//
-// function load_out(){
-// 	$("#loader").animate({opacity:0, top:-20},300, function(){ $("#loader").css("display","none");});
-// }
-
 function load_in(){
 	$("#loader").css("display","block");
 	$('#loader-backdrop').css('display', 'block');
@@ -409,3 +395,15 @@ function round(num)
 {
 	return Math.round((num + Number.EPSILON) * 100) / 100;
 }
+
+$.fn.hasError = function(msg) {
+  name = this.attr('id');
+  $('#'+name+'-error').text(msg);
+  return this.addClass('has-error');
+};
+
+$.fn.clearError = function() {
+  name = this.attr('id');
+  $('#'+name+'-error').text('');
+  return this.removeClass('has-error');
+};
