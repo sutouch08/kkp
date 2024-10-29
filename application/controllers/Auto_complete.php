@@ -220,7 +220,6 @@ public function get_item_code()
 }
 
 
-
 public function get_item_code_and_name()
 {
   $sc = array();

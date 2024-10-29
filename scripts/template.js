@@ -381,6 +381,10 @@ $('.search-box').keyup(function(e) {
 	}
 });
 
+function generateUID() {
+  return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+}
+
 function validCode(input){
   var regex = /[^a-z0-9-_]+/gi;
   input.value = input.value.replace(regex, '');

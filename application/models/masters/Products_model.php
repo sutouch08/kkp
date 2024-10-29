@@ -335,6 +335,41 @@ class Products_model extends CI_Model
   }
 
 
+  public function get_all()
+  {
+    $rs = $this->db->get('products');
+
+    if($rs->num_rows() > 0)
+    {
+      return $rs->result();
+    }
+
+    return NULL;
+  }
+
+
+  public function get_by_range($from_code, $to_code)
+  {
+    $from = $from_code;
+    $to = $to_code;
+
+    if($from > $to)
+    {
+      $from = $to_code;
+      $to = $from_code;
+    }
+
+    $rs = $this->db->where('code >=', $from)->where('code <=', $to)->get('products');
+
+    if($rs->num_rows() > 0)
+    {
+      return $rs->result();
+    }
+
+    return NULL;
+  }
+
+
   public function get($code)
   {
 		$rs = $this->db
