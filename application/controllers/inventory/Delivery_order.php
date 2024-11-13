@@ -345,8 +345,8 @@ class Delivery_order extends PS_Controller
                         'sale_name' => $customer->sale_name,
                         'user' => $order->user,
                         'date_add'  => $sold_date,
-                        'zone_code' => $use_prepare ? $rm->zone_code : $default_zone,
-                        'warehouse_code'  => $use_prepare ? $rm->warehouse_code : $warehouse_code,
+                        'zone_code' => $order->picked == 1 ? $rm->zone_code : $default_zone,
+                        'warehouse_code'  => $order->picked == 1 ? $rm->warehouse_code : $warehouse_code,
                         'update_user' => get_cookie('uname'),
                         'budget_code' => $order->budget_code,
                         'is_count' => $rs->is_count

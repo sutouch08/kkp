@@ -53,7 +53,7 @@ class Adjust_model extends CI_Model
     return NULL;
   }
 
-	
+
   public function get_details($code)
   {
     if(!empty($code))
@@ -269,7 +269,7 @@ class Adjust_model extends CI_Model
         $this->db->where('adj.status', $ds['status']);
       }
 
-      $this->db->order_by('adj.code', 'ASC');
+      $this->db->order_by('adj.code', 'DESC');
 
       $this->db->limit($perpage, $offset);
 
