@@ -14,14 +14,16 @@ class Stock extends PS_Controller
     parent::__construct();
     $this->home = base_url().'inventory/stock';
     $this->load->model('stock/stock_model');
+    $this->load->helper('buffer');
+    $this->load->helper('cancle');
   }
 
 
   public function index()
   {
     $filter = array(
-      'pd_code'          => get_filter('pd_code', 'pd_code', ''),
-      'zone_code'      => get_filter('zone_code', 'zone_code', '')
+      'pd_code' => get_filter('pd_code', 'pd_code', ''),
+      'zone_code'=> get_filter('zone_code', 'zone_code', '')
     );
 
 		//--- แสดงผลกี่รายการต่อหน้า

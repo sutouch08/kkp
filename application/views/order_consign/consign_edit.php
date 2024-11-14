@@ -23,7 +23,7 @@
 					<?php if($order->status == 0) : ?>
 						<button type="button" class="btn btn-xs btn-success" onclick="saveOrder()"><i class="fa fa-save"></i> บันทึก</button>
 					<?php endif; ?>
-				<?php endif; ?>				
+				<?php endif; ?>
       </p>
     </div>
 </div><!-- End Row -->
@@ -40,7 +40,7 @@
 </div>
 <hr/>
 <!-- <?php $this->load->view('orders/order_discount_bar'); ?> -->
-<?php $this->load->view('order_consign/consign_view_detail'); ?>
+<?php $this->load->view('order_consign/consign_detail'); ?>
 
 <?php if($this->menu_code == 'SOCCSO') : ?>
 <script src="<?php echo base_url(); ?>scripts/order_consign/consign.js"></script>

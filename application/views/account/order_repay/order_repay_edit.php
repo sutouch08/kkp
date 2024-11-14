@@ -83,16 +83,16 @@
 			<div class="modal-body" id="check-list-body">
 				<form id="check-form">
 				<div class="row">
-					<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5 table-responsive" style="max-height:500px; overflow:auto;">
-						<table class="table border-1" style="margin-bottom:0;">
+					<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5" style="max-height:500px; overflow:auto;">
+						<table class="table border-1" style="min-width:580px; margin-bottom:0;">
 							<thead>
 								<tr>
-									<th class="width-10"></th>
-									<th class="width-20">เลขที่</th>
-									<th class="width-20">วันที่</th>
-									<th class="width-20">วันครบกำหนด</th>
-									<th class="width-15 text-right">มูลค่า</th>
-									<th class="width-15 text-right">ค้างชำระ</th>
+									<th class="fix-width-40"></th>
+									<th class="min-width-120">เลขที่</th>
+									<th class="fix-width-100">วันที่</th>
+									<th class="fix-width-100">ครบกำหนด</th>
+									<th class="fix-width-120 text-right">มูลค่า</th>
+									<th class="fix-width-120 text-right">ค้างชำระ</th>
 								</tr>
 							</thead>
 							<tbody id="check-list-table">

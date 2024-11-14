@@ -103,7 +103,6 @@ class Printer
 	}
 
 
-
 	public function cancle_watermark()
 	{
 		$this->cancle_watermark = '<div id="watermark" style="width:0px; height:0px; position:absolute; left:30%; line-height:0px; top:400px;color:red; text-align:center; z-index:100000; opacity:0.1; transform:rotate(-30deg)">
@@ -112,25 +111,16 @@ class Printer
 	}
 
 
-
 	public function add_title($title)
 	{
 		$this->title = $title;
 	}
 
 
-
-
-
-
 	public function set_pattern($pattern) //// กำหนดรูปแบบ CSS ให้กับ td
 	{
 		$this->pattern = $pattern;
 	}
-
-
-
-
 
 
 	public function print_sub_total(array $data)
@@ -150,16 +140,10 @@ class Printer
 	}
 
 
-
-
-
 	public function add_subheader($sub_header)
 	{
 		$this->sub_header = $this->thead($sub_header);
 	}
-
-
-
 
 
 	public function thead(array $dataset)
@@ -179,16 +163,10 @@ class Printer
 	}
 
 
-
-
-
 	public function doc_footer()
 	{
 		return "</div></body></html>";
 	}
-
-
-
 
 
 	public function add_header(array $header)
@@ -197,11 +175,10 @@ class Printer
 	}
 
 
-
 	public function print_header()
 	{
-
 		$header  = "<div style='width:{$this->content_width}mm; margin:auto; padding-bottom:10px; border-bottom:solid 2px #333;'>";
+
 
 		$header .= "<table style='border:none; width:100%;'>";
 		$header .= "<tr>";
@@ -220,7 +197,7 @@ class Printer
 		$header .= "<td style='width:40%; border-bottom:solid 2px #333;'>";
 		$header .= "<table style='width:100%; border:none;'>";
 
-		if(!empty($this->header_row['B']))
+		if( ! empty($this->header_row['B']))
 		{
 			foreach($this->header_row['B'] as $row)
 			{
@@ -284,8 +261,6 @@ class Printer
 	}
 
 
-
-
 	public function print_custom_header()
 	{
 		$height = ($this->header_rows * $this->row_height) +1;
@@ -294,11 +269,6 @@ class Printer
 		$sc .= '</div>';
 		return $sc;
 	}
-
-
-
-
-
 
 
 	public function add_content($data)
@@ -310,32 +280,18 @@ class Printer
 	}
 
 
-
-
-
-
-
 	public function page_start()
 	{
 		$page_break = "page-break-after:always;";
-		// if($this->current_page == $this->total_page)
-		// {
-		// 	$page_break = "";
-		// }
 
 		return "<div class='page_layout' style='width:".$this->page_width."mm; padding-top:5mm; height:".$this->page_height."mm; position:relative; margin:auto; ".$page_break."'>";
 	}
-
-
-
-
 
 
 	public function page_end()
 	{
 		return "</div><div class='hidden-print' style='height: 5mm; width:".$this->page_width."'></div>";
 	}
-
 
 
 	public function top_page()
@@ -353,7 +309,6 @@ class Printer
 			$top .= $this->custom_header;
 			$top .= "</div>"; /// top end;
 		}
-
 
 		return $top;
 	}
@@ -393,8 +348,8 @@ class Printer
 		$top .= "</table>";
 
 		return $top;
-
 	}
+
 
 	public function top_page_right()
 	{
@@ -411,6 +366,8 @@ class Printer
 		if(!empty($this->header_row['right']))
 		{
 			$rob = 1;
+			$ro = count($this->header_row['right']);
+
 			foreach($this->header_row['right'] as $right)
 			{
 
@@ -420,11 +377,11 @@ class Printer
 				foreach($right as $row)
 				{
 					$count++;
-					$under_line = ($rob == 1 && $count == $item) ? 'border-bottom:solid 2px #333;' : '';
+					$under_line = $ro == 1 ? '' : (($rob == 1 && $count == $item) ? 'border-bottom:solid 2px #333;' : '');
 					$padding_top = ($count == 1) ? 'padding-top:5px;' : '';
 					$top .= "<tr class='font-size-12'>";
-					$top .= "<td class='{$this->text_color}' style='padding-bottom:5px; width:30%; vertical-align:text-top; {$under_line} {$padding_top}'>{$row['label']}</td>";
-					$top .= "<td class='' style='padding-bottom:5px; width:70%; white-space:pre-wrap; {$under_line} {$padding_top}'>{$row['value']}</td>";
+					$top .= "<td class='{$this->text_color}' style='padding-bottom:5px; width:30%; vertical-align:text-top; {$under_line} {$padding_top}'>".inputRow($row['label'])."</td>";
+					$top .= "<td class='' style='padding-bottom:5px; width:70%; white-space:pre-wrap; {$under_line} {$padding_top}'>".inputRow($row['value'])."</td>";
 					$top .= "</tr>";
 				}
 

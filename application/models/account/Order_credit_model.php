@@ -183,7 +183,6 @@ class Order_credit_model extends CI_Model
   }
 
 
-
   public function update($code, array $ds = array())
   {
     if(!empty($ds))
@@ -255,7 +254,7 @@ class Order_credit_model extends CI_Model
       {
         $this->db->query("UPDATE order_credit SET balance = 0, valid = 1 WHERE order_code = '{$code}'");
       }
-    }    
+    }
   }
 
 

@@ -9,9 +9,11 @@ function getDiffList(){
 }
 
 
-function saveAdjust(){
+function saveAdjust() {
   let code = $('#code').val();
+
   load_in();
+
   $.ajax({
     url:HOME + 'save',
     type:'POST',
@@ -117,17 +119,40 @@ function add(){
     },
     success:function(rs){
       load_out();
-      var rs = $.trim(rs);
-      var arr = rs.split('|');
-      if(arr.length === 2){
-        goEdit(arr[1]);
-      }else{
-        swal({
-          title:'Error!',
-          text: rs,
-          type:'error'
-        });
+
+      if(isJson(rs)) {
+        let ds = JSON.parse(rs);
+
+        if(ds.status == 'success') {
+          goEdit(ds.code);
+        }
+        else {
+          swal({
+            title:'Error!',
+            text:ds.message,
+            type:'error',
+            html:true
+          })
+        }
       }
+      else {
+        swal({
+          title:'Error !',
+          text:rs,
+          type:'error',
+          html:true
+        })
+      }
+    },
+    error:function(rs) {
+      load_out();
+
+      swal({
+        title:'Error!',
+        text:rs.responseText,
+        type:'error',
+        html:true
+      })
     }
   });
 }
@@ -318,13 +343,14 @@ function add_detail(){
     },
     success:function(rs){
       load_out();
+
       if(isJson(rs)){
         //--- แปลง json ให้เป็น object
         var ds = $.parseJSON(rs);
 
         //--  ตรวจสอบว่ามีรายการปรับยอดอยู่แล้วหรือไม่
         //--- ถ้ามีจะ update ยอด
-        if( $('#row-' + ds.id ).length == 1){
+        if( $('#row-' + ds.id ).length == 1) {
           //--- update ยอดในรายการ
           $('#qty-up-'+ ds.id).text(ds.up);
           $('#qty-down-'+ ds.id).text(ds.down);
@@ -335,7 +361,8 @@ function add_detail(){
           //--- Reset Input control พร้อมสำหรับรายการต่อไป
           getReady();
 
-        }else{
+        }
+        else {
           //--- ถ้ายังไม่มีรายการในตารางดำเนินการเพิ่มใหม่
           //--- ลำดับล่าสุด
           var no = getMaxNo() + 1;
@@ -458,4 +485,70 @@ function deleteDetail(id, pdCode){
 			}
 		});
 	});
+}
+
+
+function getApprove() {
+  swal({
+    title:'อนุมัติ',
+    text:'ต้องการอนุมัติเอกสารนี้หรือไม่ ?',
+    type:'info',
+    showCancelButton:true,
+    cancelButtonText:'No',
+    confirmButtonText:'Yes',
+    closeOnConfirm:true
+  }, function() {
+    setTimeout(() => {
+      doApprove();
+    }, 100);
+  })
+}
+
+
+function doApprove() {
+  let code = $('#code').val();
+
+  load_in();
+
+  $.ajax({
+    url:HOME + 'approve',
+    type:'POST',
+    cache:false,
+    data:{
+      'code' : code
+    },
+    success:function(rs) {
+      load_out();
+
+      if(rs.trim() == 'success') {
+        swal({
+          title:'Approved',
+          type:'success',
+          timer:1000
+        });
+
+        setTimeout(() => {
+          window.location.reload();
+        }, 1200);
+      }
+      else {
+        swal({
+          title:'Error!',
+          text:rs,
+          type:'error',
+          html:true
+        })
+      }
+    },
+    error:function(rs) {
+      load_out();
+
+      swal({
+        title:'Error!',
+        text:rs.responseText,
+        type:'error',
+        html:true
+      })
+    }
+  })
 }

@@ -12,81 +12,52 @@ function saveConsign(){
 		}, function(){
       load_in();
       $.ajax({
-        url: HOME + 'save_consign/'+code,
+        url: HOME + 'save_consign',
         type:'POST',
         cache:'false',
-        success:function(rs){
+        data:{
+          'code' : code
+        },
+        success:function(rs) {
           load_out();
-          if(rs == 'success'){
+          if(rs.trim() == 'success') {
             swal({
               title:'Saved',
               type:'success',
               timer:1000
             });
 
-            setTimeout(function(){
+            setTimeout(() => {
               viewDetail(code);
-            },1500);
-          }else{
-            swal('Error!', rs, 'error');
+            },1200);
           }
+          else {
+            swal({
+              title:'Error!',
+              text:rs,
+              type:'error',
+              html:true
+            })
+          }
+        },
+        error:function(rs) {
+          load_out();
+
+          swal({
+            title:'Error!',
+            text:rs.responseText,
+            type:'error',
+            html:true
+          })
         }
       });
 	});
 }
 
 
-function unSaveConsign(){
-  var code = $('#consign_code').val();
-  msg  = '<center><span style="color:red;">ก่อนยืนยันการทำรายการนี้</span></center>';
-  msg += '<center><span style="color:red;">คุณต้องแน่ใจว่าได้ลบ เอกสารใน SAP แล้ว</span></center>';
-  msg += '<center><span style="color:red;">ต้องการยกเลิกการเปิดบิลหรือไม่</span></center>';
-
-  swal({
-    title: "ยกเลิกการเปิดบิล ?",
-    text: msg,
-    type: "warning",
-    html:true,
-    showCancelButton: true,
-    confirmButtonColor: "#FA5858",
-    confirmButtonText: 'ใช่, ฉันต้องการ',
-    cancelButtonText: 'ยกเลิก',
-    closeOnConfirm: false
-    }, function(){
-      load_in();
-      $.ajax({
-        url: HOME + 'unsave_consign/'+code,
-        type:'POST',
-        cache:'false',
-        success:function(rs){
-          load_out();
-          var rs = $.trim(rs);
-          if(rs == 'success'){
-            swal({
-              title:'Success',
-              type:'success',
-              timer:1000
-            });
-
-            setTimeout(function(){
-              goEdit(code);
-            }, 1500);
-
-          }else{
-            swal('Error!', rs, 'error');
-          }
-        }
-      });
-  });
-}
-
-
 $('#date').datepicker({
   dateFormat:'dd-mm-yy'
 });
-
-
-
 
 
 $("#customer").autocomplete({
@@ -101,7 +72,32 @@ $("#customer").autocomplete({
 			$("#customerCode").val(code);
 			$("#customer").val(name);
       zoneInit(code, true);
-		}else{
+      $('#zone_code').focus();
+		}
+    else {
+			$("#customerCode").val('');
+			$(this).val('');
+      zoneInit('');
+		}
+	}
+});
+
+
+$("#customerCode").autocomplete({
+	source: BASE_URL + 'auto_complete/get_customer_code_and_name',
+	autoFocus: true,
+	close: function(){
+		var rs = $.trim($(this).val());
+		var arr = rs.split(' | ');
+		if( arr.length == 2 ){
+			var code = arr[0];
+			var name = arr[1];
+			$("#customerCode").val(code);
+			$("#customer").val(name);
+      zoneInit(code, true);
+      $('#zone_code').focus();
+		}
+    else {
 			$("#customerCode").val('');
 			$(this).val('');
       zoneInit('');
@@ -117,10 +113,8 @@ $(document).ready(function(){
 });
 
 
-
-function zoneInit(customer_code, edit)
-{
-  if(edit){
+function zoneInit(customer_code, edit) {
+  if(edit) {
     $('#zone_code').val('');
     $('#zone').val('');
   }
@@ -129,15 +123,36 @@ function zoneInit(customer_code, edit)
     source:BASE_URL + 'auto_complete/get_consign_zone/' + customer_code,
     autoFocus: true,
     close:function(){
-      var rs = $.trim($(this).val());
-      var arr = rs.split(' | ');
+      let rs = $.trim($(this).val());
+      let arr = rs.split(' | ');
       if(arr.length == 2)
       {
-        var code = arr[0];
-        var name = arr[1];
+        let code = arr[0];
+        let name = arr[1];
         $('#zone_code').val(code);
         $('#zone').val(name);
-      }else{
+      }
+      else {
+        $('#zone_code').val('');
+        $('#zone').val('');
+      }
+    }
+  })
+
+  $('#zone_code').autocomplete({
+    source:BASE_URL + 'auto_complete/get_consign_zone/'+customer_code,
+    autoFocus:true,
+    close:function() {
+      let rs = $(this).val().trim();
+      let arr = rs.split(' | ');
+      if(arr.length == 2) {
+        let code = arr[0];
+        let name = arr[1];
+
+        $('#zone_code').val(code);
+        $('#zone').val(name);
+      }
+      else {
         $('#zone_code').val('');
         $('#zone').val('');
       }
@@ -146,32 +161,86 @@ function zoneInit(customer_code, edit)
 }
 
 
+function add() {
+  $('.e').clearError();
+
+  let h = {
+    'customer_code' : $('#customerCode').val().trim(),
+    'customer_name' : $('#customer').val().trim(),
+    'date_add' : $('#date').val(),
+    'zone_code' : $('#zone_code').val().trim(),
+    'zone_name' : $('#zone').val().trim(),
+    'remark' : $('#remark').val().trim()
+  }
 
 
-function add(){
-  var customer_code = $('#customerCode').val();
-  var customer_name = $('#customer').val();
-  var date_add = $('#date').val();
-  var zone_code = $('#zone_code').val();
-  var zone_name = $('#zone').val();
+  if(h.customer_code.length == 0 || h.customer_name.length == 0) {
+    $('#customerCode').hasError();
+    $('#customer').hasError();
 
-
-  if(customer_code.length == 0 || customer_name.length == 0){
-    swal('ชื่อลูกค้าไม่ถูกต้อง');
     return false;
   }
 
-  if(!isDate(date_add))
+  if( ! isDate(h.date_add))
   {
-    swal('วันที่ไม่ถูกต้อง');
+    $('#date').hasError();
     return false;
   }
 
-  if(zone_code.length == 0 || zone_name.length == 0)
+  if(h.zone_code.length == 0 || h.zone_name.length == 0)
   {
-    swal('โซนไม่ถูกต้อง');
+    $('#zone').hasError();
+    $('#zone_code').hasError();
     return false;
   }
+
+  load_in();
+
+  $.ajax({
+    url:HOME + 'add',
+    type:'POST',
+    cache:false,
+    data:{
+      'data' : JSON.stringify(h)
+    },
+    success:function(rs) {
+      load_out();
+
+      if(isJson(rs)) {
+        let ds = JSON.parse(rs);
+
+        if(ds.status == 'success') {
+          goEdit(ds.code);
+        }
+        else {
+          swal({
+            title:'Error!',
+            text:ds.message,
+            type:'error',
+            html:true
+          })
+        }
+      }
+      else {
+        swal({
+          title:'Error!',
+          text:rs,
+          type:'error',
+          html:true
+        })
+      }
+    },
+    error:function(rs) {
+      load_out();
+
+      swal({
+        title:'Error!',
+        text:rs.responseText,
+        type:'error',
+        html:true
+      })
+    }
+  })
 
   $('#addForm').submit();
 }
@@ -183,47 +252,121 @@ var date;
 
 
 function getEdit(){
-  $('.edit').removeAttr('disabled');
+  $('.e').removeAttr('disabled');
   $('#btn-edit').addClass('hide');
   $('#btn-update').removeClass('hide');
 }
 
 
-function update(){
+function getUpdate() {
+  $('.e').clearError();
+
   let code = $('#consign_code').val();
   let date = $('#date').val();
-  let remark = $('#remark').val();
+  let remark = $('#remark').val().trim();
+  let customer_code = $('#customer_code').val();
+  let customer_name = $('#customer').val().trim();
+  let prev_customer_code = $('#prev-customer-code').val();
+  let prev_customer_name = $('#prev-customer-name').val();
+  let zone_code = $('#zone_code').val().trim();
+  let zone_name = $('#zone').val();
+  let prev_zone_code = $('#prev-zone-code').val().trim();
+  let rows = $('.rox').length;
 
-  if(!isDate(date)){
-    swal('วันที่ไม่ถูกต้อง');
+  if( ! isDate(date)) {
+    $('#date').hasError();
     return false;
   }
 
-  load_in();
-  $.ajax({
-    url: HOME + 'update',
-    type:'POST',
-    cache:false,
-    data:{
-      'code' : code,
-      'date' : date,
-      'remark' : remark
-    },
-    success:function(rs){
-      load_out();
-      if(rs === 'success'){
-        swal({
-          title:'Updted',
-          type:'success',
-          timer:1000
-        });
+  if(customer_code.length == 0 || customer_name.length == 0) {
+    $('#customerCode').hasError();
+    $('#customer').hasError();
+    return false;
+  }
 
-        $('.edit').attr('disabled', 'disabled');
-        $('#btn-edit').removeClass('hide');
-        $('#btn-update').addClass('hide');
+  if(zone_code.length == 0 || zone_name.length == 0) {
+    $('#zone_code').hasError();
+    $('#zone').hasError();
+    return false;
+  }
+
+  if(zone_code !== prev_zone_code && rows > 0) {
+    swal({
+      title:'คำเตือน !',
+      text:'เนื่องจากโซนมีการเปลี่ยนแปลง รายการที่มีอยู่จะถูกลบทั้งหมด<br/> ต้องการดำเนินการต่อหรือไม่ ?',
+      type:'warning',
+      html:true,
+      showCancelButton:true,
+      cancelButtonText:'No',
+      confirmButtonText:'Yes',
+      closeOnConfirm:true
+    },
+    function() {
+      update();
+    })
+  }
+  else {
+    update();
+  }
+}
+
+
+function update() {
+  let h = {
+    'code' : $('#consign_code').val(),
+    'date_add' : $('#date').val(),
+    'customer_code' : $('#customer_code').val(),
+    'customer_name' : $('#customer').val().trim(),
+    'zone_code' : $('#zone_code').val().trim(),
+    'zone_name' : $('#zone').val().trim(),
+    'remark' : $('#remark').val().trim()
+  };
+
+  load_in();
+
+  setTimeout(() => {
+    $.ajax({
+      url: HOME + 'update',
+      type:'POST',
+      cache:false,
+      data:{
+        'data' : JSON.stringify(h)
+      },
+      success:function(rs) {
+        load_out();
+
+        if(rs.trim() == 'success'){
+          swal({
+            title:'Updted',
+            type:'success',
+            timer:1000
+          });
+
+          setTimeout(() => {
+            window.location.reload();
+          }, 1200);
+        }
+        else {
+          swal({
+            title:'Error!',
+            text:rs,
+            type:'error',
+            html:true
+          });
+        }
+      },
+      error:function(rs) {
+        load_out();
+
+        swal({
+          title:'Error!',
+          text:rs.responseText,
+          type:'error',
+          html:true
+        });
       }
-    }
-  })
+    })
+  }, 100);
 }
 
 
@@ -236,7 +379,7 @@ function deleteRow(id, code){
 		confirmButtonColor: "#FA5858",
 		confirmButtonText: 'ใช่, ฉันต้องการลบ',
 		cancelButtonText: 'ยกเลิก',
-		closeOnConfirm: false
+		closeOnConfirm: true
 		}, function(){
       deleteDetail(id);
 	});
@@ -267,53 +410,71 @@ function deleteDetail(id){
 }
 
 
+function deleteChecked() {
+  if($('.chk:checked').length > 0) {
 
-function unSave(id){
-  msg  = '<center><span style="color:red;">ก่อนยืนยันการทำรายการนี้</span></center>';
-  msg += '<center><span style="color:red;">คุณต้องแน่ใจว่าได้ลบ เอกสารใบสั่งซื้อ(SO) ใน Formula แล้ว</span></center>';
-  msg += '<center><span style="color:red;">ต้องการยกเลิกการเปิดบิลหรือไม่</span></center>';
+    swal({
+      title: "คุณแน่ใจ ?",
+      text: "ต้องการลบรายการที่เลือกหรือไม่ ?",
+      type: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#FA5858",
+      confirmButtonText: 'ใช่, ฉันต้องการลบ',
+      cancelButtonText: 'ยกเลิก',
+      closeOnConfirm: true
+    },
+    function() {
+      let h = {
+        'code' : $('#consign_code').val(),
+        'rows' : []
+      };
 
-  swal({
-    title: "ยกเลิกการเปิดบิล ?",
-    text: msg,
-    type: "warning",
-    html:true,
-    showCancelButton: true,
-    confirmButtonColor: "#FA5858",
-    confirmButtonText: 'ใช่, ฉันต้องการลบ',
-    cancelButtonText: 'ยกเลิก',
-    closeOnConfirm: true
-    }, function(){
-      load_in();
-      $.ajax({
-        url:'controller/consignController.php?unSaveConsign',
-        type:'POST',
-        cache:'false',
-        data:{
-          'id_consign' : id
-        },
-        success:function(rs){
-          load_out();
-          var rs = $.trim(rs);
-          if(rs == 'success'){
-            swal({
-              title:'Success',
-              type:'success',
-              timer:1000
-            });
 
-            setTimeout(function(){
-              window.location.reload();
-            }, 1500);
-
-          }else{
-            swal('Error!', rs, 'error');
-          }
-        }
+      $('.chk:checked').each(function() {
+        h.rows.push($(this).val());
       });
-  });
-}
 
+      if(h.rows.length > 0) {
+        load_in();
+        setTimeout(() => {
+          $.ajax({
+            url:HOME + 'delete_details',
+            type:'POST',
+            cache:false,
+            data:{
+              'data' : JSON.stringify(h)
+            },
+            success:function(rs) {
+              load_out();
+
+              if(rs.trim() == 'success') {
+                window.location.reload();
+              }
+              else {
+                swal({
+                  title:'Error!',
+                  text:rs,
+                  type:'error',
+                  html:true
+                })
+              }
+            },
+            error :function(rs) {
+              load_out();
+
+              swal({
+                title:'Error!',
+                text:rs.responseText,
+                type:'error',
+                html:true
+              })
+            }
+          })
+        }, 100);
+      }
+    });
+  }
+}
 
 
 //--- ลบรายการนำเข้ายอดต่าง

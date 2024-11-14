@@ -270,5 +270,21 @@ class Cancle_model extends CI_Model
   }
 
 
+  public function get_product_cancle_zone($zone_code, $product_code)
+  {
+    $rs = $this->db
+    ->select_sum('qty')
+    ->where('zone_code', $zone_code)
+    ->where('product_code', $product_code)
+    ->get('cancle');
+
+    if($rs->num_rows() === 1)
+    {
+      return $rs->row()->qty > 0 ? $rs->row()->qty : 0;
+    }
+
+    return 0;
+  }
+
 }
  ?>

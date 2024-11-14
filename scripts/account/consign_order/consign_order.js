@@ -15,72 +15,99 @@ function viewDetail(code){
 }
 
 
-function goEdit(code)
-{
+function goEdit(code) {
   window.location.href = HOME + 'edit/'+code;
 }
 
 
-//--- delete all data and cancle document
-function getDelete(code){
-	swal({
+function goCancel(code) {
+  swal({
 		title: "คุณแน่ใจ ?",
 		text: "ต้องการยกเลิก '"+code+"' หรือไม่ ?",
 		type: "warning",
 		showCancelButton: true,
 		confirmButtonColor: "#DD6B55",
-		confirmButtonText: 'ใช่, ฉันต้องการ',
-		cancelButtonText: 'ไม่ใช่',
-		closeOnConfirm: false
-		}, function(){
-			$.ajax({
-				url: HOME + 'cancle/'+code,
-				type:"POST",
-				cache:"false",
-				success: function(rs){
-					var rs = $.trim(rs);
-					if( rs == 'success' ){
-						swal({
-							title: 'Cancled',
-							type: 'success',
-							timer: 1000
-						});
+		confirmButtonText: 'Yes',
+		cancelButtonText: 'No',
+		closeOnConfirm: true
+		}, function() {
+      $('#cancel-code').val(code);
+      $('#cancel-reason').val('');
 
-						setTimeout(function(){
-							window.location.reload();
-						}, 1200);
-
-					}else{
-						swal("Error !", rs, "error");
-					}
-				}
-			});
+      setTimeout(() => {
+        cancelReason();
+      }, 200);
 	});
 }
 
 
-function exportConsignSold(code){
-  load_in();
-  $.ajax({
-    url: HOME + 'export_consign_order/'+code,
-    type:'POST',
-    cache:'false',
-    success:function(rs){
-      load_out();
-      var rs = $.trim(rs);
-      if(rs == 'success'){
-        swal({
-          title:'success',
-          type:'success',
-          timer:1000
-        });
+function cancelReason() {
+	$('#cancel-modal').modal('show');
+}
 
-        setTimeout(function(){
-          window.location.reload();
-        }, 1200);
-      }
-    }
-  });
+
+$('#cancel-modal').on('shown.bs.modal', function() {
+	$('#cancel-reason').focus();
+});
+
+
+function doCancel() {
+	$('#cancel-reason').clearError();
+
+	let code = $('#cancel-code').val();
+	let reason = $('#cancel-reason').val().trim();
+
+	if(reason.length == 0) {
+		$('#cancel-reason').hasError().focus();
+		return false;
+	}
+
+	$('#cancel-modal').modal('hide');
+
+	load_in();
+
+	setTimeout(() => {
+		$.ajax({
+			url:HOME + 'cancel',
+			type:'POST',
+			cache:false,
+			data:{
+				'code' : code,
+				'reason' : reason
+			},
+			success:function(rs) {
+				load_out();
+
+        if(rs.trim() == 'success') {
+          swal({
+            title:'Success',
+            type:'success',
+            timer:1000
+          });
+
+          setTimeout(() => {
+            window.location.reload();
+          }, 1200);
+        }
+				else {
+					swal({
+						title:'Error!',
+						text:rs,
+						type:'error'
+					});
+				}
+			},
+			error:function(xhr) {
+				load_out();
+				swal({
+					title:'Error!',
+					text:xhr.responseText,
+					type:'error',
+					html:true
+				});
+			}
+		});
+	}, 200);
 }
 
 
@@ -105,7 +132,6 @@ $("#fromDate").datepicker({
 });
 
 
-
 $("#toDate").datepicker({
 	dateFormat: 'dd-mm-yy',
 	onClose: function(ds){
@@ -114,15 +140,14 @@ $("#toDate").datepicker({
 });
 
 
-
-// JavaScript Document
-function printConsignOrder(){
-  var code = $('#consign_code').val();
-	var center = ($(document).width() - 800) /2;
-  var target = HOME + 'print_consign/'+ code;
+function printConsignOrder() {
+  let code = $('#consign_code').val();
+  let width = 800;
+  let height = 900;
+	let center = ($(document).width() - width)/2;
+  let target = HOME + 'print_consign/'+ code;
   window.open(target, "_blank", "width=800, height=900, left="+center+", scrollbars=yes");
 }
-
 
 
 function clearFilter(){

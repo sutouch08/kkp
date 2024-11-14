@@ -85,33 +85,6 @@ class Invoice_model extends CI_Model
     return 0;
   }
 
-  // public function get_billed_detail($code, $use_qc = TRUE)
-  // {
-  //   $qr = "SELECT o.id, o.product_code, o.product_name, o.qty AS order_qty, o.is_count, ";
-  //   $qr .= "o.price, o.discount1, o.discount2, o.discount3, ";
-  //   $qr .= "(o.discount_amount / o.qty) AS discount_amount, ";
-  //   $qr .= "(o.total_amount/o.qty) AS final_price ";
-  //   $qr .= "FROM order_details AS o ";
-  //
-  //   $qr .= "(SELECT SUM(qty) FROM prepare WHERE order_code = '{$code}' AND product_code = o.product_code) AS prepared ";
-  //
-  //   if($use_qc)
-  //   {
-  //     $qr .= ",(SELECT SUM(qty) FROM qc WHERE order_code = '{$code}' AND product_code = o.product_code) AS qc ";
-  //   }
-  //
-  //   $qr .= ",(SELECT SUM(qty) FROM order_sold WHERE reference = '{$code}' AND product_code = o.product_code) AS sold ";
-  //   $qr .= "WHERE o.order_code = '{$code}' GROUP BY o.product_code";
-  //
-  //   $rs = $this->db->query($qr);
-  //   if($rs->num_rows() > 0)
-  //   {
-  //     return $rs->result();
-  //   }
-  //
-  //   return FALSE;
-  // }
-
 
   public function get_details($code)
   {
@@ -123,7 +96,6 @@ class Invoice_model extends CI_Model
 
     return FALSE;
   }
-
 
 
   public function get_total_sold_qty($code)
@@ -145,6 +117,11 @@ class Invoice_model extends CI_Model
     return $this->db->where('id', $id)->delete('order_sold');
   }
 
+
+  public function drop_order_sold($code)
+  {
+    return $this->db->where('reference', $code)->delete('order_sold');
+  }
 
 
   public function is_over_due($customer_code)

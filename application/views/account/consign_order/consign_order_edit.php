@@ -1,95 +1,92 @@
 <?php $this->load->view('include/header'); ?>
 <div class="row">
-	<div class="col-sm-4 col-xs-5">
-    <h4 class="title">
-      <?php echo $this->title; ?>
-    </h3>
-    </div>
-    <div class="col-sm-8 col-xs-7">
-    	<p class="pull-right top-p">
-				<button type="button" class="btn btn-sm btn-warning" onclick="goBack()"><i class="fa fa-arrow-left"></i> กลับ</button>
-				<button type="button" class="btn btn-sm btn-default hidden-xs" onclick="getSample()">
-	        <i class="fa fa-download"></i> ไฟล์ตัวอย่าง
-	      </button>
+	<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 padding-5">
+		<h4 class="title"><?php echo $this->title; ?></h4>
+	</div>
+	<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 padding-5 text-right top-p">
+		<button type="button" class="btn btn-xs btn-warning" onclick="goBack()"><i class="fa fa-arrow-left"></i> กลับ</button>
+		<?php if(($this->pm->can_add OR $this->pm->can_edit) && $doc->status == 0) : ?>
+			<button type="button" class="btn btn-sm btn-success" onclick="saveConsign()">
+				<i class="fa fa-save"></i> บันทึก
+			</button>
+		<?php endif; ?>
+		<div class="btn-group">
+			<button data-toggle="dropdown" class="btn btn-primary btn-sm dropdown-toggle" aria-expanded="false">
+				ตัวเลือก
+				<i class="ace-icon fa fa-angle-down icon-on-right"></i>
+			</button>
+			<ul class="dropdown-menu dropdown-menu-right">
+				<li>
+					<a href="javascript:getSample()"><i class="fa fa-download"></i> Template</a>
+				</li>
 				<?php if(($this->pm->can_add OR $this->pm->can_edit) && $doc->status == 0) : ?>
-					<button type="button" class="btn btn-sm btn-primary hidden-xs" onclick="getUploadFile()">
-		        นำเข้าจากไฟล์ Excel
-		      </button>
+					<li>
+						<a href="javascript:getUploadFile()"><i class="fa fa-upload"></i> Import excel</a>
+					</li>
 					<?php if(empty($doc->ref_code)) : ?>
-						<button type="button" class="btn btn-sm btn-info hidden-xs" onclick="getActiveCheckList()">
-			        โหลดเอกสารกระทบยอด
-			      </button>
+						<li class="hide">
+							<a href="javascript:getActiveCheckList()"><i class="fa fa-flash"></i> โหลดเอกสารกระทบยอด</a>
+						</li>
 					<?php endif; ?>
-					<button type="button" class="btn btn-sm btn-success" onclick="saveConsign()">
-		        <i class="fa fa-save"></i> บันทึก
-		      </button>
 				<?php endif; ?>
-      </p>
-    </div>
+			</ul>
+		</div>
+	</div>
 </div><!-- End Row -->
 <hr class=""/>
-<form id="addForm" method="post" action="<?php echo $this->home; ?>/update">
 <div class="row">
-  <div class="col-sm-1 col-1-harf col-xs-6 padding-5 first">
-    <label>เลขที่เอกสาร</label>
-    <input type="text" class="form-control input-sm" value="<?php echo $doc->code; ?>" disabled />
-  </div>
-
-  <div class="col-sm-1 col-1-harf col-xs-6 padding-5">
-    <label>วันที่</label>
-    <input type="text" class="form-control input-sm text-center edit" name="date_add" id="date" value="<?php echo thai_date($doc->date_add); ?>" readonly disabled />
-  </div>
-
-  <div class="col-sm-4 col-4-harf col-xs-12 padding-5">
-    <label>ลูกค้า[ในระบบ]</label>
-    <input type="text" class="form-control input-sm" name="customer" id="customer" value="<?php echo $doc->customer_name; ?>" disabled />
-  </div>
-
-	<div class="col-sm-4 col-4-harf col-xs-12 padding-5 last">
-    <label>โซน[ฝากขาย]</label>
-		<input type="text" class="form-control input-sm" name="zone" id="zone" value="<?php echo $doc->zone_name; ?>" disabled />
-  </div>
-
-<?php if(!empty($doc->ref_code) && $this->pm->can_edit) : ?>
-	<div class="col-sm-1 col-1-harf col-xs-8 padding-5 first">
-    <label>อ้างอิง</label>
-    <input type="text" class="form-control input-sm text-center" name="ref_code" id="ref_code" value="<?php echo $doc->ref_code; ?>" disabled>
-  </div>
-	<div class="col-sm-1 col-xs-4 padding-5">
-		<label class="display-block not-show">remove</label>
-		<button type="button" class="btn btn-xs btn-danger btn-block" onclick="clearImportDetail('<?php echo $doc->ref_code; ?>')">
-			ลบการนำเข้า
-		</button>
+	<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
+		<label>เลขที่เอกสาร</label>
+		<input type="text" class="form-control input-sm" value="<?php echo $doc->code; ?>" disabled />
 	</div>
-	<div class="col-sm-6 col-xs-12 padding-5">
-    <label>หมายเหตุ</label>
-    <input type="text" class="form-control input-sm edit" name="remark" id="remark" value="<?php echo $doc->remark; ?>" disabled>
-  </div>
-<?php else : ?>
-	<div class="col-sm-1 col-1-harf col-xs-12 padding-5 hidden-xs first">
-    <label>อ้างอิง</label>
-    <input type="text" class="form-control input-sm text-center" name="ref_code" id="ref_code" value="<?php echo $doc->ref_code; ?>" disabled>
-  </div>
-	<div class="col-sm-7 col-xs-12 padding-5">
-    <label>หมายเหตุ</label>
-    <input type="text" class="form-control input-sm edit" name="remark" id="remark" value="<?php echo $doc->remark; ?>" disabled>
-  </div>
-<?php endif; ?>
 
-  <div class="col-sm-1 col-xs-12 padding-5 last">
-    <label class="display-block not-show">Submit</label>
-  <?php if($this->pm->can_edit) : ?>
-    <button type="button" class="btn btn-xs btn-warning btn-block" id="btn-edit" onclick="getEdit()"></i class="fa fa-pencil"></i> แก้ไข</button>
-    <button type="button" class="btn btn-xs btn-success btn-block hide" id="btn-update" onclick="update()"><i class="fa fa-save"></i> บันทึก</button>
-  <?php endif; ?>
-  </div>
+	<div class="col-lg-1 col-md-1-harf col-sm-1-harf col-xs-6 padding-5">
+		<label>วันที่</label>
+		<input type="text" class="form-control input-sm text-center e" name="date_add" id="date" value="<?php echo thai_date($doc->date_add, FALSE); ?>" readonly disabled />
+	</div>
+
+	<div class="col-lg-1-harf col-md-2-harf col-sm-2-harf col-xs-6 padding-5">
+		<label>รหัสลูกค้า</label>
+		<input type="text" class="form-control input-sm e" name="customerCode" id="customerCode" value="<?php echo $doc->customer_code; ?>" disabled/>
+	</div>
+	<div class="col-lg-3-harf col-md-6 col-sm-6 col-xs-6 padding-5">
+		<label>ลูกค้า[ในระบบ]</label>
+		<input type="text" class="form-control input-sm e" name="customer" id="customer" value="<?php echo $doc->customer_name; ?>" disabled />
+	</div>
+
+	<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
+		<label>โซน</label>
+		<input type="text" class="form-control input-sm e" name="zone_code" id="zone_code" value="<?php echo $doc->zone_code; ?>" disabled/>
+	</div>
+	<div class="col-lg-3 col-md-4 col-sm-4 col-xs-6 padding-5">
+		<label>โซน[ฝากขาย]</label>
+		<input type="text" class="form-control input-sm e" name="zone" id="zone" value="<?php echo $doc->zone_name; ?>" disabled/>
+	</div>
+
+	<div class="col-lg-10-harf col-md-4-harf col-sm-4-harf col-xs-9 padding-5">
+		<label>หมายเหตุ</label>
+		<input type="text" class="form-control input-sm e" name="remark" id="remark" value="<?php echo $doc->remark; ?>" disabled>
+	</div>
+	<?php if($this->pm->can_add OR $this->pm->can_edit) : ?>
+		<div class="col-lg-1-harf col-md-1-harf col-sm-1-harf col-xs-3 padding-5">
+			<label class="display-block not-show">Submit</label>
+			<button type="button" class="btn btn-xs btn-warning btn-block" id="btn-edit" onclick="getEdit()"></i class="fa fa-pencil"></i> แก้ไข</button>
+	    <button type="button" class="btn btn-xs btn-success btn-block hide" id="btn-update" onclick="getUpdate()"><i class="fa fa-save"></i> บันทึก</button>
+		</div>
+	<?php endif; ?>
+
+	<input type="hidden" id="consign_code" value="<?php echo $doc->code; ?>">
+	<input type="hidden" id="customer_code" value="<?php echo $doc->customer_code; ?>">
+	<input type="hidden" id="auz" value="<?php echo $auz; ?>">
+	<input type="hidden" id="prev-customer-code" value="<?php echo $doc->customer_code; ?>" />
+	<input type="hidden" id="prev-customer-name" value="<?php echo $doc->customer_name; ?>" />
+	<input type="hidden" id="prev-zone-code" value="<?php echo $doc->zone_code; ?>" />
+	<input type="hidden" id="prev-zone-name" value="<?php echo $doc->zone_name; ?>" />
 </div>
+
 <hr class="margin-top-15">
-<input type="hidden" name="consign_code" id="consign_code" value="<?php echo $doc->code; ?>">
-<input type="hidden" name="customer_code" id="customer_code" value="<?php echo $doc->customer_code; ?>">
-<input type="hidden" name="zone_code" id="zone_code" value="<?php echo $doc->zone_code; ?>" >
-<input type="hidden" name="auz" id="auz" value="<?php echo $auz; ?>">
-</form>
+
+
 
 <?php $this->load->view('account/consign_order/consign_order_control'); ?>
 <?php $this->load->view('account/consign_order/consign_order_detail'); ?>

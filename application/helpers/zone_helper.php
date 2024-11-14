@@ -56,4 +56,23 @@ function select_sell_zone($se = NULL)
 }
 
 
+function select_consign_zone($se = NULL)
+{
+  $sc = "";
+  $ci =& get_instance();
+  $ci->load->model('masters/zone_model');
+  $options = $ci->zone_model->get_consign_zone();
+
+  if( ! empty($options))
+  {
+    foreach($options as $rs)
+    {
+      $sc .= '<option value="'.$rs->code.'" '.is_selected($se, $rs->code).'>'.$rs->code.' | '.$rs->name.'</option>';
+    }
+  }
+
+  return $sc;
+}
+
+
  ?>

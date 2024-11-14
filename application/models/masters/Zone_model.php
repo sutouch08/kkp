@@ -459,6 +459,26 @@ class Zone_model extends CI_Model
 		return NULL;
 	}
 
+
+  public function get_consign_zone()
+  {
+    $rs = $this->db
+    ->select('z.*')
+    ->from('zone AS z')
+    ->join('warehouse AS w', 'z.warehouse_code = w.code', 'left')
+    ->where('w.role', 2)
+    ->where('w.active', 1)
+    ->order_by('w.code', 'ASC')
+    ->order_by('z.name', 'ASC')
+    ->get();
+
+    if($rs->num_rows() > 0)
+    {
+      return $rs->result();
+    }
+
+    return NULL;
+  }
 } //--- end class
 
  ?>

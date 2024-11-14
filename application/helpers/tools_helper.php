@@ -273,6 +273,24 @@ function set_message($message)
 }
 
 
+function get_error_message($key, $name = "data")
+{
+	$error = array(
+		'insert' => "Insert {$name} failed.",
+		'update' => "Update {$name} failed.",
+		'delete' => "Delete {$name} failed.",
+		'permission' => "You don't have permission to perform this operation.",
+		'required' => "Missing required parameter.",
+		'exists' => "'{$name}' already exists.",
+		'status' => "Invalid document status",
+		'notfound' => "Document number not found",
+		'transection' => "Unable to delete {$name} because transections exists or link to other module."
+	);
+
+	return (!empty($error[$key]) ? $error[$key] : "Unknow error.");
+}
+
+
 
 function label($content)
 {

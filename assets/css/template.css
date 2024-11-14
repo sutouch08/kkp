@@ -1629,6 +1629,7 @@ input[type=number]::-webkit-outer-spin-button {
   width:100%;
   padding:0px;
   border:0px;
+  background-color:#ffffff00 !important;
 }
 
 
@@ -1947,7 +1948,7 @@ input[type=number]::-webkit-outer-spin-button {
 .tableFixHead {
   table-layout: fixed;
   min-width: 100%;
-  margin-top:-1px;  
+  margin-top:-1px;
   margin-right:0px;
   margin-bottom: 0;
 }

@@ -15,21 +15,21 @@
 
 <form id="searchForm" method="post" action="<?php echo current_url(); ?>">
 <div class="row">
-  <div class="col-sm-2 padding-5 first">
+  <div class="col-lg-2 col-md-2 col-sm-2 col-xs-6 padding-5">
     <label>รหัสสินค้า</label>
     <input type="text" class="form-control input-sm search" name="pd_code"  value="<?php echo $pd_code; ?>" />
   </div>
 
-  <div class="col-sm-2 padding-5">
+  <div class="col-lg-2 col-md-2 col-sm-2 col-xs-6 padding-5">
     <label>รหัสโซน</label>
     <input type="text" class="form-control input-sm search" name="zone_code" value="<?php echo $zone_code; ?>" />
   </div>
 
-  <div class="col-sm-1 padding-5">
+  <div class="col-lg-1 col-md-1 col-sm-1-harf col-xs-6 padding-5">
     <label class="display-block not-show">buton</label>
     <button type="submit" class="btn btn-xs btn-primary btn-block"><i class="fa fa-search"></i> ค้นหา</button>
   </div>
-	<div class="col-sm-1 padding-5 last">
+	<div class="col-lg-1 col-md-1 col-sm-1-harf col-xs-6 padding-5">
     <label class="display-block not-show">buton</label>
     <button type="button" class="btn btn-xs btn-warning btn-block" onclick="clearFilter()"><i class="fa fa-retweet"></i> เคลียร์</button>
   </div>
@@ -38,31 +38,37 @@
 </form>
 <?php echo $this->pagination->create_links(); ?>
 <div class="row">
-  <div class="col-sm-12">
-    <table class="table table-striped table-bordered">
+  <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5 table-responsive">
+    <table class="table table-striped table-bordered" style="min-width:840px;">
       <tr>
-        <th class="width-5 text-center">ลำดับ</th>
-        <th class="width-30">สินค้า</th>
-    		<th class="width-30">โซน</th>
-        <th class="width-8 text-center">คงเหลือ</th>
-        <th class="width-15 text-center">ปรับปรุง</th>
+        <th class="fix-width-40 text-center">#</th>
+        <th class="min-width-200">สินค้า</th>
+    		<th class="fix-width-200">โซน</th>
+        <th class="fix-width-100 text-center">ในโซน</th>
+				<th class="fix-width-100 text-center">Buffer</th>
+				<th class="fix-width-100 text-center">Cancel</th>
+				<th class="fix-width-100 text-center">รวม</th>
       </tr>
       <tbody>
     <?php if( !empty($data)) : ?>
     <?php $no = $this->uri->segment(4) + 1; ?>
     <?php foreach($data as $rs) : ?>
+			<?php $bQty = get_buffer_qty_by_product_and_zone($rs->product_code, $rs->zone_code); ?>
+			<?php $cQty = get_cancle_qty_by_product_and_zone($rs->product_code, $rs->zone_code); ?>
       <tr class="font-size-12">
         <td class="text-center"><?php echo $no; ?></td>
         <td><?php echo $rs->product_code; ?> -- <?php echo $rs->product_name; ?></td>
-    		<td class=""><?php echo $rs->name; ?></td>
+    		<td class=""><?php echo $rs->zone_name; ?></td>
         <td class="text-center"> <?php echo number($rs->qty); ?></td>
-    		<td class="text-center"><?php echo thai_date($rs->date_upd, TRUE); ?></td>
+    		<td class="text-center"> <?php echo number($bQty); ?></td>
+				<td class="text-center"> <?php echo number($cQty); ?></td>
+				<td class="text-center"> <?php echo number($rs->qty + $bQty + $cQty); ?></td>
       </tr>
     <?php  $no++; ?>
     <?php endforeach; ?>
     <?php else : ?>
       <tr>
-        <td colspan="5" class="text-center">--- ไม่พบข้อมูล ---</td>
+        <td colspan="7" class="text-center">--- ไม่พบข้อมูล ---</td>
       </tr>
     <?php endif; ?>
       </tbody>

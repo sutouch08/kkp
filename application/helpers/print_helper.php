@@ -141,7 +141,7 @@ function barcodeImage($barcode, $height = 8)
 
 function inputRow($text, $style='')
 {
-  return '<input type="text" class="print-row" value="'.$text.'" style="'.$style.'" />';
+  return '<input type="text" class="print-row" value="'.$text.'" style="'.$style.'" disabled/>';
 }
 
 

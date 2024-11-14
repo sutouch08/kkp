@@ -15,7 +15,7 @@ class stock_model extends CI_Model
       if(!empty($ds['pd_code']) OR !empty($ds['zone_code']))
       {
         $this->db
-        ->select('st.*, pd.name AS product_name, zone.name')
+        ->select('st.*, pd.name AS product_name, zone.code AS zone_code, zone.name AS zone_name')
         ->from('stock AS st')
 				->join('products AS pd', 'st.product_code = pd.code', 'left')
         ->join('zone', 'st.zone_code = zone.code', 'left');

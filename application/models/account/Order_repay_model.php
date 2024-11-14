@@ -109,6 +109,14 @@ class Order_repay_model extends CI_Model
   }
 
 
+  //---- สำหรับเช็คว่าเอกสารมีการรับชำระไปแล้วหรือยัง
+  public function is_exists_reference($reference)
+  {
+    $count = $this->db->where('reference', $reference)->where('valid !=', 2)->count_all_results('order_repay_detail');
+
+    return $count > 0 ? TRUE : FALSE;
+  }
+
 
   public function get_exclude_order($repay_code)
   {
