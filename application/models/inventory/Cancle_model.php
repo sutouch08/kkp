@@ -110,6 +110,25 @@ class Cancle_model extends CI_Model
   }
 
 
+  public function get_sum_product($product_code, $warehouse_code = NULL)
+  {
+    $this->db->select_sum('qty')->where('product_code', $product_code);
+
+    if( ! empty($warehouse_code))
+    {
+      $this->db->where('warehouse_code', $warehouse_code);
+    }
+
+    $rs = $this->db->get('cancle');
+
+    if($rs->num_rows() === 1)
+    {
+      return $rs->row()->qty;
+    }
+
+    return 0;
+  }
+
 
   public function get_sum_cancle_product($order_code, $product_code)
   {

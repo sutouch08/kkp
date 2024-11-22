@@ -835,14 +835,32 @@ class Orders_model extends CI_Model
 
 
 
-  public function get_reserv_stock($item_code)
+  public function get_reserv_stock($item_code, $warehouse_code = NULL)
   {
-    $rs = $this->db->select_sum('qty')
-    ->where('product_code', $item_code)
-    ->where('is_complete', 0)
-    ->where('is_expired', 0)
-    ->where('is_count', 1)
-    ->get('order_details');
+    if( ! empty($warehouse_code))
+    {
+      $rs = $this->db
+      ->select_sum('od.qty')
+      ->from('order_details AS od')
+      ->join('orders AS o', 'od.order_code = o.code', 'left')
+      ->where('od.product_code', $item_code)
+      ->where('od.is_cancle', 0)
+      ->where('od.is_complete', 0)
+      ->where('od.is_expired', 0)
+      ->where('od.is_count', 1)
+      ->where('o.warehouse_code', $warehouse_code)
+      ->get();
+    }
+    else
+    {
+      $rs = $this->db->select_sum('qty')
+      ->where('product_code', $item_code)
+      ->where('is_cancle', 0)
+      ->where('is_complete', 0)
+      ->where('is_expired', 0)
+      ->where('is_count', 1)
+      ->get('order_details');
+    }
 
     if($rs->num_rows() == 1)
     {

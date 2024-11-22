@@ -80,9 +80,10 @@ $delete = $this->pm->can_delete;
 <hr class="margin-top-15 margin-bottom-0 padding-5" />
 
 <?php
-
-$this->load->view('orders/order_tab_menu');
-
+if(getConfig('USE_PRODUCT_TAB'))
+{
+  $this->load->view('orders/order_tab_menu');
+}
 ?>
 
 <?php $this->load->view('orders/order_detail');  ?>

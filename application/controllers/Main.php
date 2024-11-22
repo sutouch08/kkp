@@ -43,14 +43,18 @@ class Main extends PS_Controller
     if(!empty($txt))
     {
 
-      $limit = 100; //--- limit result
+      $limit = 1000; //--- limit result
       $list = $this->main_model->get_search_order($txt, $warehouse, $limit);
 
-      if(!empty($list))
+      if( ! empty($list))
       {
+				$no = 1;
+				$total = 0;
+
         foreach($list as $rs)
         {
           $arr = array(
+						'no' => number($no),
             'pdCode' => $rs->product_code,
             'reference' => $rs->code,
             'qty' => number($rs->qty),
@@ -60,7 +64,15 @@ class Main extends PS_Controller
           );
 
           array_push($sc, $arr);
+					$total += $rs->qty;
+					$no++;
         }
+
+				$arr = array(
+					'total' => number($total)
+				);
+
+				array_push($sc, $arr);
       }
       else
       {

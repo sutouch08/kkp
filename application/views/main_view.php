@@ -36,35 +36,45 @@
 <table class="table table-bordered border-1">
 	<thead>
 		<tr class="font-size-12">
-			<th class="width-20">รหัสสินค้า</th>
-			<th class="width-15 text-center">เลขที่ออเดอร์</th>
-			<th class="width-10 text-center">จำนวน</th>
-			<th class="width-10 text-center">สถานะ</th>
-			<th class="width-30 text-center">ลูกค้า</th>
-			<th class="width-15 text-center">พนักงาน</th>
+			<th class="fix-width-60 text-center">#</th>
+			<th class="fix-width-200">รหัสสินค้า</th>
+			<th class="fix-width-150 text-center">เลขที่ออเดอร์</th>
+			<th class="fix-width-100 text-center">จำนวน</th>
+			<th class="fix-width-100 text-center">สถานะ</th>
+			<th class="min-width-200 text-center">ลูกค้า</th>
+			<th class="fix-width-200 text-center">พนักงาน</th>
 		</tr>
 	</thead>
 	<tbody>
 		{{#each this}}
 			{{#if nodata}}
 				<tr>
-					<td colspan="6" class="text-center">ไม่พบข้อมูล</td>
+					<td colspan="7" class="text-center">ไม่พบข้อมูล</td>
 				</tr>
 			{{else}}
+				{{#if @last}}
 				<tr class="font-size-12">
-					<td class="middle">
-          {{#if oldCode}}
-            {{oldCode}} |
-          {{/if}}
-
-          {{ pdCode }}
-          </td>
-					<td class="middle text-center">{{ reference }}</td>
-					<td class="middle text-center">{{ qty }}</td>
-					<td class="middle text-center">{{ state }}</td>
-					<td class="middle">{{ cusName }}</td>
-					<td class="middle">{{ empName }}</td>
+					<td colspan="3" class="text-right">รวม</td>
+					<td class="middle text-center">{{ total }}</td>
+					<td colspan="3" class="middle"></td>
 				</tr>
+				{{else}}
+					<tr class="font-size-12">
+						<td class="text-center">{{no}}</td>
+						<td class="middle">
+	          {{#if oldCode}}
+	            {{oldCode}} |
+	          {{/if}}
+
+	          {{ pdCode }}
+	          </td>
+						<td class="middle text-center">{{ reference }}</td>
+						<td class="middle text-center">{{ qty }}</td>
+						<td class="middle text-center">{{ state }}</td>
+						<td class="middle">{{ cusName }}</td>
+						<td class="middle">{{ empName }}</td>
+					</tr>
+				{{/if}}
 			{{/if}}
 		{{/each}}
 	</tbody>

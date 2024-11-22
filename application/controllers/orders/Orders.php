@@ -14,15 +14,17 @@ class Orders extends PS_Controller
     parent::__construct();
     $this->home = base_url().'orders/orders';
     $this->load->model('orders/orders_model');
+    $this->load->model('orders/order_state_model');
+    $this->load->model('orders/discount_model');
     $this->load->model('masters/channels_model');
     $this->load->model('masters/payment_methods_model');
     $this->load->model('masters/customers_model');
-    $this->load->model('orders/order_state_model');
     $this->load->model('masters/product_tab_model');
-    $this->load->model('stock/stock_model');
     $this->load->model('masters/product_style_model');
     $this->load->model('masters/products_model');
-    $this->load->model('orders/discount_model');
+    $this->load->model('stock/stock_model');
+    $this->load->model('inventory/buffer_model');
+    $this->load->model('inventory/cancle_model');
 
     $this->load->helper('order');
     $this->load->helper('channels');
@@ -1885,12 +1887,14 @@ class Orders extends PS_Controller
     $this->load->view('print/print_order_sheet', $ds);
   }
 
-  public function get_sell_stock($item_code)
+  public function get_sell_stock($item_code, $warehouse_code = NULL)
   {
     $auz = getConfig('ALLOW_UNDER_ZERO') == 1 ? TRUE : FALSE;
-    $sell_stock = $this->stock_model->get_sell_stock($item_code);
-    $reserv_stock = $this->orders_model->get_reserv_stock($item_code);
-    $availableStock = $sell_stock - $reserv_stock;
+    $sell_stock = $this->stock_model->get_sell_stock($item_code, $warehouse_code);
+    $reserv_stock = $this->orders_model->get_reserv_stock($item_code, $warehouse_code);
+    $buffer = $this->buffer_model->get_sum_product($item_code, $warehouse_code);
+    $cancle = $this->cancle_model->get_sum_product($item_code, $warehouse_code);
+    $availableStock = ($sell_stock + $buffer + $cancle) - $reserv_stock;
 		return $auz === TRUE ? $availableStock : ($availableStock < 0 ? 0 : $availableStock);
   }
 
@@ -2413,7 +2417,7 @@ class Orders extends PS_Controller
           if($sc === TRUE && $order->state == 8)
           {
             $this->load->model('account/order_credit_model');
-            
+
             if($state < 8)
             {
               if( ! $this->roll_back_action($order))

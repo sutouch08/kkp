@@ -195,16 +195,22 @@ class stock_model extends CI_Model
 
 
   //---- ยอดรวมสินค้าในคลังที่สั่งได้ ยอดในโซน
-  public function get_sell_stock($item)
+  public function get_sell_stock($item, $warehouse_code = NULL)
   {
-    $rs = $this->db
+    $this->db
     ->select_sum('qty', 'qty')
     ->from('stock')
     ->join('zone', 'zone.code = stock.zone_code', 'left')
     ->join('warehouse', 'warehouse.code = zone.warehouse_code', 'left')
     ->where('stock.product_code', $item)
-    ->where('warehouse.sell', 1)
-    ->get();
+    ->where('warehouse.sell', 1);
+
+    if( ! empty($warehouse_code))
+    {
+      $this->db->where('zone.warehouse_code', $warehouse_code);
+    }
+
+    $rs = $this->db->get();  
 
     return $rs->row()->qty === NULL ? 0 : $rs->row()->qty;
   }

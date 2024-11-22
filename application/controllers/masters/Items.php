@@ -290,7 +290,7 @@ class Items extends PS_Controller
       'is_api' => is_null($api) ? 0 : 1,
       'update_user' => $user
     );
-
+    
     if($this->products_model->update($code, $arr))
     {
       $this->product_tab_model->updateTabsItem($code, $tabs);
