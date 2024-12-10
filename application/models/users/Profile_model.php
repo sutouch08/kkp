@@ -74,6 +74,8 @@ class Profile_model extends CI_Model
 
 	public function get_list(array $ds = array(), $perpage = 20, $offset = 0)
 	{
+    $this->db->where('id >', 0);
+    
 		if(!empty($ds['name']) && $ds['name'] != "")
 		{
 			$this->db->like('name', $ds['name']);
@@ -92,7 +94,7 @@ class Profile_model extends CI_Model
 
   public function get_profiles()
   {
-		$rs = $this->db->order_by('name', 'ASC')->get('profile');
+		$rs = $this->db->where('id >', 0)->order_by('name', 'ASC')->get('profile');
 
 		if($rs->num_rows() > 0)
 		{
@@ -111,7 +113,7 @@ class Profile_model extends CI_Model
 			$this->db->like('name', $ds['name']);
 		}
 
-		return $this->db->count_all_results('profile');
+		return $this->db->where('id >', 0)->count_all_results('profile');
 	}
 
 

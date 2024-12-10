@@ -24,7 +24,7 @@
     $this->load->view('inventory/delivery_order/bill_confirm_detail');
   }
   else if( $order->state == 8)
-  {
+  {    
     $this->load->view('inventory/delivery_order/bill_closed_detail');
   }
   else
@@ -33,6 +33,6 @@
   }
 ?>
 
-<script src="<?php echo base_url(); ?>scripts/inventory/bill/bill.js"></script>
-<script src="<?php echo base_url(); ?>scripts/inventory/bill/bill_detail.js"></script>
+<script src="<?php echo base_url(); ?>scripts/inventory/bill/bill.js?v=<?php echo date('Ymd'); ?>"></script>
+<script src="<?php echo base_url(); ?>scripts/inventory/bill/bill_detail.js?v=<?php echo date('Ymd'); ?>"></script>
 <?php $this->load->view('include/footer'); ?>

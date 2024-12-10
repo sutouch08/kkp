@@ -1,7 +1,7 @@
 <?php
-$pm = get_permission('SOREST', get_cookie('uid'), get_cookie('id_profile')); //--- ย้อนสถานะออเดอร์ได้หรือไม่
-$px	= get_permission('SORECT', get_cookie('uid'), get_cookie('id_profile')); //--- ย้อนสถานะออเดอร์ที่เปิดบิลแล้วได้หรือไม่
-$pc = get_permission('SOREUP', get_cookie('uid'), get_cookie('id_profile')); //--- ปล่อยออเดอร์ที่ยังไม่ชำระเงิน (เงินสด)
+$pm = get_permission('SOREST', $this->_user->uid, $this->_user->id_profile); //--- ย้อนสถานะออเดอร์ได้หรือไม่
+$px	= get_permission('SORECT', $this->_user->uid, $this->_user->id_profile); //--- ย้อนสถานะออเดอร์ที่เปิดบิลแล้วได้หรือไม่
+$pc = get_permission('SOREUP', $this->_user->uid, $this->_user->id_profile); //--- ปล่อยออเดอร์ที่ยังไม่ชำระเงิน (เงินสด)
 $canChange	= ($pm->can_add + $pm->can_edit + $pm->can_delete) > 0 ? TRUE : FALSE;
 $canUnbill	= ($px->can_add + $px->can_edit + $px->can_delete) > 0 ? TRUE : FALSE;
 $canSkip = ($pc->can_add + $pc->can_edit + $pc->can_delete) > 0 ? TRUE : FALSE;
@@ -19,28 +19,35 @@ $canSkip = ($pc->can_add + $pc->can_edit + $pc->can_delete) > 0 ? TRUE : FALSE;
 							<?php if($order->status == 0) : ?>
 								<option value="0">กรุณาบันทึกออเดอร์</option>
 							<?php else : ?>
-								<option value="0">เลือกสถานะ</option>
+								<?php if($order->role == 'P' && $order->is_approved == 0) : ?>
+									<option value="0">รออนุมัติ</option>
+								<?php else : ?>
+									<option value="0">เลือกสถานะ</option>
+								<?php endif; ?>
 							<?php endif; ?>
 
 							<?php if( $order->state != 9 && $order->is_expired == 0 && $order->status == 1) : ?>
 								<?php if( $order->state <=3 && $canChange) : ?>
-									<?php if($order->state != 1): ?>
-										<option value="1">รอดำเนินการ</option>
-									<?php endif; ?>
-									<?php if($order->role == 'S' && $order->state != 2 && $order->is_term == 0) : ?>
-										<option value="2">รอชำระเงิน</option>
-									<?php endif; ?>
-									<?php if($order->state != 3) : ?>
-										<?php if($order->role == 'S' && ($order->is_paid == 1 OR $order->is_term == 1 OR $order->payment_role == 4 OR $canSkip)) : ?>
-											<option value="3">รอจัดสินค้า</option>
+										<?php if($order->state != 1): ?>
+													<option value="1">รอดำเนินการ</option>
 										<?php endif; ?>
-										<?php if($order->role != 'S') : ?>
-											<option value="3">รอจัดสินค้า</option>
+										<?php if($order->role == 'S' && $order->state != 2 && $order->is_term == 0) : ?>
+													<option value="2">รอชำระเงิน</option>
 										<?php endif; ?>
-									<?php endif; ?>
+
+										<?php if($order->state != 3) : ?>
+											<?php if($order->role == 'S' && ($order->is_paid == 1 OR $order->is_term == 1 OR $order->payment_role == 4 OR $canSkip)) : ?>
+												<option value="3">รอจัดสินค้า</option>
+											<?php endif; ?>
+											<?php if($order->role != 'S' && ($order->role != 'P' OR $order->is_approved == 1)) : ?>
+												<option value="3">รอจัดสินค้า</option>
+											<?php endif; ?>
+										<?php endif; ?>
+
 									<?php if(getConfig('DEFAULT_ZONE') != "" && getConfig('USE_PREPARE') == 0) : ?>
 										<option value="7">รอเปิดบิล</option>
 									<?php endif; ?>
+
 								<?php elseif($order->state > 3 && $order->state < 8 && $canChange ) : ?>
 									<option value="1">รอดำเนินการ</option>
 									<?php if($order->role == 'S') : ?>

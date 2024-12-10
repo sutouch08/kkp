@@ -6,6 +6,7 @@
   $service_edit = $order->service_fee > 0 ? '' : 'hide';
   $service_update = $order->service_fee > 0 ? 'hide' : '';
 ?>
+<?php if($order->role == 'S') : ?>
 <div class="row">
   <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5" style="padding-top:10px;">
   <?php echo paymentLabel($payments); ?>
@@ -21,6 +22,7 @@
   </div>
 </div>
 <hr class="padding-5" />
+<?php endif; ?>
 <div class="row">
   <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5">
     <div class="tabable">

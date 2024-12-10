@@ -3,21 +3,20 @@
 	$edit = $this->pm->can_edit;
 	$delete = $this->pm->can_delete;
 	?>
-
 <div class="row">
 	<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5 table-responsive">
-		<table class="table table-striped border-1" style="min-width:1000px;">
+		<table class="table table-striped border-1" style="min-width:910px;">
 			<thead>
 				<tr class="font-size-12">
-					<th class="fix-width-50 text-center">#</th>
-					<th class="fix-width-50 text-center"></th>
+					<th class="fix-width-40 text-center">No.</th>
+					<th class="fix-width-60 text-center"></th>
 					<th class="fix-width-150">รหัสสินค้า</th>
-					<th class="min-width-250">ชื่อสินค้า</th>
+					<th class="min-width-200">ชื่อสินค้า</th>
 					<th class="fix-width-100 text-center">ราคา</th>
 					<th class="fix-width-100 text-center">จำนวน</th>
 					<th class="fix-width-100 text-center">GP</th>
-					<th class="fix-width-150 text-right">มูลค่า</th>
-					<th class="fix-width-50 text-center"></th>
+					<th class="fix-width-120 text-right">มูลค่า</th>
+					<th class="fix-width-40 text-center"></th>
 				</tr>
 			</thead>
 			<tbody id="detail-table">
@@ -28,8 +27,8 @@
 				<?php   $order_amount = 0;    ?>
 				<?php if(!empty($details)) : ?>
 					<?php   foreach($details as $rs) : ?>
-						<?php 	$discount = $order->role == 'C' ? $rs->gp : discountLabel($rs->discount1, $rs->discount2, $rs->discount3); ?>
-						<?php 	$discLabel = $order->role == 'C' ? $rs->gp .' %' : discountLabel($rs->discount1, $rs->discount2, $rs->discount3); ?>
+						<?php 	$discount = discountLabel($rs->discount1, $rs->discount2, $rs->discount3); ?>
+						<?php 	$discLabel = discountLabel($rs->discount1, $rs->discount2, $rs->discount3); ?>
 						<tr class="font-size-10" id="row_<?php echo $rs->id; ?>">
 							<td class="middle text-center no">
 								<?php echo $no; ?>
@@ -39,73 +38,19 @@
 								<img src="<?php echo get_product_image($rs->product_code, 'mini'); ?>" width="40px" height="40px"  />
 							</td>
 
-							<td class="middle pd-code" id="pd-code-<?php echo $rs->id; ?>" data-id="<?php echo $rs->id; ?>">
-								<?php echo $rs->product_code; ?>
-							</td>
+							<td class="middle"><?php echo $rs->product_code; ?></td>
 
-							<td class="middle">
-								<?php echo $rs->product_name; ?>
-							</td>
+							<td class="middle"><?php echo $rs->product_name; ?></td>
 
-							<td class="middle text-center">
-								<input type="number"
-								class="form-control input-sm text-right price-box digit"
-								id="price_<?php echo $rs->id; ?>"
-								name="price[<?php echo $rs->id; ?>]"
-								data-id="<?php echo $rs->id; ?>"
-								value="<?php echo $rs->price; ?>"
-								onkeyup="recal(<?php echo $rs->id; ?>)"
-								onchange="update_detail(<?php echo $rs->id; ?>)"
-								/>
-							</td>
+							<td class="middle text-center"><?php echo number($rs->price, 2); ?></td>
 
-							<td class="middle text-center">
-								<input type="number"
-								class="form-control input-sm text-right qty-box digit"
-								id="qty_<?php echo $rs->id; ?>"
-								data-id="<?php echo $rs->id; ?>"
-								name="qty[<?php echo $rs->id; ?>]"
-								data-id="<?php echo $rs->id; ?>"
-								value="<?php echo $rs->qty; ?>"
-								onkeyup="recal(<?php echo $rs->id; ?>)"
-								onchange="update_detail(<?php echo $rs->id; ?>)"
-								/>
-								<input type="hidden" id="current_qty_<?php echo $rs->id; ?>" value="<?php echo $rs->qty; ?>" />
-							</td>
+							<td class="middle text-center"><?php echo number($rs->qty, 2); ?></td>
 
-							<td class="middle text-center">
-								<input type="text"
-								class="form-control input-sm text-center discount-box row-disc"
-								id="disc_<?php echo $rs->id; ?>"
-								name="disc[<?php echo $rs->id; ?>]"
-								data-id="<?php echo $rs->id; ?>"
-								value="<?php echo $discount; ?>"
-								onkeyup="recal(<?php echo $rs->id; ?>)"
-								onchange="update_detail(<?php echo $rs->id; ?>)"
-								/>
-							</td>
+							<td class="middle text-center"><?php echo $discount; ?></td>
 
-							<td class="middle text-right">
-								<input type="number"
-								class="form-control input-sm text-right line-total digit"
-								id="line_total_<?php echo $rs->id; ?>"
-								data-id="<?php echo $rs->id; ?>"
-								name="line_total[<?php echo $rs->id; ?>]"
-								data-id="<?php echo $rs->id; ?>"
-								value = "<?php echo $rs->total_amount; ?>"
-								onkeyup="recalDiscount(<?php echo $rs->id; ?>)"
-								onchange="update_detail(<?php echo $rs->id; ?>)"
-								/>
-							</td>
+							<td class="middle text-right"><?php echo number($rs->total_amount, 2); ?></td>
 
-							<td class="middle text-right">
-								<?php if( ( $order->is_paid == 0 && $order->state != 2 && $order->is_expired == 0 ) && ($edit OR $add) && $order->state < 4 ) : ?>
-									<button type="button"
-									class="btn btn-mini btn-danger"
-									onclick="removeDetail(<?php echo $rs->id; ?>, '<?php echo $rs->product_code; ?>')">
-									<i class="fa fa-trash"></i></button>
-								<?php endif; ?>
-							</td>
+							<td class="middle text-right"></td>
 						</tr>
 
 						<?php			$total_qty += $rs->qty;	?>
@@ -163,9 +108,12 @@
 				</tr>
 
 			</tbody>
-		</table>
+		</table>	
 	</div>
 </div>
+<!--  End Order Detail ----------------->
+<!--</form> -->
+<!-- order detail template ------>
 <script id="detail-table-template" type="text/x-handlebars-template">
 {{#each this}}
 	{{#if @last}}

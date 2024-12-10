@@ -746,29 +746,36 @@ public function get_active_item_code_and_name()
 
   public function get_sponsor()
   {
-    $sc = array();
-    $txt = $_REQUEST['term'];
-    $this->ms->select('BpCode, BpName');
+    $ds = array();
+    $txt = trim($_REQUEST['term']);
+
+    $this->db
+    ->select('cs.code, cs.name')
+    ->from('sponsor AS sp')
+    ->join('customers AS cs', 'sp.customer_code = cs.code', 'left')
+    ->where('sp.active', 1);
 
     if($txt != '*')
     {
-      $this->ms->like('BpCode', $txt)->or_like('BpName', $txt);
+      $this->db
+      ->group_start()
+      ->like('cs.code', $txt)
+      ->or_like('cs.name', $txt)
+      ->group_end();
     }
 
-    $this->ms->limit(20);
+    $sp = $this->db->order_by('cs.name', 'DESC')->limit(50)->get();
 
-    $sponsor = $this->ms->get('OOAT');
-
-    if($sponsor->num_rows() > 0)
+    if($sp->num_rows() > 0)
     {
-      foreach($sponsor->result() as $rs)
+      foreach($sp->result() as $rs)
       {
-        $sc[] = $rs->BpCode.' | '.$rs->BpName;
+        $sc[] = $rs->code.' | '.$rs->name;
       }
     }
     else
     {
-      $sc[] = 'ไม่พบรายการ';
+      $sc[] = 'notfound';
     }
 
     echo json_encode($sc);

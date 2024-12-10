@@ -1,61 +1,59 @@
 <?php $this->load->view('include/header'); ?>
 <div class="row">
-	<div class="col-sm-6">
-    <h3 class="title">
-    <?php echo $this->title; ?>
-    </h3>
-    </div>
-    <div class="col-sm-6">
-    	<p class="pull-right top-p">
-      <?php if($this->pm->can_add) : ?>
-        <button type="button" class="btn btn-sm btn-success" onclick="addNew()"><i class="fa fa-plus"></i> เพิมใหม่</button>
-      <?php endif; ?>
-      </p>
-    </div>
+	<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 padding-5">
+		<h4 class="title"><?php echo $this->title; ?> </h4>
+	</div>
+	<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 padding-5">
+		<p class="pull-right top-p">
+			<?php if($this->pm->can_add) : ?>
+				<button type="button" class="btn btn-sm btn-success" onclick="addNew()"><i class="fa fa-plus"></i> เพิมใหม่</button>
+			<?php endif; ?>
+		</p>
+	</div>
 </div><!-- End Row -->
 <hr class=""/>
 <form id="searchForm" method="post" action="<?php echo current_url(); ?>">
-<div class="row">
-  <div class="col-sm-2 padding-5 first">
-    <label>เลขที่เอกสาร</label>
-    <input type="text" class="form-control input-sm search" name="code"  value="<?php echo $code; ?>" />
-  </div>
+	<div class="row">
+		<div class="col-lg-2 col-md-2 col-sm-2 col-xs-6 padding-5">
+			<label>เลขที่เอกสาร</label>
+			<input type="text" class="form-control input-sm search" name="code"  value="<?php echo $code; ?>" />
+		</div>
 
-  <div class="col-sm-2 padding-5">
-    <label>ผู้เบิก</label>
-    <input type="text" class="form-control input-sm search" name="customer" value="<?php echo $customer; ?>" />
-  </div>
+		<div class="col-lg-2 col-md-2 col-sm-2 col-xs-6 padding-5">
+			<label>ผู้เบิก</label>
+			<input type="text" class="form-control input-sm search" name="customer" value="<?php echo $customer; ?>" />
+		</div>
 
-	<div class="col-sm-2 padding-5">
-    <label>ผู้รับสินค้า</label>
-    <input type="text" class="form-control input-sm search" name="user_ref" value="<?php echo $user_ref; ?>" />
-  </div>
+		<div class="col-lg-2 col-md-2 col-sm-2 col-xs-6 padding-5">
+			<label>ผู้รับสินค้า</label>
+			<input type="text" class="form-control input-sm search" name="user_ref" value="<?php echo $user_ref; ?>" />
+		</div>
 
-	<div class="col-sm-2 padding-5">
-    <label>พนักงาน</label>
-    <input type="text" class="form-control input-sm search" name="user" value="<?php echo $user; ?>" />
-  </div>
+		<div class="col-lg-2 col-md-2 col-sm-2 col-xs-6 padding-5">
+			<label>พนักงาน</label>
+			<input type="text" class="form-control input-sm search" name="user" value="<?php echo $user; ?>" />
+		</div>
 
-	<div class="col-sm-2 padding-5">
-    <label>วันที่</label>
-    <div class="input-daterange input-group">
-      <input type="text" class="form-control input-sm width-50 from-date" name="fromDate" id="fromDate" value="<?php echo $from_date; ?>" />
-      <input type="text" class="form-control input-sm width-50" name="toDate" id="toDate" value="<?php echo $to_date; ?>" />
-    </div>
+		<div class="col-lg-2 col-md-2 col-sm-2 col-xs-6 padding-5">
+			<label>วันที่</label>
+			<div class="input-daterange input-group">
+				<input type="text" class="form-control input-sm width-50 from-date" name="fromDate" id="fromDate" value="<?php echo $from_date; ?>" />
+				<input type="text" class="form-control input-sm width-50" name="toDate" id="toDate" value="<?php echo $to_date; ?>" />
+			</div>
 
-  </div>
+		</div>
 
-  <div class="col-sm-1 padding-5">
-    <label class="display-block not-show">buton</label>
-    <button type="submit" class="btn btn-xs btn-primary btn-block"><i class="fa fa-search"></i> Search</button>
-  </div>
-	<div class="col-sm-1 padding-5 last">
-    <label class="display-block not-show">buton</label>
-    <button type="button" class="btn btn-xs btn-warning btn-block" onclick="clearFilter()"><i class="fa fa-retweet"></i> Reset</button>
-  </div>
-</div>
-<hr class="margin-top-15">
+		<div class="col-sm-1 padding-5">
+			<label class="display-block not-show">buton</label>
+			<button type="submit" class="btn btn-xs btn-primary btn-block"><i class="fa fa-search"></i> Search</button>
+		</div>
+		<div class="col-sm-1 padding-5 last">
+			<label class="display-block not-show">buton</label>
+			<button type="button" class="btn btn-xs btn-warning btn-block" onclick="clearFilter()"><i class="fa fa-retweet"></i> Reset</button>
+		</div>
+	</div>
 </form>
+<hr class="margin-top-15">
 <?php echo $this->pagination->create_links(); ?>
 <div class="row">
 	<div class="col-sm-12">

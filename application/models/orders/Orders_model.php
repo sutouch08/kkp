@@ -80,9 +80,6 @@ class Orders_model extends CI_Model
   }
 
 
-
-
-
   public function get($code)
   {
 		$rs = $this->db
@@ -421,320 +418,292 @@ class Orders_model extends CI_Model
   }
 
 
+  public function update_approver($code, $user)
+  {
+    return $this->db
+    ->set('approver', $user)
+    ->set('approve_date', now())
+    ->set('is_approved', 1)
+    ->where('code', $code)
+    ->update('orders');
+  }
+
+
+  public function un_approver($code, $user)
+  {
+    return $this->db
+    ->set('approver', NULL)
+    ->set('approve_date', now())
+    ->set('is_approved', 0)
+    ->where('code', $code)
+    ->update('orders');
+  }
+  
+
 	public function count_rows(array $ds = array(), $role = 'S')
 	{
-		$this->db
-		->from('orders')
-		->join('customers', 'orders.customer_code = customers.code', 'left')
-		->join('zone', 'orders.zone_code = zone.code', 'left')
-		->join('user', 'orders.user = user.uname', 'left');
-
-		$this->db->where('role', $role);
+    $this->db->where('role', $role);
 
 		//---- เลขที่เอกสาร
 		if( ! empty($ds['code']))
 		{
-			$this->db->like('orders.code', $ds['code']);
+			$this->db->like('code', $ds['code']);
 		}
 
 		//--- รหัส/ชื่อ ลูกค้า
 		if( ! empty($ds['customer']))
 		{
-			$this->db->group_start();
-			$this->db->like('customers.code', $ds['customer']);
-			$this->db->or_like('customers.name', $ds['customer']);
-			$this->db->or_like('orders.customer_ref', $ds['customer']);
-			$this->db->group_end();
+			$this->db
+      ->group_start()
+			->like('customer_code', $ds['customer'])
+			->or_like('customer_name', $ds['customer'])
+			->or_like('customer_ref', $ds['customer'])
+			->group_end();
 		}
 
 		//---- user name / display name
-		if( ! empty($ds['user']))
+		if( isset($ds['user']) && $ds['user'] != 'all')
 		{
-			$this->db->group_start();
-			$this->db->like('user.uname', $ds['user']);
-			$this->db->or_like('user.name', $ds['user']);
-			$this->db->group_end();
+			$this->db->where('user', $ds['user']);
 		}
 
 		//---- เลขที่อ้างอิงออเดอร์ภายนอก
 		if( ! empty($ds['reference']))
 		{
-			$this->db->like('orders.reference', $ds['reference']);
+			$this->db->like('reference', $ds['reference']);
 		}
 
 		//---เลขที่จัดส่ง
 		if( ! empty($ds['ship_code']))
 		{
-			$this->db->like('orders.shipping_code', $ds['ship_code']);
+			$this->db->like('shipping_code', $ds['ship_code']);
 		}
 
 		//--- ช่องทางการขาย
 		if( ! empty($ds['channels']))
 		{
-			$this->db->where('orders.channels_code', $ds['channels']);
+			$this->db->where('channels_code', $ds['channels']);
 		}
 
 		//--- ช่องทางการชำระเงิน
 		if( ! empty($ds['payment']))
 		{
-			$this->db->where('orders.payment_code', $ds['payment']);
+			$this->db->where('payment_code', $ds['payment']);
 		}
 
+    if(isset($ds['zone_code']) && $ds['zone_code'] != 'all')
+    {
+      $this->db->where('zone_code', $ds['zone_code']);
+    }
 
-		if( ! empty($ds['zone_code']))
+		if( ! empty($ds['user_ref']))
 		{
-			$this->db->group_start();
-			$this->db->like('zone.code', $ds['zone_code']);
-			$this->db->or_like('zone.name', $ds['zone_code']);
-			$this->db->group_end();
+			$this->db->like('user_ref', $ds['user_ref']);
 		}
 
-		if( !empty($ds['user_ref']))
+		if( ! empty($ds['empName']))
 		{
-			$this->db->like('orders.user_ref', $ds['user_ref']);
-		}
-
-		if(!empty($ds['empName']))
-		{
-			$this->db->like('orders.empName', $ds['empName']);
+			$this->db->like('empName', $ds['empName']);
 		}
 
 		if( ! empty($ds['from_date']) && ! empty($ds['to_date']))
 		{
-			$this->db->where('orders.date_add >=', from_date($ds['from_date']));
-			$this->db->where('orders.date_add <=', to_date($ds['to_date']));
+			$this->db->where('date_add >=', from_date($ds['from_date']));
+			$this->db->where('date_add <=', to_date($ds['to_date']));
 		}
 
 		if(!empty($ds['warehouse']))
 		{
-			$this->db->where('orders.warehouse_code', $ds['warehouse']);
+			$this->db->where('warehouse_code', $ds['warehouse']);
 		}
 
-		if(!empty($ds['notSave']))
+		if( ! empty($ds['notSave']))
 		{
-			$this->db->where('orders.status', 0);
+			$this->db->where('status', 0);
 		}
 		else
 		{
-			if(isset($ds['isApprove']))
+			if(isset($ds['isApprove']) && $ds['isApprove'] != 'all')
 			{
-				if($ds['isApprove'] !== 'all')
-				{
-					$this->db->where('orders.status', 1);
-				}
+        $this->db->where('orders.status', 1);
 			}
 		}
 
-		if(!empty($ds['onlyMe']))
+		if( ! empty($ds['onlyMe']))
 		{
-			$this->db->where('orders.user', get_cookie('uname'));
+			$this->db->where('user', $this->_user->uname);
 		}
 
-		if(!empty($ds['isExpire']))
+		if( ! empty($ds['isExpire']))
 		{
-			$this->db->where('orders.is_expired', 1);
+			$this->db->where('is_expired', 1);
 		}
 
 		if(!empty($ds['state_list']))
 		{
-			$this->db->where_in('orders.state', $ds['state_list']);
+			$this->db->where_in('state', $ds['state_list']);
 		}
 
-		//--- ใช้กับเอกสารที่ต้อง approve เท่านั้น
-		if(isset($ds['isApprove']))
+    //--- ใช้กับเอกสารที่ต้อง approve เท่านั้น
+		if(isset($ds['isApprove']) && $ds['isApprove'] !== 'all')
 		{
-			if($ds['isApprove'] !== 'all')
-			{
-				$this->db->where('orders.is_approved', $ds['isApprove']);
-			}
+      $this->db->where('is_approved', $ds['isApprove']);
 		}
+
 
 		//--- ใช้กับเอกสารที่ต้อง ว่ารับสินค้าเข้าปลายทางหรือยัง เท่านั้น
-		if(isset($ds['isValid']))
+		if(isset($ds['isValid']) && $ds['isValid'] != 'all')
 		{
-			if($ds['isValid'] !== 'all')
-			{
-				$this->db->where('orders.is_valid', $ds['isValid']);
-			}
+      $this->db->where('is_valid', $ds['isValid']);
 		}
 
-		if(!empty($ds['is_paid']) && $ds['is_paid'] != 'all')
+		if( ! empty($ds['is_paid']) && $ds['is_paid'] != 'all')
 		{
 			$is_paid = ($ds['is_paid'] == 'not_paid' ? 0 : 1);
-			$this->db->where('orders.is_paid', $is_paid);
+			$this->db->where('is_paid', $is_paid);
 		}
 
-		return $this->db->count_all_results();
+		return $this->db->count_all_results('orders');
 	}
 
 
 
-
-
-	public function get_data(array $ds = array(), $perpage = '', $offset = '', $role = 'S')
+	public function get_data(array $ds = array(), $perpage = 20, $offset = 0, $role = 'S')
 	{
-		$this->db
-		->distinct()
-		->select('orders.*')
-		->from('orders')
-		->join('customers', 'orders.customer_code = customers.code', 'left')
-		->join('zone', 'orders.zone_code = zone.code', 'left')
-		->join('user', 'orders.user = user.uname', 'left');
-
 		$this->db->where('role', $role);
 
 		//---- เลขที่เอกสาร
 		if( ! empty($ds['code']))
 		{
-			$this->db->like('orders.code', $ds['code']);
+			$this->db->like('code', $ds['code']);
 		}
 
 		//--- รหัส/ชื่อ ลูกค้า
 		if( ! empty($ds['customer']))
 		{
-			$this->db->group_start();
-			$this->db->like('customers.code', $ds['customer']);
-			$this->db->or_like('customers.name', $ds['customer']);
-			$this->db->or_like('orders.customer_ref', $ds['customer']);
-			$this->db->group_end();
+			$this->db
+      ->group_start()
+			->like('customer_code', $ds['customer'])
+			->or_like('customer_name', $ds['customer'])
+			->or_like('customer_ref', $ds['customer'])
+			->group_end();
 		}
 
 		//---- user name / display name
-		if( ! empty($ds['user']))
+		if( isset($ds['user']) && $ds['user'] != 'all')
 		{
-			$this->db->group_start();
-			$this->db->like('user.uname', $ds['user']);
-			$this->db->or_like('user.name', $ds['user']);
-			$this->db->group_end();
+			$this->db->where('user', $ds['user']);
 		}
 
 		//---- เลขที่อ้างอิงออเดอร์ภายนอก
 		if( ! empty($ds['reference']))
 		{
-			$this->db->like('orders.reference', $ds['reference']);
+			$this->db->like('reference', $ds['reference']);
 		}
 
 		//---เลขที่จัดส่ง
 		if( ! empty($ds['ship_code']))
 		{
-			$this->db->like('orders.shipping_code', $ds['ship_code']);
+			$this->db->like('shipping_code', $ds['ship_code']);
 		}
 
 		//--- ช่องทางการขาย
 		if( ! empty($ds['channels']))
 		{
-			$this->db->where('orders.channels_code', $ds['channels']);
+			$this->db->where('channels_code', $ds['channels']);
 		}
 
 		//--- ช่องทางการชำระเงิน
 		if( ! empty($ds['payment']))
 		{
-			$this->db->where('orders.payment_code', $ds['payment']);
+			$this->db->where('payment_code', $ds['payment']);
 		}
 
+    if(isset($ds['zone_code']) && $ds['zone_code'] != 'all')
+    {
+      $this->db->where('zone_code', $ds['zone_code']);
+    }
 
-		if( ! empty($ds['zone_code']))
+		if( ! empty($ds['user_ref']))
 		{
-			$this->db->group_start();
-			$this->db->like('zone.code', $ds['zone_code']);
-			$this->db->or_like('zone.name', $ds['zone_code']);
-			$this->db->group_end();
+			$this->db->like('user_ref', $ds['user_ref']);
 		}
 
-		if( !empty($ds['user_ref']))
+		if( ! empty($ds['empName']))
 		{
-			$this->db->like('orders.user_ref', $ds['user_ref']);
-		}
-
-		if(!empty($ds['empName']))
-		{
-			$this->db->like('orders.empName', $ds['empName']);
+			$this->db->like('empName', $ds['empName']);
 		}
 
 		if( ! empty($ds['from_date']) && ! empty($ds['to_date']))
 		{
-			$this->db->where('orders.date_add >=', from_date($ds['from_date']));
-			$this->db->where('orders.date_add <=', to_date($ds['to_date']));
+			$this->db->where('date_add >=', from_date($ds['from_date']));
+			$this->db->where('date_add <=', to_date($ds['to_date']));
 		}
 
 		if(!empty($ds['warehouse']))
 		{
-			$this->db->where('orders.warehouse_code', $ds['warehouse']);
+			$this->db->where('warehouse_code', $ds['warehouse']);
 		}
 
-		if(!empty($ds['notSave']))
+		if( ! empty($ds['notSave']))
 		{
-			$this->db->where('orders.status', 0);
+			$this->db->where('status', 0);
 		}
 		else
 		{
-			if(isset($ds['isApprove']))
+			if(isset($ds['isApprove']) && $ds['isApprove'] != 'all')
 			{
-				if($ds['isApprove'] !== 'all')
-				{
-					$this->db->where('orders.status', 1);
-				}
+        $this->db->where('status', 1);
 			}
 		}
 
-		if(!empty($ds['onlyMe']))
+		if( ! empty($ds['onlyMe']))
 		{
-			$this->db->where('orders.user', get_cookie('uname'));
+			$this->db->where('user', $this->_user->uname);
 		}
 
-		if(!empty($ds['isExpire']))
+		if( ! empty($ds['isExpire']))
 		{
-			$this->db->where('orders.is_expired', 1);
+			$this->db->where('is_expired', 1);
 		}
 
 		if(!empty($ds['state_list']))
 		{
-			$this->db->where_in('orders.state', $ds['state_list']);
+			$this->db->where_in('state', $ds['state_list']);
 		}
 
 		//--- ใช้กับเอกสารที่ต้อง approve เท่านั้น
-		if(isset($ds['isApprove']))
+		if(isset($ds['isApprove']) && $ds['isApprove'] !== 'all')
 		{
-			if($ds['isApprove'] !== 'all')
-			{
-				$this->db->where('orders.is_approved', $ds['isApprove']);
-			}
+      $this->db->where('is_approved', $ds['isApprove']);
 		}
 
 		//--- ใช้กับเอกสารที่ต้อง ว่ารับสินค้าเข้าปลายทางหรือยัง เท่านั้น
-		if(isset($ds['isValid']))
+		if(isset($ds['isValid']) && $ds['isValid'] != 'all')
 		{
-			if($ds['isValid'] !== 'all')
-			{
-				$this->db->where('orders.is_valid', $ds['isValid']);
-			}
+      $this->db->where('is_valid', $ds['isValid']);
 		}
 
-		if(!empty($ds['is_paid']) && $ds['is_paid'] != 'all')
+		if( ! empty($ds['is_paid']) && $ds['is_paid'] != 'all')
 		{
 			$is_paid = ($ds['is_paid'] == 'not_paid' ? 0 : 1);
-			$this->db->where('orders.is_paid', $is_paid);
+			$this->db->where('is_paid', $is_paid);
 		}
 
 
-		if(!empty($ds['order_by']))
+		if( ! empty($ds['order_by']))
 		{
-			$order_by = "orders.{$ds['order_by']}";
-			$this->db->order_by($order_by, $ds['sort_by']);
+			$this->db->order_by($ds['order_by'], $ds['sort_by']);
 		}
 		else
 		{
-			$this->db->order_by('orders.code', 'DESC');
+			$this->db->order_by('code', 'DESC');
 		}
 
-		if($perpage != '')
-		{
-			$offset = $offset === NULL ? 0 : $offset;
-			$this->db->limit($perpage, $offset);
-		}
+    $this->db->limit($perpage, $offset);
 
-		$rs = $this->db->get();
-		//echo $this->db->get_compiled_select();
+		$rs = $this->db->get('orders');
+
 		if($rs->num_rows() > 0)
 		{
 			return $rs->result();

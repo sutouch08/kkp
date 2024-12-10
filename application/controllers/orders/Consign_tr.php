@@ -36,13 +36,49 @@ class Consign_tr extends PS_Controller
   public function index()
   {
     $filter = array(
-      'code' => get_filter('code', 'code', ''),
-      'customer' => get_filter('customer', 'customer', ''),
-      'user' => get_filter('user', 'user', ''),
-      'zone_code' => get_filter('zone', 'zone', ''),
-      'from_date' => get_filter('fromDate', 'fromDate', ''),
-      'to_date' => get_filter('toDate', 'toDate', '')
+      'code' => get_filter('code', 'cs_code', ''),
+      'customer' => get_filter('customer', 'cs_customer', ''),
+      'user' => get_filter('user', 'cs_user', 'all'),
+      'zone_code' => get_filter('zone', 'cs_zone', 'all'),
+      'from_date' => get_filter('fromDate', 'cs_fromDate', ''),
+      'to_date' => get_filter('toDate', 'cs_toDate', ''),
+      'notSave' => get_filter('notSave', 'notSave', NULL),
+      'onlyMe' => get_filter('onlyMe', 'onlyMe', NULL),
+      'isApprove' => get_filter('isApprove', 'cs_isApprove', 'all')
     );
+
+    $state = array(
+      '1' => get_filter('state_1', 'state_1', 'N'),
+      '2' => get_filter('state_2', 'state_2', 'N'),
+      '3' => get_filter('state_3', 'state_3', 'N'),
+      '4' => get_filter('state_4', 'state_4', 'N'),
+      '5' => get_filter('state_5', 'state_5', 'N'),
+      '6' => get_filter('state_6', 'state_6', 'N'),
+      '7' => get_filter('state_7', 'state_7', 'N'),
+      '8' => get_filter('state_8', 'state_8', 'N'),
+      '9' => get_filter('state_9', 'state_9', 'N')
+    );
+
+    $state_list = array();
+
+    $button = array();
+
+    for($i =1; $i <= 9; $i++)
+    {
+    	if($state[$i] === 'Y')
+    	{
+    		$state_list[] = $i;
+    	}
+
+      $btn = 'state_'.$i;
+      $button[$btn] = $state[$i] === 'Y' ? 'btn-info' : '';
+    }
+
+    $button['not_save'] = empty($filter['notSave']) ? '' : 'btn-info';
+    $button['only_me'] = empty($filter['onlyMe']) ? '' : 'btn-info';
+
+
+    $filter['state_list'] = empty($state_list) ? NULL : $state_list;
 
 		//--- แสดงผลกี่รายการต่อหน้า
 		$perpage = get_rows();
@@ -71,7 +107,8 @@ class Consign_tr extends PS_Controller
     }
 
     $filter['orders'] = $ds;
-
+    $filter['state'] = $state;
+    $filter['btn'] = $button;
 		$this->pagination->initialize($init);
     $this->load->view('order_consign/consign_list', $filter);
   }
@@ -327,12 +364,25 @@ class Consign_tr extends PS_Controller
   public function clear_filter()
   {
     $filter = array(
-      'code',
-      'customer',
-      'user',
-      'zone_code',
-      'fromDate',
-      'toDate'
+      'cs_code',
+      'cs_customer',
+      'cs_user',
+      'cs_zone',
+      'cs_fromDate',
+      'cs_toDate',
+      'cs_is_approve',
+      'notSave',
+      'onlyMe',
+      'isExpire',
+      'state_1',
+      'state_2',
+      'state_3',
+      'state_4',
+      'state_5',
+      'state_6',
+      'state_7',
+      'state_8',
+      'state_9'
     );
 
     clear_filter($filter);

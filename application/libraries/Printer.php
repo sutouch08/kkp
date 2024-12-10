@@ -381,7 +381,7 @@ class Printer
 					$padding_top = ($count == 1) ? 'padding-top:5px;' : '';
 					$top .= "<tr class='font-size-12'>";
 					$top .= "<td class='{$this->text_color}' style='padding-bottom:5px; width:30%; vertical-align:text-top; {$under_line} {$padding_top}'>".inputRow($row['label'])."</td>";
-					$top .= "<td class='' style='padding-bottom:5px; width:70%; white-space:pre-wrap; {$under_line} {$padding_top}'>".inputRow($row['value'])."</td>";
+					$top .= "<td class='' style='padding-bottom:5px; width:70%; white-space:pre-wrap; {$under_line} {$padding_top}'>".$row['value']."</td>";
 					$top .= "</tr>";
 				}
 

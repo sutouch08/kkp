@@ -1,8 +1,8 @@
 <?php
 $this->load->helper('print');
 $total_row 	= empty($details) ? 0 :count($details);
-$config 		= array(
-	"row" => 9,
+$config = array(
+	"row" => 12,
 	"total_row" => $total_row,
 	"font_size" => 10,
 	"text_color" => "text-blue" //--- hilight text color class
@@ -12,8 +12,8 @@ $this->printer->config($config);
 
 $page  = '';
 $page .= $this->printer->doc_header();
-
-$this->printer->add_title($title);
+$docType = doc_type($order->role);
+$this->printer->add_title($docType['title']);
 
 $header		= array();
 
@@ -61,8 +61,6 @@ $header['right']['A'] = array(
 $header['right']['B'] = array(
 	array('label' => '', 'value' => barcodeImage($order->code, 12))
 );
-
-
 
 
 $this->printer->add_header($header);
@@ -154,20 +152,20 @@ while($total_page > 0 )
 
       $barcode = barcodeImage($rs->barcode); //$is_barcode === FALSE ? $rs->barcode : barcodeImage($rs->barcode);
       //--- เตรียมข้อมูลไว้เพิ่มลงตาราง
-      $data = array(
-                    $n,
-                    $barcode,
-                    inputRow($rs->product_code.' : '.$rs->product_name),
-                    number($price, 2),
-                    number($qty),
-                    $discount,
-                    number($amount, 2)
-                );
+			$data = array(
+				$n,
+				$barcode,
+				inputRow($rs->product_code.' : '.$rs->product_name),
+				number($price, 2),
+				number($qty),
+				$discount,
+				number($amount, 2)
+			);
 
-      $total_qty      += $qty;
-      $total_amount   += $amount;
-      $total_discount += $discount_amount;
-      $total_order    += ($qty * $price);
+			$total_qty      += $qty;
+			$total_amount   += $amount;
+			$total_discount += $discount_amount;
+			$total_order    += ($qty * $price);
     }
     else
     {
@@ -210,8 +208,9 @@ while($total_page > 0 )
 
   $subTotal = array();
 
+	$rowspan = $order->role == 'S' ? 4 : 3;
   //--- จำนวนรวม   ตัว
-  $sub_qty  = '<td rowspan="6" class="width-60 subtotal-first-row">';
+  $sub_qty  = '<td rowspan="'.$rowspan.'" class="width-60 subtotal-first-row">';
 	$sub_qty .= '<strong>หมายเหตุ : </strong> '.$order->remark;
   $sub_qty .= '</td>';
   $sub_qty .= '<td class="width-20 subtotal subtotal-first-row">';
@@ -242,34 +241,36 @@ while($total_page > 0 )
   $sub_disc .= '</td>';
   array_push($subTotal, array($sub_disc));
 
-  //--- shipping_fee
-  $sub_ship  = '<td class="subtotal">';
-  $sub_ship .=  '<strong>ค่าจัดส่ง</strong>';
-  $sub_ship .= '</td>';
-  $sub_ship .= '<td class="subtotal text-right">';
-  $sub_ship .=  $shipping_fee;
-  $sub_ship .= '</td>';
-  array_push($subTotal, array($sub_ship));
+  // //--- shipping_fee
+  // $sub_ship  = '<td class="subtotal">';
+  // $sub_ship .=  '<strong>ค่าจัดส่ง</strong>';
+  // $sub_ship .= '</td>';
+  // $sub_ship .= '<td class="subtotal text-right">';
+  // $sub_ship .=  $shipping_fee;
+  // $sub_ship .= '</td>';
+  // array_push($subTotal, array($sub_ship));
 
+	//
+  // //--- service_fee
+  // $sub_serv  = '<td class="subtotal">';
+  // $sub_serv .=  '<strong>อื่นๆ</strong>';
+  // $sub_serv .= '</td>';
+  // $sub_serv .= '<td class="subtotal text-right">';
+  // $sub_serv .=  $service_fee;
+  // $sub_serv .= '</td>';
+  // array_push($subTotal, array($sub_serv));
 
-  //--- service_fee
-  $sub_serv  = '<td class="subtotal">';
-  $sub_serv .=  '<strong>อื่นๆ</strong>';
-  $sub_serv .= '</td>';
-  $sub_serv .= '<td class="subtotal text-right">';
-  $sub_serv .=  $service_fee;
-  $sub_serv .= '</td>';
-  array_push($subTotal, array($sub_serv));
-
-
-  //--- deposit
-  $sub_depo  = '<td class="subtotal">';
-  $sub_depo .=  '<strong>ชำระแล้ว</strong>';
-  $sub_depo .= '</td>';
-  $sub_depo .= '<td class="subtotal text-right"> -';
-  $sub_depo .=  $deposit;
-  $sub_depo .= '</td>';
-  array_push($subTotal, array($sub_depo));
+	if($order->role == 'S')
+	{
+		//--- deposit
+		$sub_depo  = '<td class="subtotal">';
+		$sub_depo .=  '<strong>ชำระแล้ว</strong>';
+		$sub_depo .= '</td>';
+		$sub_depo .= '<td class="subtotal text-right"> -';
+		$sub_depo .=  $deposit;
+		$sub_depo .= '</td>';
+		array_push($subTotal, array($sub_depo));
+	}
 
 
   //--- ยอดสุทธิ

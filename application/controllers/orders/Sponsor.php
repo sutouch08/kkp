@@ -13,7 +13,8 @@ class Sponsor extends PS_Controller
     parent::__construct();
     $this->home = base_url().'orders/sponsor';
     $this->load->model('orders/orders_model');
-    $this->load->model('orders/sponsor_model');
+    $this->load->model('masters/sponsors_model');
+    $this->load->model('masters/sponsor_budget_model');
     $this->load->model('masters/customers_model');
     $this->load->model('orders/order_state_model');
     $this->load->model('masters/product_tab_model');
@@ -26,22 +27,56 @@ class Sponsor extends PS_Controller
     $this->load->helper('users');
     $this->load->helper('state');
     $this->load->helper('product_images');
+    $this->load->helper('discount');
   }
 
 
   public function index()
   {
     $filter = array(
-      'code'          => get_filter('code', 'code', ''),
-      'customer'      => get_filter('customer', 'customer', ''),
-      'user'          => get_filter('user', 'user', ''),
-      'reference'     => get_filter('reference', 'reference', ''),
-      'ship_code'     => get_filter('shipCode', 'shipCode', ''),
-      'channels'      => get_filter('channels', 'channels', ''),
-      'payment'       => get_filter('payment', 'payment', ''),
-      'from_date'     => get_filter('fromDate', 'fromDate', ''),
-      'to_date'       => get_filter('toDate', 'toDate', '')
+      'code' => get_filter('code', 'sp_code', ''),
+      'customer' => get_filter('customer', 'sp_customer', ''),
+      'user' => get_filter('user', 'sp_user', 'all'),
+      'from_date' => get_filter('fromDate', 'sp_fromDate', ''),
+      'to_date' => get_filter('toDate', 'sp_toDate', ''),
+      'notSave' => get_filter('notSave', 'notSave', NULL),
+      'onlyMe' => get_filter('onlyMe', 'onlyMe', NULL),
+      'isApprove' => get_filter('isApprove', 'sp_isApprove', 'all')
     );
+
+    $state = array(
+      '1' => get_filter('state_1', 'state_1', 'N'),
+      '2' => get_filter('state_2', 'state_2', 'N'),
+      '3' => get_filter('state_3', 'state_3', 'N'),
+      '4' => get_filter('state_4', 'state_4', 'N'),
+      '5' => get_filter('state_5', 'state_5', 'N'),
+      '6' => get_filter('state_6', 'state_6', 'N'),
+      '7' => get_filter('state_7', 'state_7', 'N'),
+      '8' => get_filter('state_8', 'state_8', 'N'),
+      '9' => get_filter('state_9', 'state_9', 'N')
+    );
+
+    $state_list = array();
+
+    $button = array();
+
+    for($i =1; $i <= 9; $i++)
+    {
+    	if($state[$i] === 'Y')
+    	{
+    		$state_list[] = $i;
+    	}
+
+      $btn = 'state_'.$i;
+      $button[$btn] = $state[$i] === 'Y' ? 'btn-info' : '';
+    }
+
+    $button['not_save'] = empty($filter['notSave']) ? '' : 'btn-info';
+    $button['only_me'] = empty($filter['onlyMe']) ? '' : 'btn-info';
+    $button['is_expire'] = empty($filter['isExpire']) ? '' : 'btn-info';
+
+
+    $filter['state_list'] = empty($state_list) ? NULL : $state_list;
 
 		//--- แสดงผลกี่รายการต่อหน้า
 		$perpage = get_rows();
@@ -70,26 +105,45 @@ class Sponsor extends PS_Controller
     }
 
     $filter['orders'] = $ds;
+    $filter['state'] = $state;
+    $filter['btn'] = $button;
 
 		$this->pagination->initialize($init);
     $this->load->view('sponsor/sponsor_list', $filter);
   }
 
 
-  public function get_sponsor_budget($customer_code)
+  public function get_budget()
   {
-    echo $this->get_budget($customer_code);
+    $arr = array(
+      'budget_id' => NULL,
+      'amount_label' => 0.00,
+      'amount' => 0.00
+    );
+
+    $sp = $this->sponsors_model->get_by_customer_code($this->input->get('code'));
+
+    if( ! empty($sp))
+    {
+      if( ! empty($sp->budget_id))
+      {
+        $bd = $this->sponsor_budget_model->get_valid_budget($sp->budget_id);
+
+        if( ! empty($bd))
+        {
+          $balance = $bd->balance;
+          $commit = $this->sponsor_budget_model->get_commit_amount($bd->id);
+          $amount = $balance - $commit;
+
+          $arr['budget_id'] = $bd->id;
+          $arr['amount'] = $amount > 0 ? $amount : 0;
+          $arr['amount_label'] = $amount > 0 ? number($amount, 2) : 0;
+        }
+      }
+    }
+
+    echo json_encode($arr);
   }
-
-
-  private function get_budget($customer_code)
-  {
-    $current = $this->sponsor_model->get_budget($customer_code);
-    $used = $this->sponsor_model->get_budget_used($customer_code);
-
-    return ($current - $used);
-  }
-
 
 
   public function add_new()
@@ -98,55 +152,103 @@ class Sponsor extends PS_Controller
   }
 
 
-
   public function add()
   {
-    if($this->input->post('customerCode'))
+    $sc = TRUE;
+
+    $ds = json_decode($this->input->post('data'));
+
+    if( ! empty($ds))
     {
-      $book_code = getConfig('BOOK_CODE_SPONSOR');
-      $date_add = db_date($this->input->post('date'));
-      $code = $this->get_new_code($date_add);
-      $role = 'P'; //--- P = Sponsor
-
-      $ds = array(
-        'code' => $code,
-        'role' => $role,
-        'bookcode' => $book_code,
-        'customer_code' => $this->input->post('customerCode'),
-        'user' => get_cookie('uname'),
-        'remark' => $this->input->post('remark'),
-        'user_ref' => $this->input->post('empName')
-      );
-
-      if($this->orders_model->add($ds) === TRUE)
+      if($this->pm->can_add)
       {
-        $arr = array(
-          'order_code' => $code,
-          'state' => 1,
-          'update_user' => get_cookie('uname')
-        );
+        $sp = $this->sponsors_model->get_by_customer_code($ds->customer_code);
 
-        $this->order_state_model->add_state($arr);
+        if( ! empty($sp) && $sp->active == 1)
+        {
+          $bd = $this->sponsor_budget_model->get_valid_budget($sp->budget_id);
 
-        redirect($this->home.'/edit_detail/'.$code);
+          if( ! empty($bd))
+          {
+            $book_code = getConfig('BOOK_CODE_SPONSOR');
+            $date_add = db_date($ds->date_add);
+            $code = $this->get_new_code($date_add);
+            $role = 'P'; //--- P = Sponsor
+
+            if( ! empty($code))
+            {
+              $arr = array(
+                'code' => $code,
+                'role' => $role,
+                'bookcode' => $book_code,
+                'customer_code' => $ds->customer_code,
+                'customer_name' => $ds->customer_name,
+                'user' => $this->_user->uname,
+                'budget_id' => $bd->id,
+                'budget_code' => $bd->code,
+                'remark' => get_null($ds->remark),
+                'user_ref' => get_null($ds->emp_name)
+              );
+
+              if($this->orders_model->add($arr))
+              {
+                $arr = array(
+                  'order_code' => $code,
+                  'state' => 1,
+                  'update_user' => $this->_user->uname
+                );
+
+                $this->order_state_model->add_state($arr);
+              }
+              else
+              {
+                $sc = FALSE;
+                $this->error = "เพิ่มเอกสารไม่สำเร็จ กรุณาลองใหม่อีกครั้ง";
+              }
+            }
+            else
+            {
+              $sc = FALSE;
+              $this->error = "Failed to generate document number";
+            }
+          }
+          else
+          {
+            $sc = FALSE;
+            $this->error = "ไม่พบงบประมาณที่ใช้ได้ กรุณาตรวจสอบ";
+          }
+        }
+        else
+        {
+          $sc = FALSE;
+          $this->error = "ไม่พบรายชื่ออภินันท์ {$ds->customer_code} กรุณาตรวจสอบ";
+        }
       }
       else
       {
-        set_error('เพิ่มเอกสารไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
-        redirect($this->home.'/add_new');
+        $sc = FALSE;
+        $this->error = get_error_message('permission');
       }
     }
     else
     {
-      set_error('ไม่พบข้อมูลลูกค้า กรุณาตรวจสอบ');
-      redirect($this->home.'/add_new');
+      $sc = FALSE;
+      $this->error = get_error_message('required');
     }
-  }
 
+    $arr = array(
+      'status' => $sc === TRUE ? 'success' : 'failed',
+      'message' => $sc === TRUE ? 'success' : $this->error,
+      'code' => $sc === TRUE ? $code : NULL
+    );
+
+    echo json_encode($arr);
+  }
 
 
   public function edit_order($code)
   {
+    $this->load->model('approve_logs_model');
     $ds = array();
     $rs = $this->orders_model->get($code);
     if(!empty($rs))
@@ -168,8 +270,10 @@ class Sponsor extends PS_Controller
     }
 
     $details = $this->orders_model->get_order_details($code);
+
     $ds['state'] = $ost;
     $ds['order'] = $rs;
+    $ds['approve_logs'] = $this->approve_logs_model->get($code);
     $ds['details'] = $details;
     $ds['allowEditDisc'] = FALSE; //getConfig('ALLOW_EDIT_DISCOUNT') == 1 ? TRUE : FALSE;
     $ds['allowEditPrice'] = getConfig('ALLOW_EDIT_PRICE') == 1 ? TRUE : FALSE;
@@ -183,32 +287,71 @@ class Sponsor extends PS_Controller
   {
     $sc = TRUE;
 
-    if($this->input->post('order_code'))
+    $ds = json_decode($this->input->post('data'));
+
+    if( ! empty($ds))
     {
-      $code = $this->input->post('order_code');
-      $ds = array(
-        'customer_code' => $this->input->post('customer_code'),
-        'date_add' => db_date($this->input->post('date_add')),
-        'user_ref' => $this->input->post('user_ref'),
-        'remark' => $this->input->post('remark'),
-        'status' => 0
-      );
+      if($this->pm->can_edit)
+      {
+        $sp = $this->sponsors_model->get_by_customer_code($ds->customer_code);
 
-      $rs = $this->orders_model->update($code, $ds);
+        if( ! empty($sp) && $sp->active == 1)
+        {
+          $bd = $this->sponsor_budget_model->get_valid_budget($sp->budget_id);
 
-      if($rs === FALSE)
+          if( ! empty($bd))
+          {
+            $order = $this->orders_model->get($ds->code);
+
+            if($order->state == 1)
+            {
+              $arr = array(
+                'customer_code' => $ds->customer_code,
+                'customer_name' => $ds->customer_name,
+                'user_ref' => $ds->emp_name,
+                'remark' => get_null($ds->remark),
+                'budget_id' => $bd->id,
+                'budget_code' => $bd->code,
+                'update_user' => $this->_user->uname
+              );
+
+              if( ! $this->orders_model->update($ds->code, $arr))
+              {
+                $sc = FALSE;
+                $this->error = get_error_message('update');
+              }
+            }
+            else
+            {
+              $sc = FALSE;
+              $this->error = "Invalid document status";
+            }
+          }
+          else
+          {
+            $sc = FALSE;
+            $this->error = "ไม่พบงบประมาณที่ใช้ได้";
+          }
+        }
+        else
+        {
+          $sc = FALSE;
+          $this->error = "รายชื่อผู้รับอภินันท์ไม่ถูกต้อง";
+        }
+      }
+      else
       {
         $sc = FALSE;
-        $message = 'ปรับปรุงข้อมูลไม่สำเร็จ';
+        $this->error = get_error_message('permission');
       }
     }
     else
     {
       $sc = FALSE;
-      $message = 'ไม่พบเลขที่เอกสาร';
+      $this->error = get_error_message('required');
     }
 
-    echo $sc === TRUE ? 'success' : $message;
+    $this->response($sc);
   }
 
 
@@ -236,34 +379,54 @@ class Sponsor extends PS_Controller
   public function save($code)
   {
     $sc = TRUE;
+
     $order = $this->orders_model->get($code);
 
-    //---- check credit balance
-    $amount = $this->orders_model->get_order_total_amount($code);
-    //--- creadit used
-    $credit_used = $this->sponsor_model->get_budget_used($order->customer_code);
-
-    //--- credit balance from sap
-    $credit_balance = $this->sponsor_model->get_budget($order->customer_code);
-
-    if($credit_used > $credit_balance)
+    if( ! empty($order))
     {
-      $diff = $credit_used - $credit_balance;
-      $sc = FALSE;
-      $message = 'เครดิตคงเหลือไม่พอ (ขาด : '.number($diff, 2).')';
-    }
+      //---- check budget balance
+      $amount = $this->orders_model->get_order_total_amount($code);
 
-    if($sc === TRUE)
-    {
-      $rs = $this->orders_model->set_status($code, 1);
-      if($rs === FALSE)
+      $bd = $this->sponsor_budget_model->get_valid_budget($order->budget_id);
+
+      if( ! empty($bd))
+      {
+        $commit = $this->sponsor_budget_model->get_commit_amount($order->budget_id, $order->code);
+
+        $available = $bd->balance - $commit;
+
+        if($available >= $amount)
+        {
+          $arr = array(
+            'status' => 1,
+            'is_approved' => 0
+          );
+
+          if( ! $this->orders_model->update($order->code, $arr))
+          {
+            $sc = FALSE;
+            $this->error = "บันทึกออเดอร์ไม่สำเร็จ";
+          }
+        }
+        else
+        {
+          $sc = FALSE;
+          $this->error = "งบคงเหลือไม่เพียงพอ <br/>Balance : ".number($bd->balance, 2)."<br/>Commited : ".number($commit, 2)."<br/>Available : ".number($available, 2);
+        }
+      }
+      else
       {
         $sc = FALSE;
-        $message = 'บันทึกออเดอร์ไม่สำเร็จ';
+        $this->error = "ไม่พบงบประมาณที่ใช้ได้";
       }
     }
+    else
+    {
+      $sc = FALSE;
+      $this->error = "Invalid document number";
+    }
 
-    echo $sc === TRUE ? 'success' : $message;
+    $this->response($sc);
   }
 
 
@@ -311,15 +474,23 @@ class Sponsor extends PS_Controller
   public function clear_filter()
   {
     $filter = array(
-      'code',
-      'customer',
-      'user',
-      'reference',
-      'shipCode',
-      'channels',
-      'payment',
-      'fromDate',
-      'toDate'
+      'sp_code',
+      'sp_customer',
+      'sp_user',
+      'sp_fromDate',
+      'sp_toDate',
+      'notSave',
+      'onlyMe',
+      'sp_isApprove',
+      'state_1',
+      'state_2',
+      'state_3',
+      'state_4',
+      'state_5',
+      'state_6',
+      'state_7',
+      'state_8',
+      'state_9',
     );
 
     clear_filter($filter);

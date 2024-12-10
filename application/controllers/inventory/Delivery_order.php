@@ -117,6 +117,12 @@ class Delivery_order extends PS_Controller
   				$warehouse_code = $this->zone_model->get_warehouse_code($order->zone_code);
         }
 
+        //-- กรณี สปอนเซอร์
+        if($order->role == 'P')
+        {
+          $this->load->model('masters/sponsor_budget_model');
+        }
+
         if($order->state == 7)
         {
           $this->db->trans_begin();
@@ -128,7 +134,7 @@ class Delivery_order extends PS_Controller
           $arr = array(
             'order_code' => $code,
             'state' => 8,
-            'update_user' => get_cookie('uname')
+            'update_user' => $this->_user->uname
           );
 
           $this->order_state_model->add_state($arr);
@@ -142,6 +148,8 @@ class Delivery_order extends PS_Controller
           $customer = $this->customers_model->get_attribute($order->customer_code);
 
           $avgBillDiscAmount = 0;
+
+          $docTotal = 0;
 
           if($order->bDiscAmount > 0)
           {
@@ -254,25 +262,7 @@ class Delivery_order extends PS_Controller
                     $sumBillDiscAmount = $avgBillDiscAmount > 0 ? round(($line_total * $avgBillDiscAmount), 2) : 0;
                     $total_amount = $line_total - $sumBillDiscAmount;
 
-                    //--- 4. update credit used
-                    if($sc === TRUE && $order->role == 'S' && $order->is_term == 1)
-                    {
-                      $credit_balance = $this->customers_model->get_credit_balance($order->customer_code);
-
-                      if($use_credit && ($credit_balance < $total_amount))
-                      {
-                        $sc = FALSE;
-                        $this->error = 'เครดิตคงเหลือไม่เพียงพอ';
-                      }
-
-                      if($sc === TRUE)
-                      {
-                        if($this->customers_model->update_used($order->customer_code, $total_amount))
-                        {
-                          $this->customers_model->update_balance($order->customer_code);
-                        }
-                      }
-                    }
+                    $docTotal += $total_amount;
 
                     if($sc === TRUE)
                     {
@@ -348,6 +338,7 @@ class Delivery_order extends PS_Controller
                         'zone_code' => $order->picked == 1 ? $rm->zone_code : $default_zone,
                         'warehouse_code'  => $order->picked == 1 ? $rm->warehouse_code : $warehouse_code,
                         'update_user' => get_cookie('uname'),
+                        'budget_id' => $order->budget_id,
                         'budget_code' => $order->budget_code,
                         'is_count' => $rs->is_count
                       );
@@ -499,23 +490,7 @@ class Delivery_order extends PS_Controller
               $line_total = $rs->final_price * $rs->qty;
               $sumBillDiscAmount = $avgBillDiscAmount > 0 ? $line_total * $avgBillDiscAmount : 0;
               $total_amount = $line_total - $sumBillDiscAmount;
-
-              //--- 4. update credit used
-              if($sc === TRUE && $order->role == 'S' && $order->is_term == 1)
-              {
-                $credit_balance = $this->customers_model->get_credit_balance($order->customer_code);
-
-                if( $use_credit && ($credit_balance < $total_amount))
-                {
-                  $sc = FALSE;
-                  $this->error = 'เครดิตคงเหลือไม่เพียงพอ';
-                }
-
-                if($sc === TRUE && $this->customers_model->update_used($order->customer_code, $total_amount))
-                {
-                  $this->customers_model->update_balance($order->customer_code);
-                }
-              }
+              $docTotal += $total_amount;
 
               //--- ข้อมูลสำหรับบันทึกยอดขาย
               $item = $this->products_model->get_attribute($rs->product_code);
@@ -589,6 +564,7 @@ class Delivery_order extends PS_Controller
                 'zone_code' => NULL,
                 'warehouse_code'  => NULL,
                 'update_user' => get_cookie('uname'),
+                'budget_id' => $order->budget_id,
                 'budget_code' => $order->budget_code,
                 'is_count' => 0
               );
@@ -600,6 +576,52 @@ class Delivery_order extends PS_Controller
                 $sc = FALSE;
                 $this->error = 'บันทึกขายไม่สำเร็จ';
               }
+            }
+          }
+
+          //--- update credit used
+          if($sc === TRUE && $order->role == 'S' && $order->is_term == 1)
+          {
+            $credit_balance = $this->customers_model->get_credit_balance($order->customer_code);
+
+            if( $use_credit && ($credit_balance < $docTotal))
+            {
+              $sc = FALSE;
+              $this->error = 'เครดิตคงเหลือไม่เพียงพอ';
+            }
+
+            if($sc === TRUE && $this->customers_model->update_used($order->customer_code, $docTotal))
+            {
+              $this->customers_model->update_balance($order->customer_code);
+            }
+          }
+
+
+          if($sc === TRUE && $order->role == 'P')
+          {
+            $bd = $this->sponsor_budget_model->get_valid_budget($order->budget_id);
+
+            if( ! empty($bd))
+            {
+              if($bd->balance < $docTotal)
+              {
+                $sc = FALSE;
+                $this->error = "งบประมาณคงเหลือไม่พอ <br/>คงเหลือ : ".number($bd->balance, 2);
+              }
+
+              if($sc === TRUE)
+              {
+                if( ! $this->sponsor_budget_model->update_used($bd->id, $docTotal))
+                {
+                  $sc = FALSE;
+                  $this->error = "Failed to update outstanding budget";
+                }
+              }
+            }
+            else
+            {
+              $sc = FALSE;
+              $this->error = "ไม่พบงบประมาณที่ใช้";
             }
           }
 
@@ -642,7 +664,6 @@ class Delivery_order extends PS_Controller
                 //--- recal balance
                 $this->order_credit_model->recal_balance($code);
               }
-
             }
           }
 
@@ -682,6 +703,7 @@ class Delivery_order extends PS_Controller
     $this->load->model('masters/channels_model');
     $this->load->model('masters/payment_methods_model');
     $this->load->model('masters/sender_model');
+    $this->load->model('inventory/invoice_model');
     $use_qc = getConfig('USE_QC') == 1 ? TRUE : FALSE;
 		$use_prepare = getConfig('USE_PREPARE') == 1 ? TRUE : FALSE;
 		$default_zone = getConfig('DEFAULT_ZONE');
@@ -694,7 +716,15 @@ class Delivery_order extends PS_Controller
       $order->zone_name = $this->zone_model->get_name($order->zone_code);
     }
 
-    $details = $this->delivery_order_model->get_pre_bill_detail($code, $use_qc);
+    if($order->state == 7)
+    {
+      $details = $this->delivery_order_model->get_pre_bill_detail($code, $use_qc);
+    }
+
+    if($order->state == 8)
+    {
+      $details = $this->invoice_model->get_billed_detail($code, $order->picked, $use_qc);
+    }
 
     $box_list = $use_qc ? $this->qc_model->get_box_list($code) : FALSE;
 
@@ -715,7 +745,7 @@ class Delivery_order extends PS_Controller
         }
         else
         {
-          $sell_qty = $use_qc ? ($rs->order_qty >= $rs->qc ? $rs->qc : $rs->order_qty) : ($rs->order_qty >= $rs->prepared ? $rs->prepared : $rs->order_qty);
+          $sell_qty = $order->state == 8 ? $rs->sold :($use_qc ? ($rs->order_qty >= $rs->qc ? $rs->qc : $rs->order_qty) : ($rs->order_qty >= $rs->prepared ? $rs->prepared : $rs->order_qty));
           $rs->line_total = $sell_qty * $rs->final_price;
           $rs->line_discount = $sell_qty * $rs->discount_amount;
           $rs->price_amount = $sell_qty * $rs->price;

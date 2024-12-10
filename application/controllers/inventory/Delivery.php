@@ -65,6 +65,12 @@ class Delivery extends PS_Controller
 					$warehouse_code = $this->zone_model->get_warehouse_code($order->zone_code);
 				}
 
+				//-- กรณี สปอนเซอร์
+        if($order->role == 'P')
+        {
+          $this->load->model('masters/sponsor_budget_model');
+        }
+
 				if($order->state == 3)
 				{
 					if($order->picked == 0)
@@ -72,7 +78,6 @@ class Delivery extends PS_Controller
 						$this->db->trans_begin();
 
 						//--- change state
-
 						$arr = array(
 							'state' => 8,
 							'picked' => 0,
@@ -113,6 +118,7 @@ class Delivery extends PS_Controller
 							$customer = $this->customers_model->get_attribute($order->customer_code);
 
 							$avgBillDiscAmount = 0;
+							$docTotal = 0;
 
 							if($order->bDiscAmount > 0)
 							{
@@ -189,23 +195,7 @@ class Delivery extends PS_Controller
 										$line_total = $rs->final_price * $rs->order_qty;
 										$sumBillDiscAmount = $avgBillDiscAmount > 0 ? round(($line_total * $avgBillDiscAmount), 2) : 0;
 										$total_amount = $line_total - $sumBillDiscAmount;
-
-										//--- 4. update credit used
-										if($sc === TRUE && $order->role == 'S' && $order->is_term == 1)
-										{
-											$credit_balance = $this->customers_model->get_credit_balance($order->customer_code);
-
-											if($use_credit && ($credit_balance < $total_amount))
-											{
-												$sc = FALSE;
-												$this->error = 'เครดิตคงเหลือไม่เพียงพอ';
-											}
-
-											if($sc === TRUE && $this->customers_model->update_used($order->customer_code, $total_amount))
-											{
-												$this->customers_model->update_balance($order->customer_code);
-											}
-										}
+										$docTotal += $total_amount;
 
 										//--- ข้อมูลสำหรับบันทึกยอดขาย
 										$item = $this->products_model->get_attribute($rs->product_code);
@@ -279,6 +269,7 @@ class Delivery extends PS_Controller
 											'zone_code' => $default_zone,
 											'warehouse_code'  => $warehouse_code,
 											'update_user' => get_cookie('uname'),
+											'budget_id' => $order->budget_id,
 											'budget_code' => $order->budget_code,
 											'is_count' => $rs->is_count
 										);
@@ -367,6 +358,53 @@ class Delivery extends PS_Controller
 									}
 								}
 							}
+
+							//--- update credit used
+		          if($sc === TRUE && $order->role == 'S' && $order->is_term == 1)
+		          {
+		            $credit_balance = $this->customers_model->get_credit_balance($order->customer_code);
+
+		            if( $use_credit && ($credit_balance < $docTotal))
+		            {
+		              $sc = FALSE;
+		              $this->error = 'เครดิตคงเหลือไม่เพียงพอ';
+		            }
+
+		            if($sc === TRUE && $this->customers_model->update_used($order->customer_code, $docTotal))
+		            {
+		              $this->customers_model->update_balance($order->customer_code);
+		            }
+		          }
+
+
+		          if($sc === TRUE && $order->role == 'P')
+		          {
+		            $bd = $this->sponsor_budget_model->get_valid_budget($order->budget_id);
+
+		            if( ! empty($bd))
+		            {
+		              if($bd->balance < $docTotal)
+		              {
+		                $sc = FALSE;
+		                $this->error = "งบประมาณคงเหลือไม่พอ <br/>คงเหลือ : ".number($bd->balance, 2);
+		              }
+
+		              if($sc === TRUE)
+		              {
+		                if( ! $this->sponsor_budget_model->update_used($bd->id, $docTotal))
+		                {
+		                  $sc = FALSE;
+		                  $this->error = "Failed to update outstanding budget";
+		                }
+		              }
+		            }
+		            else
+		            {
+		              $sc = FALSE;
+		              $this->error = "ไม่พบงบประมาณที่ใช้";
+		            }
+		          }
+
 
 							if($sc === TRUE)
 							{

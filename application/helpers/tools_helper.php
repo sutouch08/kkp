@@ -47,7 +47,7 @@ function is_checked($val1, $val2)
 
 function is_active($val)
 {
-  return $val == 1 ? '<i class="fa fa-check green"></i>' : '<i class="fa fa-times red"></i>';
+  return ($val == 1 OR $val == '1' OR $val == 'Y' OR $val == 'y') ? '<i class="fa fa-check green"></i>' : '<i class="fa fa-times red"></i>';
 }
 
 
@@ -283,8 +283,9 @@ function get_error_message($key, $name = "data")
 		'required' => "Missing required parameter.",
 		'exists' => "'{$name}' already exists.",
 		'status' => "Invalid document status",
-		'notfound' => "Document number not found",
-		'transection' => "Unable to delete {$name} because transections exists or link to other module."
+		'notfound' => "Document number or Data not found",
+		'transection' => "Unable to delete {$name} because transections exists or link to other module.",
+		'duplicated' => "Duplicated {$name} already exists."
 	);
 
 	return (!empty($error[$key]) ? $error[$key] : "Unknow error.");

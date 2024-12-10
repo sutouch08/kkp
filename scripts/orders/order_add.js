@@ -52,6 +52,7 @@ function update_detail(id) {
 			var rs = $.trim(rs)
 			if(rs == 'success') {
 				$('#current_qty_'+id).val(qty);
+        $('#btn-save-order').removeClass('hide');
 			}
 			else {
 				swal({
@@ -353,7 +354,6 @@ function addItemToOrder(){
 }
 
 
-// JavaScript Document
 function updateDetailTable(){
 	var order_code = $("#order_code").val();
 	$.ajax({
@@ -405,7 +405,8 @@ function removeDetail(id, name){
 					if( rs == 'success' ){
 						swal({ title: 'Deleted', type: 'success', timer: 1000 });
 						updateDetailTable();
-					}else{
+					}
+          else {
 						swal("Error !", rs , "error");
 					}
 				}

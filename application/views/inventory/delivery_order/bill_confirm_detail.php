@@ -52,9 +52,6 @@
 <div class="row">
   <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5 text-right">
     <?php if( $this->pm->can_edit || $this->pm->can_add ) : ?>
-
-      <?php //if($order->is_term == 1 OR $order->balance <= 0 OR $order->payment_role == 4) : ?>
-      <?php //else : ?>
         <?php if($order->role == 'S' && $order->is_term == 0 && $order->balance > 0 && $order->payment_role != 4) : ?>
         <span class="red" style="padding-right:10px;">มียอดค้างชำระ : <?php echo number($order->balance,2); ?></span>
       <?php endif; ?>
@@ -70,19 +67,19 @@
 
 <div class="row">
   <div class="col-lg-12 col-md-12 col-sm-12 col-sm-12 padding-5 table-responsive">
-    <table class="table table-bordered">
+    <table class="table table-bordered" style="min-width:950px;">
       <thead>
         <tr class="font-size-12">
-          <th class="width-5 text-center">ลำดับ</th>
-          <th class="width-35 text-center">สินค้า</th>
-          <th class="width-10 text-center">ราคา</th>
-          <th class="width-10 text-center">ออเดอร์</th>
-          <th class="width-10 text-center">จัด</th>
+          <th class="fix-width-50 text-center">ลำดับ</th>
+          <th class="min-width-300 text-center">สินค้า</th>
+          <th class="fix-width-100 text-center">ราคา</th>
+          <th class="fix-width-100 text-center">ออเดอร์</th>
+          <th class="fix-width-100 text-center">จัด</th>
         <?php if($use_qc) : ?>
-          <th class="width-10 text-center">ตรวจ</th>
+          <th class="fix-width-100 text-center">ตรวจ</th>
         <?php endif; ?>
-          <th class="width-10 text-center">ส่วนลด</th>
-          <th class="width-10 text-center">มูลค่า</th>
+          <th class="fix-width-100 text-center">ส่วนลด</th>
+          <th class="fix-width-100 text-center">มูลค่า</th>
         </tr>
       </thead>
       <tbody>
@@ -179,7 +176,7 @@
           </td>
         </tr>
 
-        <tr>
+        <!-- <tr>
           <td colspan="<?php echo $colspan; ?>">
             ค่าจัดส่ง
           </td>
@@ -195,7 +192,7 @@
           <td colspan="2" class="text-right">
             <?php echo number($order->service_fee, 2); ?>
           </td>
-        </tr>
+        </tr> -->
 
         <tr>
           <td colspan="<?php echo $colspan; ?>">

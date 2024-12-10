@@ -5,47 +5,47 @@ function doc_type($role)
 	{
 		case 'S' :
 			$content	= "order";
-			$title 		= "Packing List";
+			$title 		= "ใบสั่งขาย";
 		break;
 
 		case 'C' :
 			$content = "consign";
-			$title = "ใบส่งของ / ใบแจ้งหนี้  สินค้าฝากขาย";
+			$title = "ใบส่งของฝากขาย";
 		break;
 
 		case 'N' :
 			$content = "consign";
-			$title = "ใบส่งของ / ใบแจ้งหนี้  สินค้าฝากขาย";
+			$title = "ใบส่งของสินค้าฝากขาย";
 		break;
 
 		case 'U' :
 			$content = "support";
-			$title = "ใบส่งของ / รายการเบิกอภินันทนาการ";
+			$title = "ใบเบิกอภินันทนาการ";
 		break;
 
 		case 'P' :
 			$content = "sponsor";
-			$title = "ใบส่งของ / รายการสปอนเซอร์สโมสร";
+			$title = "ใบเบิกอภินันทนาการ";
 		break;
 
 		case 'T' :
 			$content = "transform";
-			$title = "ใบส่งของ / ใบเบิกสินค้าเพื่อแปรรูป";
+			$title = "ใบเบิกสินค้าเพื่อแปรรูป";
 		break;
 
 		case 'L' :
 			$content = "lend";
-			$title = "ใบส่งของ / ใบยืมสินค้า";
+			$title = "ใบยืมสินค้า";
 		break;
 
 		case 'R' :
 			$content 	= "requisition";
-			$title 		= "ใบส่งของ / ใบเบิกสินค้า";
+			$title 		= "ใบเบิกสินค้า";
 		break;
 
 		default :
 			$content = "order";
-			$title = "ใบส่งของ / ใบแจ้งหนี้";
+			$title = "ใบส่งของ";
 		break;
 	}
 

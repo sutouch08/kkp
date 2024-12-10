@@ -45,7 +45,7 @@ class Orders extends PS_Controller
     $filter = array(
       'code'          => get_filter('code', 'order_code', ''),
       'customer'      => get_filter('customer', 'order_customer', ''),
-      'user'          => get_filter('user', 'order_user', ''),
+      'user'          => get_filter('user', 'order_user', 'all'),
       'reference'     => get_filter('reference', 'order_reference', ''),
       'ship_code'     => get_filter('shipCode', 'order_shipCode', ''),
       'channels'      => get_filter('channels', 'order_channels', ''),
@@ -1882,7 +1882,6 @@ class Orders extends PS_Controller
     $ds['details'] = $details;
 		$ds['customer'] = $customer;
 		$ds['address'] = $customer_address;
-    $ds['title'] = "ใบสั่งขาย";
     $ds['is_barcode'] = $barcode != '' ? TRUE : FALSE;
     $this->load->view('print/print_order_sheet', $ds);
   }
@@ -1924,9 +1923,12 @@ class Orders extends PS_Controller
           "productName"	=> $rs->product_name,
           "cost"				=> $rs->cost,
           "price"	=> $rs->price,
+          "priceLabel" => number($rs->price, 2),
           "qty"	=> $rs->qty,
+          "qtyLabel" => number($rs->qty, 2),
           "discount"	=> discountLabel($rs->discount1, $rs->discount2, $rs->discount3),
-          "amount"	=> $rs->total_amount
+          "amount"	=> $rs->total_amount,
+          "amountLabel" => number($rs->total_amount, 2)
         );
         array_push($ds, $arr);
         $total_qty += $rs->qty;
@@ -1940,6 +1942,7 @@ class Orders extends PS_Controller
 
       $arr = array(
         "bDiscAmount" => $order->bDiscAmount,
+        "bDiscAmountLabel" => number($order->bDiscAmount, 2),
         "total_qty" => number($total_qty, 2),
         "order_amount" => number($total_order, 2),
         "total_discount" => number($total_discount, 2),
@@ -2360,6 +2363,85 @@ class Orders extends PS_Controller
     echo $rs === TRUE ? 'success' : 'ทำรายการไม่สำเร็จ';
   }
 
+
+  public function do_approve($code)
+  {
+    $sc = TRUE;
+    $this->load->model('approve_logs_model');
+
+    $order = $this->orders_model->get($code);
+
+    if( ! empty($order))
+    {
+      if($order->state == 1)
+      {
+        $user = $this->_user->uname;
+
+        $rs = $this->orders_model->update_approver($code, $user);
+
+        if(! $rs)
+        {
+          $sc = FALSE;
+          $this->error = "อนุมัติไม่สำเร็จ";
+        }
+        else
+        {
+          $this->approve_logs_model->add($code, 1, $user);
+        }
+      }
+      else
+      {
+        $sc = FALSE;
+        $this->error = "สถานะเอกสารไม่ถูกต้อง";
+      }
+    }
+    else
+    {
+      $sc = FALSE;
+      $this->error = "ไม่พบเลขที่เอกสาร";
+    }
+
+
+    echo $sc === TRUE ? 'success' : $this->error;
+  }
+
+
+  public function un_approve($code)
+  {
+    $sc = TRUE;
+    $this->load->model('approve_logs_model');
+    $order = $this->orders_model->get($code);
+    if(!empty($order))
+    {
+      if($order->state == 1 )
+      {
+        $user = $this->_user->uname;
+        $rs = $this->orders_model->un_approver($code, $user);
+        if(! $rs)
+        {
+          $sc = FALSE;
+          $this->error = "อนุมัติไม่สำเร็จ";
+        }
+        else
+        {
+          $this->approve_logs_model->add($code, 0, $user);
+        }
+      }
+      else
+      {
+        $sc = FALSE;
+        $this->error = "สถานะเอกสารไม่ถูกต้อง";
+      }
+    }
+    else
+    {
+      $sc = FALSE;
+      $this->error = "ไม่พบเลขที่เอกสาร";
+    }
+
+
+    echo $sc === TRUE ? 'success' : $this->error;
+  }
 
 
   public function order_state_change()

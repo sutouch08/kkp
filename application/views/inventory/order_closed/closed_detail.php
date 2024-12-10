@@ -94,18 +94,20 @@
 
   <div class="row">
     <div class="col-lg-12 col-md-12 col-sm-12 col-sm-12 padding-5 table-responsive">
-      <table class="table table-bordered">
+      <table class="table table-bordered" style="min-width:1050px;">
         <thead>
           <tr class="font-size-12">
-            <th class="width-5 text-center">ลำดับ</th>
-            <th class="width-35 text-center">สินค้า</th>
-            <th class="width-8 text-center">ราคา</th>
-            <th class="width-8 text-center">ออเดอร์</th>
-            <th class="width-8 text-center">จัด</th>
-            <th class="width-8 text-center">ตรวจ</th>
-            <th class="width-8 text-center">เปิดบิล</th>
-            <th class="width-10 text-center">ส่วนลด</th>
-            <th class="width-10 text-center">มูลค่า</th>
+            <th class="fix-width-50 text-center">ลำดับ</th>
+            <th class="min-width-300 text-center">สินค้า</th>
+            <th class="fix-width-100 text-center">ราคา</th>
+            <th class="fix-width-100 text-center">ออเดอร์</th>
+            <th class="fix-width-100 text-center">จัด</th>
+            <?php if($use_qc) : ?>
+              <th class="fix-width-100 text-center">ตรวจ</th>
+            <?php endif; ?>
+            <th class="fix-width-100 text-center">เปิดบิล</th>
+            <th class="fix-width-100 text-center">ส่วนลด</th>
+            <th class="fix-width-120 text-center">มูลค่า</th>
           </tr>
         </thead>
         <tbody>
@@ -141,7 +143,7 @@
               <td class="text-center"><?php echo $no; ?></td>
 
               <!--- รายการสินค้า ที่มีการสั่งสินค้า --->
-              <td><?php echo limitText($rs->product_code.' : '. $rs->product_name, 100); ?></td>
+              <td><?php echo $rs->product_code.' : '. $rs->product_name; ?></td>
 
               <!--- ราคาสินค้า  --->
               <td class="text-center"><?php echo number($rs->price, 2); ?></td>
@@ -151,8 +153,12 @@
 
               <!--- จำนวนที่จัดได้  --->
               <td class="text-center"><?php echo number($rs->prepared); ?></td>
+
               <!--- จำนวนที่ตรวจได้ --->
+              <?php if($use_qc) : ?>
               <td class="text-center"><?php echo number($rs->qc); ?></td>
+              <?php endif; ?>
+
               <!--- จำนวนที่บันทึกขาย --->
               <td class="text-center"><?php echo number($rs->sold); ?></td>
 
@@ -162,7 +168,7 @@
               <td class="text-right"><?php echo number($rs->line_total, 2); ?></td>
 
             </tr>
-    <?php            
+    <?php
             $totalQty += $rs->order_qty;
             $totalPrepared += $rs->prepared;
             $totalQc += $rs->qc;
@@ -184,9 +190,12 @@
             <td class="text-center">
               <?php echo number($totalPrepared); ?>
             </td>
-            <td class="text-center">
-              <?php echo number($totalQc); ?>
-            </td>
+
+            <?php if($use_qc) : ?>
+              <td class="text-center">
+                <?php echo number($totalQc); ?>
+              </td>
+            <?php endif; ?>
 
             <td class="text-center">
               <?php echo number($totalSold); ?>
