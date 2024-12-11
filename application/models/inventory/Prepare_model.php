@@ -237,39 +237,45 @@ class Prepare_model extends CI_Model
 
 
 
-  public function get_data(array $ds = array(), $perpage = '', $offset = '', $state = 3)
+  public function get_list(array $ds = array(), $perpage = 20, $offset = 0, $state = 3)
   {
-    $this->db->select('orders.*, channels.name AS channels_name, customers.name AS customer_name')
+    $this->db
+    ->select('orders.*, channels.name AS channels_name')
     ->from('orders')
     ->join('channels', 'channels.code = orders.channels_code','left')
-    ->join('customers', 'customers.code = orders.customer_code', 'left')
     ->where('orders.state', $state);
 
     if(!empty($ds['code']))
     {
-			$this->db->group_start();
-      $this->db->like('orders.code', $ds['code']);
-			$this->db->or_like('orders.reference', $ds['code']);
-			$this->db->group_end();
+			$this->db
+      ->group_start()
+      ->like('orders.code', $ds['code'])
+			->or_like('orders.reference', $ds['code'])
+			->group_end();
     }
 
-    if(!empty($ds['customer']))
+    if( ! empty($ds['customer']))
     {
-      $this->db->like('customers.name', $ds['customer']);
-      $this->db->or_like('orders.customer_ref', $ds['customer']);
+      $this->db
+      ->group_start()
+      ->like('orders.customer_code', $ds['customer'])
+      ->or_like('orders.customer_name', $ds['customer'])
+      ->or_like('orders.customer_ref', $ds['customer'])
+      ->group_end();
     }
 
     //---- user name / display name
-    if(!empty($ds['user']))
+    if( isset($ds['user']) && $ds['user'] != 'all')
     {
-      $users = user_in($ds['user']);
-      $this->db->where_in('orders.user', $users);
+      $this->db->where('orders.user', $ds['user']);
     }
 
-    if(!empty($ds['channels']))
+
+    if( isset($ds['channels']) && $ds['channels'] != 'all')
     {
       $this->db->where('orders.channels_code', $ds['channels']);
     }
+
 
     if($ds['from_date'] != '' && $ds['to_date'] != '')
     {
@@ -277,15 +283,17 @@ class Prepare_model extends CI_Model
       $this->db->where('orders.date_add <=', to_date($ds['to_date']));
     }
 
-    if($perpage != '')
+    $rs = $this->db
+    ->order_by('orders.date_add', 'ASC')
+    ->limit($perpage, $offset)
+    ->get();
+
+    if($rs->num_rows() > 0)
     {
-      $offset = $offset === NULL ? 0 : $offset;
-      $this->db->limit($perpage, $offset);
+      return $rs->result();
     }
 
-    $rs = $this->db->get();
-
-    return $rs->result();
+    return NULL;
   }
 
 

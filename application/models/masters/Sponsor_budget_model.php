@@ -45,6 +45,15 @@ class Sponsor_budget_model extends CI_Model
   }
 
 
+  public function rollback_used($id, $amount)
+  {
+    if($this->db->set("used", "used - {$amount}", FALSE)->where('id', $id)->update($this->tb))
+    {
+      return $this->recal_balance($id);
+    }
+  }
+
+
   public function recal_balance($id)
   {
     return $this->db->set("balance", "amount - used", FALSE)->where('id', $id)->update($this->tb);

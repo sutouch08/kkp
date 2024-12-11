@@ -16,11 +16,11 @@
 <div class="row">
   <div class="col-lg-1-harf col-md-3 col-sm-3 col-xs-6 padding-5">
     <label>รหัส</label>
-    <input type="text" class="form-control input-sm" name="code" value="<?php echo $code; ?>" />
+    <input type="text" class="form-control input-sm search-box" name="code" value="<?php echo $code; ?>" />
   </div>
 	<div class="col-lg-1-harf col-md-3 col-sm-3 col-xs-6 padding-5">
     <label>อ้างอิง</label>
-    <input type="text" class="form-control input-sm" name="reference" value="<?php echo $reference; ?>" />
+    <input type="text" class="form-control input-sm search-box" name="reference" value="<?php echo $reference; ?>" />
   </div>
 
 	<div class="col-lg-2 col-md-3 col-sm-3 col-xs-6 padding-5">
@@ -69,15 +69,15 @@
 					<th class="fix-width-40 text-center">#</th>
 					<th class="fix-width-100">รหัส</th>
 					<th class="fix-width-100">อ้างอิง</th>
-					<th class="fix-width-100">เริ่มต้น</th>
-					<th class="fix-width-100">สิ้นสุด</th>
+					<th class="fix-width-100 text-center">เริ่มต้น</th>
+					<th class="fix-width-100 text-center">สิ้นสุด</th>
 					<th class="fix-width-80 text-center">ปีงบประมาณ</th>
 					<th class="fix-width-60 text-center">สถานะ</th>
 					<th class="fix-width-80 text-center">ผู้ใช้งาน</th>
 					<th class="fix-width-100 text-right">งบประมาณ</th>
 					<th class="fix-width-100 text-right">ใช้ไป</th>
 					<th class="fix-width-100 text-right">คงเหลือ</th>
-					<th class="fix-width-150">แก้ไขล่าสุด</th>
+					<th class="fix-width-150 text-center">แก้ไขล่าสุด</th>
 					<th class="fix-width-150">แก้ไขโดย</th>
 				</tr>
 			</thead>
@@ -106,7 +106,7 @@
 						<td class="text-right"><?php echo number($rs->amount, 2); ?></td>
 						<td class="text-right"><?php echo number($rs->used, 2); ?></td>
 						<td class="text-right"><?php echo number($rs->balance, 2); ?></td>
-						<td><?php echo empty($rs->date_upd) ? thai_date($rs->date_add, TRUE) : thai_date($rs->date_upd, TRUE); ?></td>
+						<td class="text-center"><?php echo empty($rs->date_upd) ? thai_date($rs->date_add, TRUE) : thai_date($rs->date_upd, TRUE); ?></td>
 						<td><?php echo empty($rs->update_user) ? $rs->user : $rs->update_user; ?></td>
 					</tr>
 					<?php $no++; ?>

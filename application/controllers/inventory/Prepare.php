@@ -24,33 +24,28 @@ class Prepare extends PS_Controller
   {
     $this->load->helper('channels');
     $filter = array(
-      'code'          => get_filter('code', 'code', ''),
-      'customer'      => get_filter('customer', 'customer', ''),
-      'user'          => get_filter('user', 'user', ''),
-      'channels'      => get_filter('channels', 'channels', ''),
-      'from_date'     => get_filter('from_date', 'from_date', ''),
-      'to_date'       => get_filter('to_date', 'to_date', '')
+      'code'          => get_filter('code', 'pp_code', ''),
+      'customer'      => get_filter('customer', 'pp_customer', ''),
+      'user'          => get_filter('user', 'pp_user', 'all'),
+      'channels'      => get_filter('channels', 'pp_channels', 'all'),
+      'from_date'     => get_filter('from_date', 'pp_from_date', ''),
+      'to_date'       => get_filter('to_date', 'pp_to_date', '')
     );
 
 		$this->title = "ออเดอร์รอจัด";
-		//--- แสดงผลกี่รายการต่อหน้า
-		$perpage = ''; //get_rows();
-		//--- หาก user กำหนดการแสดงผลมามากเกินไป จำกัดไว้แค่ 300
-		// if($perpage > 300)
-		// {
-		// 	$perpage = 20;
-		// }
+
+		$perpage = get_rows();
 
 		$segment  = 4; //-- url segment
-		//$rows     = $this->prepare_model->count_rows($filter, 3);
+		$rows = $this->prepare_model->count_rows($filter, 3);
 		//--- ส่งตัวแปรเข้าไป 4 ตัว base_url ,  total_row , perpage = 20, segment = 3
-		//$init	    = pagination_config($this->home.'/index/', $rows, $perpage, $segment);
-		$orders   = $this->prepare_model->get_data($filter, $perpage, $this->uri->segment($segment), 3);
+		$init	= pagination_config($this->home.'/index/', $rows, $perpage, $segment);
+		$orders = $this->prepare_model->get_list($filter, $perpage, $this->uri->segment($segment), 3);
 
     $filter['orders'] = $orders;
 		$filter['use_prepare'] = is_true(getConfig('USE_PREPARE'));
 
-		//$this->pagination->initialize($init);
+		$this->pagination->initialize($init);
     $this->load->view('inventory/prepare/prepare_list', $filter);
   }
 
@@ -58,23 +53,28 @@ class Prepare extends PS_Controller
   public function view_process()
   {
     $this->load->helper('channels');
+
     $filter = array(
-      'code'          => get_filter('code', 'code', ''),
-      'customer'      => get_filter('customer', 'customer', ''),
-      'user'          => get_filter('user', 'user', ''),
-      'channels'      => get_filter('channels', 'channels', ''),
-      'from_date'     => get_filter('from_date', 'from_date', ''),
-      'to_date'       => get_filter('to_date', 'to_date', '')
+      'code'          => get_filter('code', 'pp_code', ''),
+      'customer'      => get_filter('customer', 'pp_customer', ''),
+      'user'          => get_filter('user', 'pp_user', 'all'),
+      'channels'      => get_filter('channels', 'pp_channels', 'all'),
+      'from_date'     => get_filter('from_date', 'pp_from_date', ''),
+      'to_date'       => get_filter('to_date', 'pp_to_date', '')
     );
 
 		$this->title = "ออเดอร์กำลังจัด";
 		//--- แสดงผลกี่รายการต่อหน้า
-		$perpage = 3000; //get_rows();
+		$perpage = get_rows();
 		$segment  = 4; //-- url segment
-		$orders   = $this->prepare_model->get_data($filter, $perpage, $this->uri->segment($segment), 4);
+    $rows = $this->prepare_model->count_rows($filter, 4);
+		//--- ส่งตัวแปรเข้าไป 4 ตัว base_url ,  total_row , perpage = 20, segment = 3
+		$init	= pagination_config($this->home.'/view_process/', $rows, $perpage, $segment);
+		$orders = $this->prepare_model->get_list($filter, $perpage, $this->uri->segment($segment), 4);
 
     $filter['orders'] = $orders;
-
+    
+    $this->pagination->initialize($init);
     $this->load->view('inventory/prepare/prepare_view_process', $filter);
   }
 
@@ -531,7 +531,15 @@ class Prepare extends PS_Controller
 
   public function clear_filter()
   {
-    $filter = array('code', 'customer', 'user', 'channels', 'from_date', 'to_date');
+    $filter = array(
+      'pp_code',
+      'pp_customer',
+      'pp_user',
+      'pp_channels',
+      'pp_from_date',
+      'pp_to_date'
+    );
+
     clear_filter($filter);
   }
 } //--- end class

@@ -2463,6 +2463,7 @@ class Orders extends PS_Controller
           $this->load->model('inventory/transform_model');
           //--- หากมีการรับสินค้าที่ผูกไว้แล้วจะไม่อนุญาติให้เปลี่ยนสถานะใดๆ
           $is_received = $this->transform_model->is_received($code);
+
           if($is_received === TRUE)
           {
             $sc = FALSE;
@@ -2476,11 +2477,19 @@ class Orders extends PS_Controller
           $this->load->model('inventory/lend_model');
           //--- หากมีการรับสินค้าที่ผูกไว้แล้วจะไม่อนุญาติให้เปลี่ยนสถานะใดๆ
           $is_received = $this->lend_model->is_received($code);
+
           if($is_received === TRUE)
           {
             $sc = FALSE;
             $this->error = 'ใบเบิกมีการรับคืนสินค้าแล้วไม่อนุญาติให้ย้อนสถานะ';
           }
+        }
+
+        if($order->role == 'P')
+        {
+          $this->load->model('masters/sponsor_budget_model');
+          $this->load->model('inventory/invoice_model');
+          $sold_amount = $this->invoice_model->get_total_sold_amount($order->code);
         }
 
         //--- เปิดไปกำกับไปแล้ว
@@ -2502,14 +2511,23 @@ class Orders extends PS_Controller
 
             if($state < 8)
             {
+
               if( ! $this->roll_back_action($order))
 							{
 								$sc = FALSE;
 							}
 							else
 							{
-								//--- ลบรายการตั้งหนี้ออก
-								$this->order_credit_model->delete($code);
+                if($order->role == 'S')
+                {
+                  //--- ลบรายการตั้งหนี้ออก
+                  $this->order_credit_model->delete($code);
+                }
+
+                if($order->role == 'P')
+                {
+                  $this->sponsor_budget_model->rollback_used($order->budget_id, $sold_amount);
+                }
 							}
             }
 
@@ -2528,8 +2546,16 @@ class Orders extends PS_Controller
 								}
 								else
 								{
-									//--- ลบรายการตั้งหนี้ออก
-									$this->order_credit_model->delete($code);
+                  if($order->role == 'S')
+                  {
+                    //--- ลบรายการตั้งหนี้ออก
+                    $this->order_credit_model->delete($code);
+                  }
+
+                  if($order->role == 'P')
+                  {
+                    $this->sponsor_budget_model->rollback_used($order->budget_id, $sold_amount);
+                  }
 								}
 							}
             }
