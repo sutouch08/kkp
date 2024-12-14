@@ -299,6 +299,36 @@ class Products_model extends CI_Model
   }
 
 
+  public function get_by_code($code)
+  {
+    $rs = $this->db
+    ->where('code', $code)
+    ->get('products');
+
+    if($rs->num_rows() === 1)
+    {
+      return $rs->row();
+    }
+
+    return NULL;
+  }
+
+
+  public function get_by_barcode($barcode)
+  {
+    $rs = $this->db
+    ->where('barcode IS NOT NULL', NULL, FALSE)
+    ->where('barcode', $barcode)
+    ->get('products');
+
+    if($rs->num_rows() > 0)
+    {
+      return $rs->row();
+    }
+
+    return NULL;
+  }
+
 
   public function get_product_by_barcode($code)
   {

@@ -319,7 +319,7 @@ class Zone_model extends CI_Model
   public function get($code)
   {
     $rs = $this->db
-    ->select('zone.code AS code, zone.name AS name, warehouse.code AS warehouse_code, warehouse.name AS warehouse_name')
+    ->select('zone.id AS id, zone.code AS code, zone.name AS name, warehouse.code AS warehouse_code, warehouse.name AS warehouse_name')
     ->from('zone')
     ->join('warehouse', 'warehouse.code = zone.warehouse_code', 'left')
     ->where('zone.code', $code)

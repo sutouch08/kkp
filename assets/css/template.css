@@ -1986,3 +1986,19 @@ input[type=number]::-webkit-outer-spin-button {
   font-style: italic;
   color: #7a8c9f;
 }
+
+.divFixHead {
+  padding-left: 0px;
+  padding-right: 0px;
+  margin-left: 5px;
+  border-top: solid 1px #CCC;
+  overflow: auto;
+}
+
+.tableFixHead > tfoot > tr > td {
+  background-color: #CCC;
+  position: sticky;
+  bottom:-1px;
+  font-size: 13px;
+  font-weight: 700;
+}

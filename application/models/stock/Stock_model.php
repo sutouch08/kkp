@@ -210,7 +210,7 @@ class stock_model extends CI_Model
       $this->db->where('zone.warehouse_code', $warehouse_code);
     }
 
-    $rs = $this->db->get();  
+    $rs = $this->db->get();
 
     return $rs->row()->qty === NULL ? 0 : $rs->row()->qty;
   }
@@ -258,7 +258,8 @@ class stock_model extends CI_Model
   public function get_all_stock_in_zone($zone_code)
   {
     $rs = $this->db
-    ->select('pd.code AS product_code, pd.name AS product_name')
+    ->select('pd.barcode, pd.code AS product_code, pd.name AS product_name')
+    ->select('pd.cost, pd.price')
     ->select('st.qty')
     ->from('stock AS st')
     ->join('products AS pd', 'st.product_code = pd.code', 'left')
