@@ -757,6 +757,17 @@ class Order_invoice extends PS_Controller
 
 				if($sc === TRUE)
 				{
+					if( ! empty($reference))
+					{
+						foreach($reference as $rs)
+						{
+							$this->order_invoice_model->update_order_sold($rs->order_code, array('inv_code' => $code));
+						}
+					}
+				}
+
+				if($sc === TRUE)
+				{
 					$this->db->trans_commit();
 				}
 				else
@@ -951,7 +962,7 @@ class Order_invoice extends PS_Controller
 					if(empty($order->invoice_code))
 					{
 						$customer = $this->customers_model->get($order->customer_code);
-						$doc_date = date('Y-m-d');
+						$doc_date = getConfig('ORDER_SOLD_DATE') == 'D' ? $order->date_add : date('Y-m-d');
 						$code = $this->get_new_code($doc_date);
 						$total_amount = 0;
 						$total_vat = 0;
@@ -1458,7 +1469,7 @@ class Order_invoice extends PS_Controller
 							if(!empty($details))
 							{
 								$customer = $this->customers_model->get($order->customer_code);
-								$doc_date = date('Y-m-d');
+								$doc_date = getConfig('ORDER_SOLD_DATE') == 'D' ? $order->date_add : date('Y-m-d');
 								$code = $this->get_new_code($doc_date);
 								$total_amount = 0;
 								$total_vat = 0;
