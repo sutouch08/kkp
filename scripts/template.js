@@ -34,20 +34,6 @@ function toggle_layout(){
 }
 
 
-
-// function load_in(){
-// 	var x = ($(document).innerWidth()/2)-50;
-// 	$("#loader").css("display","");
-// 	$("#loader").css("left",x);
-// 	$("#loader").animate({opacity:0.8, top:300},300);
-// }
-//
-//
-//
-// function load_out(){
-// 	$("#loader").animate({opacity:0, top:-20},300, function(){ $("#loader").css("display","none");});
-// }
-
 function load_in(){
 	$("#loader").css("display","block");
 	$('#loader-backdrop').css('display', 'block');
@@ -160,6 +146,18 @@ function render_append(source, data, output){
 }
 
 
+function render_after(source, data, output) {
+	var template = Handlebars.compile(source);
+	var html = template(data);
+	$(html).insertAfter(output);
+}
+
+function render_before(source, data, output) {
+	var template = Handlebars.compile(source);
+	var html = template(data);
+	$(html).insertBefore(output);
+}
+
 
 
 function set_rows()
@@ -189,19 +187,24 @@ $('#set_rows').keyup(function(e){
 
 
 
-
-function reIndex(){
-	//let no = parseDefault(parseInt($('#no').val()), 0);
-	let no = 0;
-  $('.no').each(function(index, el) {
-    no += 1;
-    $(this).text(addCommas(no));
-  });
+function reIndex(className){
+  if(className === undefined || className === null) {
+    $('.no').each(function(index, el) {
+      no = index +1;
+      $(this).text(addCommas(no));
+    });
+  }
+  else {
+    $('.'+className).each(function(index, el) {
+      no = index +1;
+      $(this).text(addCommas(no));
+    })
+  }
 }
 
 
-
 var downloadTimer;
+
 function get_download(token)
 {
 	load_in();
@@ -390,6 +393,19 @@ $('.search-box').keyup(function(e) {
 	}
 });
 
+$('.filter').change(function() {
+	getSearch();
+})
+
+function generateUID() {
+  return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+}
+
+function uniqueId()
+{
+	return Math.floor(Math.random() * Date.now());
+}
+
 function validCode(input){
   var regex = /[^a-z0-9-_]+/gi;
   input.value = input.value.replace(regex, '');
@@ -403,4 +419,64 @@ function isInteger(value) {
 function round(num)
 {
 	return Math.round((num + Number.EPSILON) * 100) / 100;
+}
+
+
+function hilightRow(id) {
+	$('.order-rows').removeClass('active-row');
+	$('#row-'+id).addClass('active-row');
+}
+
+$.fn.hasError = function(msg) {
+  let name = this.attr('id');
+  $('#'+name+'-error').text(msg);
+  return this.addClass('has-error');
+};
+
+$.fn.clearError = function() {
+  this.removeClass('has-error');
+  let name = this.attr('id');
+  return $('#'+name+'-error').text('');
+};
+
+function clearErrorByClass(className) {
+  $('.'+className).each(function() {
+    let name = $(this).attr('id');
+    $('#'+name+'-error').text('');
+    $(this).removeClass('has-error');
+  })
+}
+
+function showError(response) {
+  load_out();
+
+  setTimeout(() => {
+    swal({
+      title:'Error!',
+      text:(typeof response === 'object') ? response.responseText : response,
+      type:'error',
+      html:true
+    })
+  }, 100);
+}
+
+function is_true(val) {
+  if(typeof(val) === 'string') {
+    val = val.trim().toLowerCase();
+  }
+
+  switch (val) {
+    case true:
+    case "true":
+    case 1:
+    case "1":
+      return true;
+    default :
+      return false;
+  }
+}
+
+
+function closeModal(modalName) {
+  $('#'+modalName).modal('hide');
 }
