@@ -1,75 +1,142 @@
 <?php $this->load->view('include/header'); ?>
 <div class="row">
-	<div class="col-lg-4 col-md-4 col-sm-3 hidden-xs padding-5">
-    <h3 class="title"><?php echo $this->title; ?></h3>
-  </div>
-	<div class="col-xs-12 visible-xs padding-5">
-    <h3 class="title-xs"><?php echo $this->title; ?></h3>
-  </div>
-  <div class="col-lg-8 col-md-8 col-sm-9 col-xs-12 padding-5">
-  	<p class="pull-right top-p">
-			<button type="button" class="btn btn-xs btn-warning top-btn" onclick="goBack()"><i class="fa fa-arrow-left"></i> กลับ</button>
-			<?php if($order->status != 2 && $this->pm->can_delete) : ?>
-				<button type="button" class="btn btn-xs btn-danger top-btn" onclick="getDelete()"><i class="fa fa-times"></i> ยกเลิก</button>
+	<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 padding-5 padding-top-5">
+		<h3 class="title"><?php echo $this->title; ?></h3>
+	</div>
+	<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 padding-5 text-right">
+		<button type="button" class="btn btn-white btn-warning top-btn" onclick="goBack()"><i class="fa fa-arrow-left"></i> กลับ</button>
+		<button type="button" class="btn btn-white btn-success top-btn" onclick="showCustomerModal()">ข้อมูลลูกค้า</button>
+		<?php if($order->status != 2 && $this->pm->can_delete) : ?>
+			<button type="button" class="btn btn-white btn-danger top-btn" onclick="getDelete()"><i class="fa fa-times"></i> ยกเลิก</button>
+		<?php endif; ?>
+		<?php if($order->status == 1) : ?>
+			<?php if($use_vat) : ?>
+				<div class="btn-group">
+					<button data-toggle="dropdown" class="btn btn-info btn-white dropdown-toggle margin-top-5" aria-expanded="false">
+						<i class="ace-icon fa fa-print icon-on-left"></i>
+						พิมพ์
+						<i class="ace-icon fa fa-angle-down icon-on-right"></i>
+					</button>
+					<ul class="dropdown-menu dropdown-menu-right">
+						<li class="success">
+							<a href="javascript:print_tax_receipt()"><i class="fa fa-print"></i> ใบเสร็จ/ใบกำกับภาษี</a>
+						</li>
+						<li class="info">
+							<a href="javascript:print_tax_invoice()"><i class="fa fa-print"></i> ใบแจ้งหนี้/ใบกำกับภาษี</a>
+						</li>
+						<li class="purple">
+							<a href="javascript:print_tax_billing_note()"><i class="fa fa-print"></i>  ใบวางบิล/ใบแจ้งหนี้ี</a>
+						</li>
+						<li class="">
+							<a href="javascript:print_postal_slip()"><i class="fa fa-print"></i>  ใบนำส่ง</a>
+						</li>
+					</ul>
+				</div>
+			<?php else : ?>
+				<div class="btn-group">
+					<button data-toggle="dropdown" class="btn btn-info btn-white dropdown-toggle margin-top-5" aria-expanded="false">
+						<i class="ace-icon fa fa-print icon-on-left"></i>
+						พิมพ์
+						<i class="ace-icon fa fa-angle-down icon-on-right"></i>
+					</button>
+					<ul class="dropdown-menu dropdown-menu-right">
+						<li class="info">
+							<a href="javascript:print_do_invoice()"><i class="fa fa-print"></i>  ใบแจ้งหนี้ี</a>
+						</li>
+						<li class="success">
+							<a href="javascript:print_do_receipt()"><i class="fa fa-print"></i> ใบเสร็จ</a>
+						</li>
+						<li class="">
+							<a href="javascript:print_postal_slip()"><i class="fa fa-print"></i>  ใบนำส่ง</a>
+						</li>
+					</ul>
+				</div>
 			<?php endif; ?>
-			<?php if($order->status == 1) : ?>
-				<?php if($use_vat) : ?>
-					<button type="button" class="btn btn-xs btn-success top-btn" onclick="print_tax_receipt()"><i class="fa fa-print"></i> ใบเสร็จ/ใบกำกับภาษี</button>
-					<button type="button" class="btn btn-xs btn-info top-btn" onclick="print_tax_invoice()"><i class="fa fa-print"></i> ใบแจ้งหนี้/ใบกำกับภาษี</button>
-					<button type="button" class="btn btn-xs btn-purple top-btn" onclick="print_tax_billing_note()"><i class="fa fa-print"></i> ใบวางบิล/ใบแจ้งหนี้</button>
-				<?php else : ?>
-					<button type="button" class="btn btn-xs btn-primary top-btn" onclick="print_do_invoice()"><i class="fa fa-print"></i> ใบแจ้งหนี้</button>
-					<button type="button" class="btn btn-xs btn-info top-btn" onclick="print_do_receipt()"><i class="fa fa-print"></i> ใบเสร็จ</button>
-				<?php endif; ?>
-			<?php endif; ?>
-    </p>
+		<?php endif; ?>
   </div>
 </div><!-- End Row -->
 <hr class="padding-5">
 <div class="row">
-	<div class="col-lg-1-harf col-md-1-harf col-sm-2 col-1-harf col-xs-6 padding-5">
-		<label for="code">เลขที่เอกสาร</label>
+	<div class="col-lg-1-harf col-md-1-harf col-sm-2 col-xs-6 padding-5">
+		<label>เลขที่เอกสาร</label>
 		<input type="text" class="form-control input-sm text-center" id="code" name="code" value="<?php echo $order->code; ?>" disabled />
 	</div>
-	<div class="col-lg-1-harf col-md-1-harf col-sm-1-harf col-1-harf col-xs-6 padding-5">
-		<label for="doc_date">วันที่</label>
-		<input type="text" class="form-control input-sm text-center edit" name="doc_date" id="doc_date" value="<?php echo thai_date($order->doc_date); ?>" readonly disabled />
-	</div>
-	<div class="col-lg-1-harf col-md-1-harf col-sm-1-harf col-1-harf col-xs-4 padding-5">
-		<label for="customer_code">รหัสลูกค้า</label>
-		<input type="text" class="form-control input-sm text-center edit" name="customer_code" id="customer_code" value="<?php echo $order->customer_code; ?>" disabled />
-	</div>
-	<?php if($use_vat) : ?>
-	<div class="col-lg-6 col-md-6 col-sm-5-harf col-xs-8 padding-5">
-		<label for="customer_name">ลูกค้า</label>
-		<input type="text" class="form-control input-sm" name="customer_name" id="customer_name" value="<?php echo $order->customer_name; ?>" disabled />
-	</div>
-	<div class="col-lg-1-harf col-md-1-harf col-sm-1-harf col-1-harf col-xs-6 padding-5">
-		<label for="phone">ราคาขาย</label>
+	<div class="col-lg-1-harf col-md-1-harf col-sm-1-harf col-xs-6 padding-5">
+		<label>ชนิด VAT</label>
 		<select class="form-control input-sm edit" id="vat_type" name="vat_type" disabled>
-			<option value="I" <?php echo is_selected('I', $order->vat_type); ?>>รวม VAT</option>
-			<option value="E" <?php echo is_selected('E', $order->vat_type); ?>>ไม่รวม VAT</option>
+			<option value="I" <?php echo is_selected('I', $order->vat_type); ?>>Include</option>
+			<option value="E" <?php echo is_selected('E', $order->vat_type); ?>>Exclude</option>
 		</select>
 	</div>
-	<?php else : ?>
-	<div class="col-lg-7 col-md-7 col-sm-7 col-xs-6 padding-5">
-		<label for="customer_name">ลูกค้า</label>
-		<input type="text" class="form-control input-sm" name="customer_name" id="customer_name" value="<?php echo $order->customer_name; ?>" disabled />
+	<div class="col-lg-1-harf col-md-1-harf col-sm-1-harf col-xs-6 padding-5">
+		<label>วันที่</label>
+		<input type="text" class="form-control input-sm text-center e" id="doc_date" value="<?php echo thai_date($order->doc_date); ?>" readonly disabled/>
 	</div>
+	<div class="col-lg-2 col-md-1-harf col-sm-2 col-xs-6 padding-5">
+		<label>รหัสลูกค้า</label>
+		<input type="text" class="form-control input-sm text-center e" id="customer_code" data-code="<?php echo $order->customer_code; ?>" value="<?php echo $order->customer_code; ?>" disabled/>
+	</div>
+	<div class="col-lg-5-harf col-md-6 col-sm-5 col-xs-12 padding-5">
+		<label>ลูกค้า</label>
+		<input type="text" class="form-control input-sm e" id="customer-name" value="<?php echo $order->customer_name; ?>"/>
+	</div>
+	<div class="col-lg-2 col-md-3 col-sm-3 col-xs-6 padding-5">
+		<label>ผู้ติดต่อ</label>
+		<input type="text" class="form-control input-sm e" id="contact" value="<?php echo $order->contact_person; ?>" />
+	</div>
+	<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
+		<label>เลขที่ผู้เสียภาษี</label>
+		<input type="text" class="form-control input-sm text-center e" maxlength="13" id="tax-id" value="<?php echo $order->tax_id; ?>" />
+	</div>
+	<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-4 padding-5">
+		<label class="display-block not-show">นิติ</label>
+		<label style="padding-top:4px;">
+			<input type="checkbox" class="ace" id="is-company" onchange="toggleBranch()" value="1" <?php echo is_checked($order->is_company, '1') ?>/>
+			<span class="lbl"> นิติบุคคล</span>
+		</label>
+	</div>
+	<div class="col-lg-1 col-md-2 col-sm-2 col-xs-3 padding-5">
+		<label>สาขา</label>
+		<input type="text" class="form-control input-sm text-center e" maxlength="10" id="branch-code" value="<?php echo $order->branch_code; ?>" />
+	</div>
+	<div class="col-lg-1-harf col-md-3 col-sm-3 col-xs-5 padding-5">
+		<label>ชื่อสาขา</label>
+		<input type="text" class="form-control input-sm e" maxlength="100" id="branch-name" value="<?php echo $order->branch_name; ?>" />
+	</div>
+	<div class="col-lg-4-harf col-md-12 col-sm-12 col-xs-12 padding-5">
+		<label>ที่อยู่</label>
+		<input type="text" class="form-control input-sm e" maxlength="254"id="address" value="<?php echo $order->address; ?>" />
+	</div>
+	<div class="col-lg-2 col-md-2 col-sm-2 col-xs-6 padding-5">
+		<label>ตำบล</label>
+		<input type="text" class="form-control input-sm e" maxlength="100" id="sub-district" value="<?php echo $order->sub_district; ?>" />
+	</div>
+	<div class="col-lg-2 col-md-2 col-sm-2 col-xs-6 padding-5">
+		<label>อำเภอ</label>
+		<input type="text" class="form-control input-sm e" maxlength="100" id="district" value="<?php echo $order->district; ?>" />
+	</div>
+	<div class="col-lg-2 col-md-2 col-sm-2 col-xs-6 padding-5">
+		<label>จังหวัด</label>
+		<input type="text" class="form-control input-sm e" maxlength="100" id="province" value="<?php echo $order->province; ?>" />
+	</div>
+	<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
+		<label>รหัสไปรษณีย์</label>
+		<input type="text" class="form-control input-sm text-center e" maxlength="12" id="postcode" value="<?php echo $order->postcode; ?>" />
+	</div>
+	<div class="col-lg-3 col-md-2 col-sm-2 col-xs-6 padding-5">
+		<label>เบอร์โทร</label>
+		<input type="text" class="form-control input-sm e" maxlength="32" id="phone" value="<?php echo $order->phone; ?>" />
+	</div>
+	<?php if($this->pm->can_add OR $this->pm->can_edit) : ?>
+		<div class="row">
+			<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
+				<label class="display-block not-show">btn</label>
+				<button type="button" class="btn btn-xs btn-primary btn-block" id="btn-update" onclick="updateHeader()">
+					บันทึกหัวเอกสาร
+				</button>
+			</div>
+		</div>
 	<?php endif; ?>
-	<div class="col-sm-2 col-xs-6 padding-5">
-		<label for="branch_name">สาขา</label>
-		<input type="text" class="form-control input-sm text-center" name="branch_name" id="branch_name" value="<?php echo $order->branch_name; ?>" disabled />
-	</div>
-	<div class="col-sm-10 col-xs-12 padding-5">
-		<label for="address">ที่อยู่</label>
-		<input type="text"
-			class="form-control input-sm"
-			name="address"
-			id="address"
-			value="<?php echo $address; ?>" disabled />
-	</div>
-
 </div>
 <input type="hidden" id="customerCode" value="<?php echo $order->customer_code; ?>" />
 <?php
@@ -182,6 +249,8 @@ if($order->status == 2)
 	</div>
 </div>
 
+
+<?php $this->load->view('order_invoice/customer_modal'); ?>
 
 
 <div class="modal fade" id="order-list-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">

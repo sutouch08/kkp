@@ -5,21 +5,16 @@
 	var USE_VAT = <?php echo $use_vat; ?>
 </script>
 <div class="row">
-	<div class="col-lg-6 col-md-6 col-sm-6 padding-5 hidden-xs">
-    <h4 class="title"><?php echo $this->title; ?></h3>
-  </div>
-	<div class="col-xs-12 padding-5 text-center visible-xs" style="background-color:#eee;">
-		<h4 class="titel-xs"><?php echo $this->title; ?></h4>
+	<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 padding-5 padding-top-5">
+		<h3 class="title"><?php echo $this->title; ?></h3>
 	</div>
-	<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 padding-5">
-			<p class="pull-right top-p">
-				<?php if($pm->can_add OR $pm->can_edit) : ?>
-					<?php $inv_option = $use_vat ? 'tax_invoice' : 'do_invoice'; ?>
-					<button type="button" class="btn btn-sm btn-primary top-btn" onclick="create_each_invoice('<?php echo $inv_option; ?>')">เปิดใบกำกับแยกออเดอร์</button>
-					<button type="button" class="btn btn-sm btn-success top-btn" onclick="create_one_invoice('<?php echo $inv_option; ?>')">เปิดใบกำกับรวมออเดอร์</button>
-				<?php endif; ?>
-			</p>
-		</div>
+	<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 padding-5 text-right">
+		<?php if($pm->can_add OR $pm->can_edit) : ?>
+			<?php $inv_option = $use_vat ? 'tax_invoice' : 'do_invoice'; ?>
+			<button type="button" class="btn btn-white btn-primary top-btn" onclick="create_each_invoice('<?php echo $inv_option; ?>')">เปิดใบกำกับแยกออเดอร์</button>
+			<button type="button" class="btn btn-white btn-success top-btn" onclick="create_one_invoice('<?php echo $inv_option; ?>')">เปิดใบกำกับรวมออเดอร์</button>
+		<?php endif; ?>
+	</div>
 </div><!-- End Row -->
 <hr class="padding-5"/>
 <form id="searchForm" method="post" action="<?php echo current_url(); ?>">
@@ -39,7 +34,7 @@
     <input type="text" class="form-control input-sm search" name="customer" value="<?php echo $customer; ?>" />
   </div>
 
-	<div class="col-lg-1-harf col-md-2 col-sm-3 col-xs-6 padding-5">
+	<div class="col-lg-1 col-md-2 col-sm-3 col-xs-6 padding-5">
     <label>ใบกำกับ</label>
 		<select class="form-control input-sm" name="is_inv" onchange="getSearch()">
 			<option value="all">ทั้งหมด</option>
@@ -56,15 +51,7 @@
 		</select>
   </div>
 
-
-	<div class="col-lg-1-harf col-md-2 col-sm-3 col-xs-6 padding-5 hide">
-    <label>รูปแบบ</label>
-		<select class="form-control input-sm" name="role" onchange="getSearch()">
-      <option value="all">ทั้งหมด</option>
-    </select>
-  </div>
-
-	<div class="col-lg-1-harf col-md-2 col-sm-3 col-xs-6 padding-5">
+	<div class="col-lg-1 col-md-2 col-sm-3 col-xs-6 padding-5">
     <label>ช่องทางขาย</label>
 		<select class="form-control input-sm" name="channels" onchange="getSearch()">
       <option value="all">ทั้งหมด</option>
@@ -99,8 +86,8 @@
       <thead>
         <tr>
 					<th class="fix-width-40 text-center"></th>
-					<th class="fix-width-60"></th>
-          <th class="fix-width-60 text-center">ลำดับ</th>
+					<th class="fix-width-60">Action</th>
+          <th class="fix-width-60 text-center">#</th>
           <th class="fix-width-100 text-center">วันที่</th>
           <th class="fix-width-120">เลขที่เอกสาร</th>
 					<th class="fix-width-120">ใบกำกับ</th>
@@ -148,7 +135,7 @@
             <?php echo $rs->invoice_code; ?>
           </td>
 
-          <td class="middle hide-text" >
+          <td class="middle" >
             <?php echo $rs->customer_name; ?>
 						<?php if(!empty($rs->customer_ref)) : ?>
 							[<?php echo $rs->customer_ref; ?>]
@@ -164,7 +151,7 @@
             <?php echo $rs->payment_name; ?>
           </td>
 
-          <td class="middle hide-text" >
+          <td class="middle" >
             <?php echo $rs->user; ?>
           </td>
         </tr>

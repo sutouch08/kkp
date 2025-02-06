@@ -80,8 +80,6 @@ function getDelete(code) {
 }
 
 
-
-
 function printSelectedInvoice(option) {
 	var data = [];
 	var url = '';
@@ -127,6 +125,16 @@ function printSelectedInvoice(option) {
 				 alert('You must allow popups for this map to work.');
 			}
 	}
+}
+
+
+function print_postal_slip() {
+	let width = 800;
+	let center = ($(document).width() - width)/2;
+	let prop = "width="+width+", height=900, left="+center+", scrollbars=yes";
+	let code = $('#code').val().trim();
+	let target = HOME + 'print_postal_slip/'+code;
+	window.open(target, '_blank', prop);
 }
 
 
@@ -220,29 +228,435 @@ $('#customer_code').autocomplete({
 		var rs = $(this).val();
 		var arr = rs.split(' | ');
 		if(arr.length == 2) {
-			$('#customerCode').val(arr[0]); //--- for check with customer
-			$('#customer_code').val(arr[0]);
-			$('#customer_name').val(arr[1]);
+			let code = arr[0];
+			let name = arr[1];
+			$('#customerCode').val(code); //--- for check with customer
+			$('#customer_code').val(code);
+			$('#customer-name').val(name);
+
+			get_customer_bill_to_address(code);
 		}
 		else {
 			$('#customerCode').val('');
 			$('#customer_code').val('');
-			$('#customer_name').val('');
+			$('#customer-name').val('');
 		}
 	}
 })
 
 
-function add() {
-	var doc_date = $('#doc_date').val();
-	var customerCode = $.trim($('#customerCode').val());
-	var customer_code = $.trim($('#customer_code').val());
-	var customer_name = $.trim($('#customer_name').val());
-	var vat_type = $('#vat_type').val();
-	var remark = $.trim($('#remark').val());
+function get_customer_bill_to_address(code) {
+	load_in();
 
-	if(customer_code.length === 0 || (customer_code != customerCode)) {
-		swal("รหัสลูกค้าไม่ถูกต้อง");
+	$.ajax({
+		url:HOME + 'get_customer_bill_to_address',
+		type:'POST',
+		cache:false,
+		data:{
+			'customer_code' : code
+		},
+		success:function(rs) {
+			load_out();
+
+			if(isJson(rs)) {
+				let ds = JSON.parse(rs);
+
+				if(ds.status == 'success') {
+					let adr = ds.bill_to;
+
+					if(adr != null) {
+						$('#customer-name').val(adr.name);
+						$('#tax-id').val(adr.tax_id);
+						$('#branch-code').val(adr.branch_code);
+						$('#branch-name').val(adr.branch_name);
+						$('#address').val(adr.address);
+						$('#sub-district').val(adr.sub_district);
+						$('#district').val(adr.district);
+						$('#province').val(adr.province);
+						$('#postcode').val(adr.postcode);
+						$('#phone').val(adr.phone);
+					}
+					else {
+						$('#tax-id').val('');
+						$('#branch-code').val('');
+						$('#branch-name').val('');
+						$('#address').val('');
+						$('#sub-district').val('');
+						$('#district').val('');
+						$('#province').val('');
+						$('#postcode').val('');
+						$('#phone').val('');
+					}
+				}
+				else {
+					showError(ds.message);
+				}
+			}
+			else {
+				showError(rs);
+			}
+		},
+		error:function(rs) {
+			load_out();
+			showError(rs);
+		}
+	})
+}
+
+
+function toggleFormBranch() {
+	if($('#form-is-company').is(':checked')) {
+		$('#form-branch-code').val('00000');
+		$('#form-branch-name').val('สำนักงานใหญ่');
+	}
+	else {
+		$('#form-branch-code').val('');
+		$('#form-branch-name').val('');
+	}
+}
+
+
+function toggleBranch() {
+	let bCode = $('#branch-code').val();
+
+	if($('#is-company').is(':checked')) {
+		if(bCode.length == 0) {
+			$('#branch-code').val('00000');
+			$('#branch-name').val('สำนักงานใหญ่');
+		}
+	}
+	else {
+		$('#branch-code').val('');
+		$('#branch-name').val('');
+	}
+}
+
+
+function showCustomerModal() {
+	$('#customerModal').modal('show');
+	$('#customerModal').on('shown.bs.modal', () => {
+		$('#tax-search').focus();
+	})
+}
+
+$('#tax-search').autocomplete({
+	source:BASE_URL + 'auto_complete/get_invoice_customer',
+	autoFocus:true,
+	open:function(event) {
+		let ul = $(this).autocomplete('widget');
+		ul.css('width', 'auto');
+	},
+	select:function(event, ui) {
+		$('#cust-id').val(ui.item.id);
+		$('#form-name').val(ui.item.name);
+		$('#form-tax-id').val(ui.item.tax_id);
+		$('#form-branch-code').val(ui.item.branch_code);
+		$('#form-branch-name').val(ui.item.branch_name);
+		$('#form-address').val(ui.item.address);
+		$('#form-sub-district').val(ui.item.sub_district);
+		$('#form-district').val(ui.item.district);
+		$('#form-province').val(ui.item.province);
+		$('#form-postcode').val(ui.item.postcode);
+		$('#form-phone').val(ui.item.phone);
+
+		if(ui.item.is_company == '1') {
+			$('#form-is-company').prop('checked', true);
+		}
+		else {
+			$('#form-is-company').prop('checked', false);
+		}
+	},
+	close:function() {
+		let arr = $(this).val().split(' | ');
+		$(this).val(arr[0]);
+	}
+})
+
+function newCustomer() {
+	let taxId = $('#tax-search').val();
+	$('.cust-form').removeAttr('disabled');
+	$('#form-tax-id').val(taxId);
+	$('#cust-id').val('');
+	$('#form-name').focus();
+}
+
+
+function addCustomer() {
+	$('.cust-form').removeClass('has-error');
+
+	let h = {
+		'customer_id' : $('#cust-id').val(),
+		'customer_name' : $.trim($('#form-name').val()),
+		'tax_id' : $('#form-tax-id').val(),
+		'branch_code' : $.trim($('#form-branch-code').val()),
+		'branch_name' : $.trim($('#form-branch-name').val()),
+		'address' : $.trim($('#form-address').val()),
+		'sub_district' : $.trim($('#form-sub-district').val()),
+		'district' : $.trim($('#form-district').val()),
+		'province' : $.trim($('#form-province').val()),
+		'postcode' : $.trim($('#form-postcode').val()),
+		'phone' : $.trim($('#form-phone').val()),
+		'is_company' : $('#form-is-company').is(':checked') ? 1 : 0
+	};
+
+	if(h.customer_name.length == 0) {
+		$('#form-name').addClass('has-error');
+		return false;
+	}
+
+	if(h.tax_id.length < 13) {
+		$('#form-tax-id').addClass('has-error');
+		return false;
+	}
+
+	if(h.is_company && (h.branch_code.length == 0 || h.branch_name.length == 0)) {
+		if(h.branch_code.length == 0) {
+			$('#form-branch-code').addClass('has-error');
+		}
+
+		if(h.branch_name.length == 0) {
+			$('#form-branch-name').addClass('has-error');
+		}
+
+		return false;
+	}
+
+	if(h.address.length == 0) {
+		$('#form-address').addClass('has-error');
+		return false;
+	}
+
+	$('#customerModal').modal('hide');
+
+	load_in();
+
+	$.ajax({
+		url:HOME + 'add_invoice_customer',
+		type:'POST',
+		cache:false,
+		data:{
+			"data" : JSON.stringify(h)
+		},
+		success:function(rs) {
+			load_out();
+
+			if(isJson(rs)) {
+				let ds = JSON.parse(rs);
+
+				if(ds.status == 'success') {
+					addToBill();
+				}
+				else {
+					message = '<h4 class="title-xs red text-center">'+ds.message+'</h4>';
+					$('#cust-result-table').html(message);
+					$('.cust-form').val('').attr('disabled', 'disabled');
+					$('#tax-search').focus();
+				}
+			}
+			else {
+				message = '<h4 class="title-xs red text-center">'+rs+'</h4>';
+				$('#cust-result-table').html(message);
+				$('#tax-search').focus();
+			}
+		}
+	})
+}
+
+
+function addToBill() {
+	$('.cust-form').removeClass('has-error');
+
+	let h = {
+		'customer_id' : $('#cust-id').val(),
+		'customer_name' : $.trim($('#form-name').val()),
+		'tax_id' : $('#form-tax-id').val(),
+		'branch_code' : $.trim($('#form-branch-code').val()),
+		'branch_name' : $.trim($('#form-branch-name').val()),
+		'address' : $.trim($('#form-address').val()),
+		'sub_district' : $.trim($('#form-sub-district').val()),
+		'district' : $.trim($('#form-district').val()),
+		'province' : $.trim($('#form-province').val()),
+		'postcode' : $.trim($('#form-postcode').val()),
+		'phone' : $.trim($('#form-phone').val()),
+		'is_company' : $('#form-is-company').is(':checked') ? 1 : 0
+	};
+
+	if(h.customer_name.length == 0) {
+		$('#form-name').addClass('has-error');
+		return false;
+	}
+
+	if(h.tax_id.length < 10) {
+		$('#form-tax-id').addClass('has-error');
+		return false;
+	}
+
+	if(h.is_company && (h.branch_code.length == 0 || h.branch_name.length == 0)) {
+		if(h.branch_code.length == 0) {
+			$('#form-branch-code').addClass('has-error');
+		}
+
+		if(h.branch_name.length == 0) {
+			$('#form-branch-name').addClass('has-error');
+		}
+
+		return false;
+	}
+
+	if(h.address.length == 0) {
+		$('#form-address').addClass('has-error');
+		return false;
+	}
+
+	$('#customerModal').modal('hide');
+
+	$('#customer-name').val(h.customer_name);
+	$('#tax-id').val(h.tax_id);
+	$('#branch-code').val(h.branch_code);
+	$('#branch-name').val(h.branch_name);
+	$('#address').val(h.address);
+	$('#sub-district').val(h.sub_district);
+	$('#district').val(h.district);
+	$('#province').val(h.province);
+	$('#postcode').val(h.postcode);
+	$('#phone').val(h.phone);
+
+	if(h.is_company) {
+		$('#is-company').prop('checked', true);
+	}
+	else {
+		$('#is-company').prop('checked', false);
+	}
+}
+
+
+function clearForm() {
+	$('.cust-form').val('');
+}
+
+function parseAddress(address, subDistrict, district, province, postcode) {
+	let addr = address;
+
+	if(subDistrict != "" || subDistrict != null || subDistrict != undefined) {
+		addr = addr + " ต. " + subDistrict;
+	}
+
+	if(district != "" || disctrict != null || district != undefined) {
+		addr = addr + " อ. " + district;
+	}
+
+	if(province != "" || province != null || province != undefined) {
+		addr = addr + " จ. " + province;
+	}
+
+	if(postcode != "" || postcode != null || postcode != undefined) {
+		addr = addr + " " +postcode;
+	}
+
+	return addr;
+}
+
+
+$('#form-name').keyup(function(e) {
+	if(e.keyCode == 13) {
+		$('#form-tax-id').focus();
+	}
+});
+
+$('#form-tax-id').keyup(function(e) {
+	if(e.keyCode == 13) {
+		$('#form-branch-code').focus();
+	}
+});
+
+$('#form-branch-code').keyup(function(e) {
+	if(e.keyCode == 13) {
+		$('#form-branch-name').focus();
+	}
+});
+
+$('#form-branch-name').keyup(function(e) {
+	if(e.keyCode == 13) {
+		$('#address').focus();
+	}
+});
+
+$('#form-address').keyup(function(e) {
+	if(e.keyCode == 13) {
+		$('#phone').focus();
+	}
+});
+
+$('#form-phone').keyup(function(e) {
+	if(e.keyCode == 13) {
+		$('#form-is-company').focus();
+	}
+});
+
+function add() {
+	$('.e').removeClass('has-error');
+
+	let h = {
+		'doc_date' : $('#doc_date').val(),
+		'vat_type' : $('#vat_type').val(),
+		'customerCode' : $('#customerCode').val().trim(),
+		'customer_code' : $('#customer_code').val().trim(),
+		'customer_name' : $('#customer-name').val().trim(),
+		'tax_id' : $('#tax-id').val().trim(),
+		'is_company' : $('#is-company').is(':checked') ? 1 : 0,
+		'branch_code' : $('#branch-code').val().trim(),
+		'branch_name' : $('#branch-name').val().trim(),
+		'address' : $('#address').val().trim(),
+		'sub_district' : $('#sub-district').val().trim(),
+		'district' : $('#district').val().trim(),
+		'province' : $('#province').val().trim(),
+		'postcode' : $('#postcode').val().trim(),
+		'phone' : $('#phone').val().trim()
+	};
+
+	if(h.customer_code.length == 0 || h.customer_code != h.customerCode) {
+		$('#customer_code').hasError();
+		return false;
+	}
+
+	if(h.customer_name.length == 0) {
+		$('#customer-name').hasError();
+		return false;
+	}
+
+	if(h.tax_id.length != 13) {
+		$('#tax-id').hasError();
+		return false;
+	}
+
+	if(h.is_company == 1 && (h.branch_code.length == 0 || h.branch_name.length == 0)) {
+		$('#branch-code').hasError();
+		$('#branch-name').hasError();
+		return false;
+	}
+
+	if(h.branch_code.length > 0 && h.branch_name.length == 0) {
+		$('#branch-name').hasError();
+		return false;
+	}
+
+	if(h.address.length == 0) {
+		$('#address').hasError();
+		return false;
+	}
+
+	if(h.sub_district.length == 0) {
+		$('#sub-district').hasError();
+		return false;
+	}
+
+	if(h.district.length == 0) {
+		$('#district').hasError();
+		return false;
+	}
+
+	if(h.province.length == 0) {
+		$('#province').hasError();
 		return false;
 	}
 
@@ -253,34 +667,28 @@ function add() {
 		type:'POST',
 		cache:false,
 		data:{
-			'doc_date' : doc_date,
-			'customer_code' : customer_code,
-			'vat_type' : vat_type,
-			'remark' : remark
+			"data" : JSON.stringify(h)
 		},
 		success:function(rs) {
 			load_out();
-			var rs = $.trim(rs);
+
 			if(isJson(rs)) {
-				var ds = $.parseJSON(rs);
+				let ds = JSON.parse(rs);
+
 				if(ds.status === 'success') {
 					goEdit(ds.code);
 				}
 				else {
-					swal({
-						title:'Error!',
-						text:ds.message,
-						type:'error'
-					});
+					showError(ds.message);
 				}
 			}
 			else {
-				swal({
-					title:'Error!',
-					text:rs,
-					type:'error'
-				})
+				showError(rs);
 			}
+		},
+		error:function(rs) {
+			load_out();
+			showError(rs);
 		}
 	})
 }
@@ -292,17 +700,167 @@ function getEdit(){
 	$('#btn-update').removeClass('hide');
 }
 
-function updateHeader(){
-	var code = $('#code').val();
-	var doc_date = $('#doc_date').val();
-	var customerCode = $.trim($('#customerCode').val());
-	var customer_code = $.trim($('#customer_code').val());
-	var customer_name = $.trim($('#customer_name').val());
-	var vat_type = $('#vat_type').val();
-	var remark = $.trim($('#remark').val());
 
-	if(customer_code.length === 0 || (customer_code != customerCode)) {
-		swal("รหัสลูกค้าไม่ถูกต้อง");
+function updateHeader() {
+	$('.e').removeClass('has-error');
+
+	let h = {
+		'code' : $('#code').val().trim(),
+		'doc_date' : $('#doc_date').val(),
+		'vat_type' : $('#vat_type').val(),
+		'customerCode' : $('#customerCode').val().trim(),
+		'customer_code' : $('#customer_code').val().trim(),
+		'customer_name' : $('#customer-name').val().trim(),
+		'contact_person' : $('#contact').val().trim(),
+		'tax_id' : $('#tax-id').val().trim(),
+		'is_company' : $('#is-company').is(':checked') ? 1 : 0,
+		'branch_code' : $('#branch-code').val().trim(),
+		'branch_name' : $('#branch-name').val().trim(),
+		'address' : $('#address').val().trim(),
+		'sub_district' : $('#sub-district').val().trim(),
+		'district' : $('#district').val().trim(),
+		'province' : $('#province').val().trim(),
+		'postcode' : $('#postcode').val().trim(),
+		'phone' : $('#phone').val().trim()
+	};
+
+	let original_customer = $('#customer_code').data('code');
+
+	if(h.customer_code.length == 0 || h.customer_code != h.customerCode) {
+		$('#customer_code').hasError();
+		return false;
+	}
+
+	if(h.customer_name.length == 0) {
+		$('#customer-name').hasError();
+		return false;
+	}
+
+	if(h.tax_id.length != 13) {
+		$('#tax-id').hasError();
+		return false;
+	}
+
+	if(h.is_company == 1 && (h.branch_code.length == 0 || h.branch_name.length == 0)) {
+		$('#branch-code').hasError();
+		$('#branch-name').hasError();
+		return false;
+	}
+
+	if(h.branch_code.length > 0 && h.branch_name.length == 0) {
+		$('#branch-name').hasError();
+		return false;
+	}
+
+	if(h.address.length == 0) {
+		$('#address').hasError();
+		return false;
+	}
+
+	if(h.sub_district.length == 0) {
+		$('#sub-district').hasError();
+		return false;
+	}
+
+	if(h.district.length == 0) {
+		$('#district').hasError();
+		return false;
+	}
+
+	if(h.province.length == 0) {
+		$('#province').hasError();
+		return false;
+	}
+
+
+	if(h.customer_code != original_customer) {
+		swal({
+			title:'Warning !',
+			text:'รหัสลูกค้าเปลียน รายการสินค้าจะถูกเคลียร์<br/>ต้องการดำเนินการต่อหรือไม่ ?',
+			type:'warning',
+			html:true,
+			showCancelButton:true,
+			confirmButtonText:'Yes',
+			cancelButtonText:'No',
+			closeOnConfirm:true
+		},function() {
+			update();
+		});
+	}
+	else {
+		update();
+	}
+}
+
+
+function update() {
+	$('.e').removeClass('has-error');
+
+	let h = {
+		'code' : $('#code').val().trim(),
+		'doc_date' : $('#doc_date').val(),
+		'vat_type' : $('#vat_type').val(),
+		'customerCode' : $('#customerCode').val().trim(),
+		'customer_code' : $('#customer_code').val().trim(),
+		'customer_name' : $('#customer-name').val().trim(),
+		'contact_person' : $('#contact').val().trim(),
+		'tax_id' : $('#tax-id').val().trim(),
+		'is_company' : $('#is-company').is(':checked') ? 1 : 0,
+		'branch_code' : $('#branch-code').val().trim(),
+		'branch_name' : $('#branch-name').val().trim(),
+		'address' : $('#address').val().trim(),
+		'sub_district' : $('#sub-district').val().trim(),
+		'district' : $('#district').val().trim(),
+		'province' : $('#province').val().trim(),
+		'postcode' : $('#postcode').val().trim(),
+		'phone' : $('#phone').val().trim()
+	};
+
+	let original_customer = $('#customer_code').data('code');
+
+	if(h.customer_code.length == 0 || h.customer_code != h.customerCode) {
+		$('#customer_code').hasError();
+		return false;
+	}
+
+	if(h.customer_name.length == 0) {
+		$('#customer-name').hasError();
+		return false;
+	}
+
+	if(h.tax_id.length != 13) {
+		$('#tax-id').hasError();
+		return false;
+	}
+
+	if(h.is_company == 1 && (h.branch_code.length == 0 || h.branch_name.length == 0)) {
+		$('#branch-code').hasError();
+		$('#branch-name').hasError();
+		return false;
+	}
+
+	if(h.branch_code.length > 0 && h.branch_name.length == 0) {
+		$('#branch-name').hasError();
+		return false;
+	}
+
+	if(h.address.length == 0) {
+		$('#address').hasError();
+		return false;
+	}
+
+	if(h.sub_district.length == 0) {
+		$('#sub-district').hasError();
+		return false;
+	}
+
+	if(h.district.length == 0) {
+		$('#district').hasError();
+		return false;
+	}
+
+	if(h.province.length == 0) {
+		$('#province').hasError();
 		return false;
 	}
 
@@ -313,32 +871,35 @@ function updateHeader(){
 		type:'POST',
 		cache:false,
 		data:{
-			'code' : code,
-			'doc_date' : doc_date,
-			'customer_code' : customer_code,
-			'vat_type' : vat_type,
-			'remark' : remark
+			"data" : JSON.stringify(h)
 		},
 		success:function(rs) {
-			var rs = $.trim(rs);
-			if(rs === 'success') {
-				swal({
-					title:'Updated',
-					type:'success',
-					timer:1000
-				});
+			load_out();
 
-				setTimeout(function(){
-					window.location.reload();
-				}, 1200);
+			if(rs.trim() == 'success') {
+				setTimeout(() => {
+					swal({
+						title:'Success',
+						type:'success',
+						timer:1000
+					});
+
+					setTimeout(() => {
+						window.location.reload();
+					}, 1200);
+				}, 100);
 			}
 			else {
-				swal({
-					title:'Error!',
-					text:rs,
-					type:'error'
-				})
+				setTimeout(() => {
+					showError(rs);
+				}, 100);
 			}
+		},
+		error:function(rs) {
+			load_out();
+			setTimeout(() => {
+				showError(rs);
+			}, 100);
 		}
 	})
 }

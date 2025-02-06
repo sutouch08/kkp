@@ -41,21 +41,22 @@ class Orders extends PS_Controller
   public function index()
   {
     $filter = array(
-      'code'          => get_filter('code', 'order_code', ''),
-      'customer'      => get_filter('customer', 'order_customer', ''),
-      'user'          => get_filter('user', 'order_user', ''),
-      'reference'     => get_filter('reference', 'order_reference', ''),
-      'ship_code'     => get_filter('shipCode', 'order_shipCode', ''),
-      'channels'      => get_filter('channels', 'order_channels', ''),
-      'payment'       => get_filter('payment', 'order_payment', ''),
-      'from_date'     => get_filter('fromDate', 'order_fromDate', ''),
-      'to_date'       => get_filter('toDate', 'order_toDate', ''),
-      'is_paid'       => get_filter('is_paid', 'is_paid', 'all'),
+      'code' => get_filter('code', 'order_code', ''),
+      'customer' => get_filter('customer', 'order_customer', ''),
+      'user' => get_filter('user', 'order_user', ''),
+      'reference' => get_filter('reference', 'order_reference', ''),
+      'ship_code' => get_filter('shipCode', 'order_shipCode', ''),
+      'channels' => get_filter('channels', 'order_channels', ''),
+      'payment' => get_filter('payment', 'order_payment', ''),
+      'from_date' => get_filter('fromDate', 'order_fromDate', ''),
+      'to_date' => get_filter('toDate', 'order_toDate', ''),
+      'is_paid' => get_filter('is_paid', 'is_paid', 'all'),
+      'is_invoice' => get_filter('is_invoice', 'is_invoice', 'all'),
 			'notSave' => get_filter('notSave', 'notSave', NULL),
       'onlyMe' => get_filter('onlyMe', 'onlyMe', NULL),
       'isExpire' => get_filter('isExpire', 'isExpire', NULL),
-      'order_by'      => get_filter('order_by', 'order_by', 'code'),
-      'sort_by'       => get_filter('sort_by', 'sort_by', 'DESC')
+      'order_by' => get_filter('order_by', 'order_by', 'code'),
+      'sort_by' => get_filter('sort_by', 'sort_by', 'DESC')
     );
 
     $state = array(
@@ -3132,6 +3133,8 @@ class Orders extends PS_Controller
       'notSave',
       'onlyMe',
       'isExpire',
+      'is_paid',
+      'is_invoice',
       'order_order_by',
       'order_sort_by',
 			'from_date',

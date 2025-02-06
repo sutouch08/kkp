@@ -5,7 +5,7 @@
 <link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/ace.css" class="ace-main-stylesheet" id="main-ace-style" />
 <link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/ace-skins.css" />
 <link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/jquery-ui-1.10.4.custom.min.css " />
-<link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/template.css?v=2.1"/>
+<link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/template.css?v=<?php echo date('Ymd'); ?>"/>
 <!-- ace settings handler -->
 <script src="<?php echo base_url(); ?>assets/js/ace-extra.js"></script>
 <script src="<?php echo base_url(); ?>assets/js/jquery.min.js"></script>

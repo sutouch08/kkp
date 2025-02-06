@@ -1,22 +1,17 @@
 <?php $this->load->view('include/header'); ?>
 <?php $can_upload = getConfig('ALLOW_UPLOAD_ORDER'); ?>
 <div class="row">
-	<div class="col-lg-6 col-md-6 col-sm-6 col-xs-4 padding-5">
-    <h3 class="title">
-      <?php echo $this->title; ?>
-    </h3>
-    </div>
-    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-8 padding-5">
-    	<p class="pull-right top-p">
-      <?php if($this->pm->can_add) : ?>
-				<?php if($can_upload == 1) : ?>
-					<button type="button" class="btn btn-xs btn-purple" onclick="getUploadFile()">นำเข้าออเดอร์</button>
-				<?php endif;?>
-        <button type="button" class="btn btn-xs btn-success" onclick="addNew()"><i class="fa fa-plus"></i> เพิมใหม่</button>
-      <?php endif; ?>
-
-      </p>
-    </div>
+	<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 padding-5 padding-top-5">
+		<h3 class="title"><?php echo $this->title; ?></h3>
+	</div>
+	<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 padding-5 text-right">
+		<?php if($this->pm->can_add) : ?>
+			<?php if($can_upload == 1) : ?>
+				<button type="button" class="btn btn-xs btn-purple top-btn" onclick="getUploadFile()">นำเข้าออเดอร์</button>
+			<?php endif;?>
+			<button type="button" class="btn btn-xs btn-success top-btn" onclick="addNew()"><i class="fa fa-plus"></i> เพิมใหม่</button>
+		<?php endif; ?>
+	</div>
 </div><!-- End Row -->
 <hr class="padding-5"/>
 <form id="searchForm" method="post" action="<?php echo current_url(); ?>">
@@ -78,6 +73,14 @@
 			<option value="not_paid" <?php echo is_selected('not_paid', $is_paid); ?>>ยังไม่จ่าย</option>
 		</select>
 	</div>
+	<div class="col-lg-2 col-md-2 col-sm-2 col-xs-6 padding-5">
+		<label>ใบกำกับภาษี</label>
+		<select class="form-control input-sm" name="is_invoice" onchange="getSearch()">
+			<option value="all">ทั้งหมด</option>
+			<option value="Y" <?php echo is_selected('Y', $is_invoice); ?>>เปิดแล้ว</option>
+			<option value="N" <?php echo is_selected('N', $is_invoice); ?>>ยังไม่เปิด</option>
+		</select>
+	</div>
 
   <div class="col-lg-1 col-md-1-harf col-sm-1-harf col-xs-3 padding-5">
     <label class="display-block not-show">buton</label>
@@ -130,17 +133,18 @@
 
 <div class="row">
 	<div class="col-sm-12 col-xs-6 padding-5 table-responsive">
-		<table class="table table-striped table-bordered table-hover dataTable" style="min-width:1000px;">
+		<table class="table table-striped table-bordered table-hover dataTable" style="min-width:1050px;">
 			<thead>
 				<tr>
-					<th class="width-5 middle text-center">ลำดับ</th>
-					<th class="width-10 middle text-center sorting <?php echo $sort_date; ?>" id="sort_date_add" onclick="sort('date_add')">วันที่</th>
-					<th class="width-15 middle sorting <?php echo $sort_code; ?>" id="sort_code" onclick="sort('code')">เลขที่เอกสาร</th>
-					<th class="middle">ลูกค้า</th>
-					<th class="width-10 middle">ยอดเงิน</th>
-					<th class="width-10 middle">ช่องทางขาย</th>
-					<th class="width-10 middle">การชำระเงิน</th>
-					<th class="width-10 middle">สถานะ</th>
+					<th class="fix-width-50 middle text-center">ลำดับ</th>
+					<th class="fix-width-100 middle text-center sorting <?php echo $sort_date; ?>" id="sort_date_add" onclick="sort('date_add')">วันที่</th>
+					<th class="fix-width-150 middle sorting <?php echo $sort_code; ?>" id="sort_code" onclick="sort('code')">เลขที่เอกสาร</th>
+					<th class="fix-width-100 middle">ใบกำกับภาษี</th>
+					<th class="min-width-250 middle">ลูกค้า</th>
+					<th class="fix-width-100 middle">ยอดเงิน</th>
+					<th class="fix-width-100 middle">ช่องทางขาย</th>
+					<th class="fix-width-100 middle">การชำระเงิน</th>
+					<th class="fix-width-100 middle">สถานะ</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -154,6 +158,7 @@
               <td class="middle text-center pointer" onclick="editOrder('<?php echo $rs->code; ?>')"><?php echo $no; ?></td>
               <td class="middle text-center pointer" onclick="editOrder('<?php echo $rs->code; ?>')"><?php echo thai_date($rs->date_add); ?></td>
               <td class="middle pointer" onclick="editOrder('<?php echo $rs->code; ?>')"><?php echo $rs->code.$ref . $cod_txt; ?></td>
+							<td class="middle pointer" onclick="editOrder('<?php echo $rs->code; ?>')"><?php echo $rs->invoice_code; ?></td>
               <td class="middle pointer" onclick="editOrder('<?php echo $rs->code; ?>')"><?php echo $rs->customer_name . $c_ref; ?></td>
               <td class="middle pointer" onclick="editOrder('<?php echo $rs->code; ?>')"><?php echo number($rs->total_amount, 2); ?></td>
               <td class="middle pointer" onclick="editOrder('<?php echo $rs->code; ?>')"><?php echo $rs->channels_name; ?></td>

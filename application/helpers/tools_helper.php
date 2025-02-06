@@ -273,6 +273,24 @@ function set_message($message)
 }
 
 
+function get_error_message($key, $name = "data")
+{
+	$error = array(
+		'insert' => "Insert {$name} failed.",
+		'update' => "Update {$name} failed.",
+		'delete' => "Delete {$name} failed.",
+		'permission' => "You don't have permission to perform this operation.",
+		'required' => "Missing required parameter.",
+		'exists' => "'{$name}' already exists.",
+		'status' => "Invalid document status",
+		'notfound' => "Document number or Data not found",
+		'transection' => "Unable to delete {$name} because transections exists or link to other module.",
+		'duplicated' => "Duplicated {$name} already exists."
+	);
+
+	return (!empty($error[$key]) ? $error[$key] : "Unknow error.");
+}
+
 
 function label($content)
 {
@@ -453,4 +471,134 @@ function baht_text($number, $include_unit = true, $display_zero = true)
     return $text;
 }
 
+function parseAddress($address, $sub_district, $district, $province, $postcode)
+{
+	$ad = $address;
+	$ad .= ! empty($sub_district) ? " {$sub_district}" : "";
+	$ad .= ! empty($district) ? " {$district}" : "";
+	$ad .= ! empty($province) ? " {$province}" : "";
+	$ad .= ! empty($postcode) ? " {$postcode}" : "";
+
+	return $ad;
+}
+
+
+function parsePhoneNumber($phone, $length = 10)
+{
+	$find = [" ", "-", "+"];
+  $rep = ["", "", ""];
+	$length = $length * -1;
+
+  if($phone != "")
+  {
+    $phone = trim($phone);
+    $phone = str_replace($find, $rep, $phone);
+    $phone = substr($phone, $length);
+
+    return $phone;
+  }
+
+  return NULL;
+}
+
+function parseSubDistrict($ad, $province)
+{
+	if(! empty($ad))
+	{
+		if(isBangkok($province))
+		{
+			$find = [' ', 'แขวง'];
+			$rep = ['', ''];
+			$ad = str_replace($find, $rep, $ad);
+			return substr_replace($ad, 'แขวง', 0, 0);
+		}
+		else
+		{
+			$find = [' ', 'ต.', 'ตำบล'];
+			$rep = ['', '', ''];
+			$ad = str_replace($find, $rep, $ad);
+			return substr_replace($ad, 'ตำบล', 0, 0);
+		}
+
+	}
+
+	return NULL;
+}
+
+
+function parseDistrict($ad, $province)
+{
+	if(! empty($ad))
+	{
+		if(isBangkok($province))
+		{
+			$find = [' ', 'เขต'];
+			$rep = ['', ''];
+			$ad = str_replace($find, $rep, $ad);
+			return substr_replace($ad, 'เขต', 0, 0);
+		}
+		else
+		{
+			$find = [' ', 'อ.', 'อำเภอ'];
+			$rep = ['', '', ''];
+			$ad = str_replace($find, $rep, $ad);
+			return substr_replace($ad, 'อำเภอ', 0, 0);
+		}
+	}
+
+	return NULL;
+}
+
+
+function parseProvince($ad)
+{
+	if(! empty($ad))
+	{
+		$find = [' ', 'จ.', 'จังหวัด', '.'];
+		$rep = ['', '', '', ''];
+		$ad = str_replace($find, $rep, $ad);
+		$ad = substr_replace($ad, 'จังหวัด', 0, 0);
+
+		if(isBangkok($ad))
+		{
+			$ad = 'จังหวัดกรุงเทพมหานคร';
+		}
+
+		return $ad;
+	}
+
+	return NULL;
+}
+
+
+function isBangkok($province)
+{
+	$list = array(
+		'จังหวัดกรุงเทพมหานคร',
+		'จังหวัดกรุงเทพ',
+		'จังหวัดกรุงเทพฯ',
+		'จ.กรุงเทพมหานคร',
+		'จ.กรุงเทพ',
+		'จ.กรุงเทพฯ',
+		'กรุงเทพ',
+		'กรุงเทพฯ',
+		'กรุงเทพมหานคร',
+		'กทม',
+		'กทม.',
+		'ก.ท.ม.'
+	);
+
+	if( ! empty($province))
+	{
+		foreach($list as $val)
+		{
+			if($province == $val)
+			{
+				return TRUE;
+			}
+		}
+	}
+
+	return FALSE;
+}
  ?>

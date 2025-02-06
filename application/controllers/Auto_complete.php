@@ -1024,5 +1024,83 @@ public function get_active_item_code_and_name()
     echo json_encode($sc);
   }
 
+
+  public function get_invoice_customer()
+  {
+    $txt = $this->db->escape_str($_REQUEST['term']);
+    $ds = array();
+
+    if($txt != '*')
+    {
+      $this->db->group_start()->like('name', $txt)->or_like('tax_id', $txt)->group_end();
+    }
+
+    $rs = $this->db->order_by('tax_id', 'ASC')->limit(50)->get('order_invoice_customer');
+
+    if($rs->num_rows() > 0)
+    {
+      foreach($rs->result() as $rd)
+      {
+        $rd->label = $rd->tax_id." | ".$rd->name;
+
+        $ds[] = $rd;
+      }
+    }
+
+    echo json_encode($ds);
+  }
+
+
+  public function get_invoice_customer_by_tax()
+  {
+    $txt = $this->db->escape_str($_REQUEST['term']);
+    $ds = array();
+
+    if($txt != '*')
+    {
+      $this->db->group_start()->like('name', $txt)->or_like('tax_id', $txt)->group_end();
+    }
+
+    $rs = $this->db->order_by('tax_id', 'ASC')->limit(50)->get('order_invoice_customer');
+
+    if($rs->num_rows() > 0)
+    {
+      foreach($rs->result() as $rd)
+      {
+        $rd->label = $rd->tax_id." | ".$rd->name;
+
+        $ds[] = $rd;
+      }
+    }
+
+    echo json_encode($ds);
+  }
+
+
+  public function get_invoice_customer_by_phone()
+  {
+    $txt = $this->db->escape_str($_REQUEST['term']);
+    $ds = array();
+
+    if($txt != '*')
+    {
+      $this->db->group_start()->like('name', $txt)->or_like('phone', $txt)->group_end();
+    }
+
+    $rs = $this->db->order_by('phone', 'ASC')->limit(50)->get('order_invoice_customer');
+
+    if($rs->num_rows() > 0)
+    {
+      foreach($rs->result() as $rd)
+      {
+        $rd->label = $rd->phone." | ".$rd->name;
+
+        $ds[] = $rd;
+      }
+    }
+
+    echo json_encode($ds);
+  }
+
 } //-- end class
 ?>

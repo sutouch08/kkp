@@ -1,22 +1,17 @@
 <?php $this->load->view('include/header'); ?>
 <div class="row">
-	<div class="col-lg-6 col-md-6 col-sm-6 hidden-xs padding-5">
+	<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 padding-5 padding-top-5">
     <h3 class="title"><?php echo $this->title; ?></h3>
   </div>
-	<div class="col-xs-12 visible-xs padding-5">
-		<h3 class="title-xs"><?php echo $this->title; ?></h3>
-	</div>
-  <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 padding-5">
-  	<p class="pull-right top-p">
-			<?php if($this->_use_vat) : ?>
-			<button type="button" class="btn btn-sm btn-info top-btn" onclick="printSelectedInvoice('tax')"><i class="fa fa-print"></i> พิมพ์ใบกำกับภาษี</button>
+  <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 padding-5 text-right">
+		<?php if($this->_use_vat) : ?>
+			<button type="button" class="btn btn-white btn-info top-btn" onclick="printSelectedInvoice('tax')"><i class="fa fa-print"></i> พิมพ์ใบกำกับภาษี</button>
 		<?php else : ?>
-			<button type="button" class="btn btn-sm btn-info top-btn" onclick="printSelectedInvoice('do')"><i class="fa fa-print"></i> พิมพ์ใบส่งสินค้า</button>
+			<button type="button" class="btn btn-white btn-info top-btn" onclick="printSelectedInvoice('do')"><i class="fa fa-print"></i> พิมพ์ใบส่งสินค้า</button>
 		<?php endif; ?>
-    <?php if($this->pm->can_add) : ?>
-      <button type="button" class="btn btn-sm btn-success top-btn" onclick="addNew()"><i class="fa fa-plus"></i> เพิ่มใหม่</button>
-    <?php endif; ?>
-    </p>
+		<?php if($this->pm->can_add) : ?>
+			<button type="button" class="btn btn-white btn-success top-btn" onclick="addNew()"><i class="fa fa-plus"></i> เพิ่มใหม่</button>
+		<?php endif; ?>
   </div>
 </div><!-- End Row -->
 <hr class="padding-5"/>
@@ -127,7 +122,7 @@
 						<?php endif; ?>
 					</td>
 					<td class="middle text-right">
-						<button type="button" class="btn btn-minier btn-info" onclick="view_detail('<?php echo $rs->code; ?>')">
+						<button type="button" class="btn btn-white btn-mini btn-info" onclick="view_detail('<?php echo $rs->code; ?>')">
 							<i class="fa fa-eye"></i>
 						</button>
 

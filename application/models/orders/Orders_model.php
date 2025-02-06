@@ -224,7 +224,7 @@ class Orders_model extends CI_Model
 		->join('products AS pd', 'od.product_code = pd.code', 'left')
 		->where('order_code', $code)
 		->get();
-    
+
     if($rs->num_rows() > 0)
     {
       return $rs->result();
@@ -543,6 +543,19 @@ class Orders_model extends CI_Model
 			$this->db->where('orders.is_paid', $is_paid);
 		}
 
+    if( ! empty($ds['is_invoice']) && $ds['is_invoice'] != 'all')
+    {
+      if($ds['is_invoice'] == 'Y')
+      {
+        $this->db->where('orders.invoice_code IS NOT NULL', NULL, FALSE);
+      }
+
+      if($ds['is_invoice'] == 'N')
+      {
+        $this->db->where('orders.invoice_code IS NULL', NULL, FALSE);
+      }
+    }
+
 		return $this->db->count_all_results();
 	}
 
@@ -694,6 +707,19 @@ class Orders_model extends CI_Model
 			$is_paid = ($ds['is_paid'] == 'not_paid' ? 0 : 1);
 			$this->db->where('orders.is_paid', $is_paid);
 		}
+
+    if( ! empty($ds['is_invoice']) && $ds['is_invoice'] != 'all')
+    {
+      if($ds['is_invoice'] == 'Y')
+      {
+        $this->db->where('orders.invoice_code IS NOT NULL', NULL, FALSE);
+      }
+
+      if($ds['is_invoice'] == 'N')
+      {
+        $this->db->where('orders.invoice_code IS NULL', NULL, FALSE);
+      }
+    }
 
 
 		if(!empty($ds['order_by']))

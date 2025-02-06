@@ -15,6 +15,7 @@ class Order_invoice extends PS_Controller
 		$this->home = base_url().'orders/order_invoice';
 		$this->load->model('orders/order_invoice_model');
 		$this->load->model('masters/customers_model');
+		$this->load->model('masters/invoice_customer_model');
 		$this->load->helper('address');
 		$this->load->helper('vat');
 		$this->title = getConfig('USE_VAT') == 1 ? 'ใบกำกับภาษี' : 'ใบส่งสินค้า';
@@ -53,6 +54,117 @@ class Order_invoice extends PS_Controller
 	}
 
 
+	public function get_customer_bill_to_address()
+	{
+		$this->load->model('address/customer_address_model');
+
+		$sc = TRUE;
+
+		$ds = [];
+
+		$code = $this->input->post('customer_code');
+
+		if( ! empty($code))
+		{
+			$customer = $this->customers_model->get($code);
+
+			if( ! empty($customer))
+			{
+				$adr = $this->customer_address_model->get_customer_bill_to_address($code);
+
+				if( ! empty($adr))
+				{
+					$ds = array(
+						'tax_id' => $customer->Tax_Id,
+						'name' => $customer->name,
+						'branch_code' => $adr->branch_code,
+						'branch_name' => $adr->branch_name,
+						'address' => $adr->address,
+						'sub_district' => $adr->sub_district,
+						'district' => $adr->district,
+						'province' => $adr->province,
+						'postcode' => $adr->postcode,
+						'country' => $adr->country,
+						'phone' => $adr->phone
+					);
+				}
+			}
+			else
+			{
+				$sc = FALSE;
+				$this->error = "Customer not found";
+			}
+		}
+		else
+		{
+			$sc = FALSE;
+			$this->error = "Missing required parameter";
+		}
+
+		$arr = array(
+			'status' => $sc === TRUE ? 'success' : 'failed',
+			'message' => $sc === TRUE ? 'success' : $this->error,
+			'bill_to' => $sc === TRUE ? $ds : NULL
+		);
+
+		echo json_encode($arr);
+	}
+
+
+	public function add_invoice_customer()
+  {
+    $sc = TRUE;
+
+    $ds = json_decode($this->input->post('data'));
+
+    if( ! empty($ds))
+    {
+      $arr = array(
+        'name' => $ds->customer_name,
+        'tax_id' => $ds->tax_id,
+        'branch_code' => get_null($ds->branch_code),
+        'branch_name' => get_null($ds->branch_name),
+        'address' => get_null($ds->address),
+        'sub_district' => get_null($ds->sub_district),
+        'district' => get_null($ds->district),
+        'province' => get_null($ds->province),
+        'postcode' => get_null($ds->postcode),
+        'phone' => $ds->phone,
+        'is_company' => $ds->is_company == 1 ? 1 : 0
+      );
+
+      if( empty($ds->customer_id) )
+      {
+        if( ! $this->invoice_customer_model->add($arr))
+        {
+          $sc = FALSE;
+          $this->error = "เพิ่มข้อมูลลูกค้าไม่สำเร็จ";
+        }
+      }
+      else
+      {
+        if( ! $this->invoice_customer_model->update($ds->customer_id, $arr))
+        {
+          $sc = FALSE;
+          $this->error = "แก้ไขข้อมูลลูกค้าไม่สำเร็จ";
+        }
+      }
+    }
+    else
+    {
+      $sc = FALSE;
+      $this->errorr = "Missing required parameter";
+    }
+
+    $arr = array(
+      'status' => $sc === TRUE ? 'success' : 'failed',
+      'message' => $sc === TRUE ? 'success' : $this->error
+    );
+
+    echo json_encode($arr);
+  }
+
+
 	public function add_new()
 	{
 		$this->load->view('order_invoice/order_invoice_add');
@@ -62,70 +174,62 @@ class Order_invoice extends PS_Controller
 	public function add()
 	{
 		$sc = TRUE;
-		$customer_code = $this->input->post('customer_code');
-		$customer = $this->customers_model->get($customer_code);
-		$customer_name = $this->customers_model->get_bill_name($customer_code);
-		$doc_date = db_date($this->input->post('doc_date'));
+		$ds = json_decode($this->input->post('data'));
 
-		if(!empty($customer))
+		if( ! empty($ds))
 		{
-			$this->load->model('address/customer_address_model');
+			$customer = $this->customers_model->get($ds->customer_code);
+			$doc_date = db_date($ds->doc_date);
 
-			$code = $this->get_new_code($doc_date);
-
-			$arr = array(
-				'code' => $code,
-				'doc_date' => $doc_date,
-				'vat_type' => $this->input->post('vat_type'),
-				'customer_code' => $customer->code,
-				'customer_name' => empty($customer_name) ? $customer->name : $customer_name,
-				'tax_id' => get_null($customer->Tax_Id),
-				'remark' => get_null(trim($this->input->post('remark'))),
-				'uname' => $this->_user->uname
-			);
-
-			$address = $this->customer_address_model->get_customer_bill_to_address($customer->code);
-			if(!empty($address))
+			if( ! empty($customer))
 			{
-				$arr['branch_code'] = get_null($address->branch_code);
-				$arr['branch_name'] = get_null($address->branch_name);
-				$arr['address'] = get_null($address->address);
-				$arr['sub_district'] = get_null($address->sub_district);
-				$arr['district'] = get_null($address->district);
-				$arr['province'] = get_null($address->province);
-				$arr['postcode'] = get_null($address->postcode);
-				$arr['phone'] = get_null($address->phone);
-			}
 
-			if(! $this->order_invoice_model->add($arr))
+				$code = $this->get_new_code($doc_date);
+
+				$arr = array(
+					'code' => $code,
+					'doc_date' => $doc_date,
+					'vat_type' => $ds->vat_type,
+					'customer_code' => $customer->code,
+					'customer_name' => empty($ds->customer_name) ? $customer->name : $ds->customer_name,
+					'tax_id' => $ds->tax_id,
+					'is_company' => $ds->is_company,
+					'branch_code' => $ds->branch_code,
+					'branch_name' => $ds->branch_name,
+					'address' => $ds->address,
+					'sub_district' => $ds->sub_district,
+					'district' => $ds->district,
+					'province' => $ds->province,
+					'postcode' => $ds->postcode,
+					'phone' => $ds->phone,
+					'uname' => $this->_user->uname
+				);
+
+				if( ! $this->order_invoice_model->add($arr))
+				{
+					$sc = FALSE;
+					$this->error = "เพิ่มเอกสารไม่สำเร็จ";
+				}
+			}
+			else
 			{
 				$sc = FALSE;
-				$this->error = "เพิ่มเอกสารไม่สำเร็จ";
+				$this->error = "รหัสลูกค้าไม่ถูกต้อง {$ds->customer_code}";
 			}
-
 		}
 		else
 		{
 			$sc = FALSE;
-			$this->error = "รหัสลูกค้าไม่ถูกต้อง {$customer_code}";
+			$this->error = get_error_message('required');
 		}
 
-		if($sc === TRUE)
-		{
-			$ds = array(
-				'status' => 'success',
-				'code' => $code
-			);
-		}
-		else
-		{
-			$ds = array(
-				'status' => 'error',
-				'message' => $this->error
-			);
-		}
+		$arr = array(
+			'status' => $sc === TRUE ? 'success' : 'failed',
+			'message' => $sc === TRUE ? 'success' : $this->error,
+			'code' => $sc === TRUE ? $code : NULL
+		);
 
-		echo json_encode($ds);
+		echo json_encode($arr);
 	}
 
 
@@ -154,64 +258,109 @@ class Order_invoice extends PS_Controller
 	}
 
 
-
 	public function update()
 	{
 		$sc = TRUE;
-		$code = $this->input->post('code');
-		$customer_code = $this->input->post('customer_code');
 
-		if(!empty($code))
+		$ds = json_decode($this->input->post('data'));
+
+		if( ! empty($ds))
 		{
-			$customer = $this->customers_model->get($customer_code);
-			if(!empty($customer))
+			$code = $ds->code;
+
+			$order = $this->order_invoice_model->get($code);
+
+			if( ! empty($order))
 			{
-				$this->load->model('address/customer_address_model');
+				if($order->status != 2) {
+					$this->db->trans_begin();
 
-				$arr = array(
-					'doc_date' => db_date($this->input->post('doc_date')),
-					'vat_type' => trim($this->input->post('vat_type')),
-					'customer_code' => $customer->code,
-					'customer_name' => $customer->name,
-					'tax_id' => $customer->Tax_Id,
-					'remark' => get_null(trim($this->input->post('remark'))),
-					'upd_user' => $this->_user->uname
-				);
+					if($order->customer_code != $ds->customer_code && $order->status == 0)
+					{
+						$this->load->model('orders/orders_model');
 
-				$address = $this->customer_address_model->get_customer_bill_to_address($customer->code);
-				if(!empty($address))
-				{
-					$arr['branch_code'] = get_null($address->branch_code);
-					$arr['branch_name'] = get_null($address->branch_name);
-					$arr['address'] = get_null($address->address);
-					$arr['sub_district'] = get_null($address->sub_district);
-					$arr['district'] = get_null($address->district);
-					$arr['province'] = get_null($address->province);
-					$arr['postcode'] = get_null($address->postcode);
-					$arr['phone'] = get_null($address->phone);
+						$reference = $this->order_invoice_model->get_all_reference($code);
+
+						if( ! empty($reference))
+						{
+							foreach($reference as $ref)
+							{
+								if( ! $this->order_invoice_model->remove_reference_detail($code, $ref->order_code))
+								{
+									$sc = FALSE;
+									$this->error = "ลบรายการไม่สำเร็จ";
+								}
+								else
+								{
+									$arr = array(
+										'invoice_code' => NULL
+									);
+
+									$this->orders_model->update($ref->order_code, $arr);
+								}
+							}
+						}
+					}
+
+					if($sc === TRUE)
+					{
+						$doc_date = db_date($ds->doc_date);
+
+						$arr = array(
+							'doc_date' => $doc_date,
+							'vat_type' => $ds->vat_type,
+							'customer_code' => $ds->customer_code,
+							'customer_name' => $ds->customer_name,
+							'contact_person' => get_null($ds->contact_person),
+							'tax_id' => $ds->tax_id,
+							'is_company' => $ds->is_company,
+							'branch_code' => $ds->branch_code,
+							'branch_name' => $ds->branch_name,
+							'address' => $ds->address,
+							'sub_district' => $ds->sub_district,
+							'district' => $ds->district,
+							'province' => $ds->province,
+							'postcode' => $ds->postcode,
+							'phone' => $ds->phone,
+							'upd_user' => $this->_user->uname
+						);
+
+						if(!$this->order_invoice_model->update($code, $arr))
+						{
+							$sc = FALSE;
+							$this->error = "Update failed";
+						}
+					}
+
+					if($sc === TRUE)
+					{
+						$this->db->trans_commit();
+					}
+					else
+					{
+						$this->db->trans_rollback();
+					}
 				}
-
-				if(!$this->order_invoice_model->update($code, $arr))
+				else
 				{
 					$sc = FALSE;
-					$this->error = "Update failed";
+					$this->error = "Invalid document status";
 				}
 			}
 			else
 			{
 				$sc = FALSE;
-				$this->error = "Invalid customer code";
+				$this->error = get_error_message('notfound');
 			}
 		}
 		else
 		{
 			$sc = FALSE;
-			$this->error = "Missing required parameter : code";
+			$this->error = get_error_message('required');
 		}
 
 		$this->response($sc);
 	}
-
 
 
 	public function cancle_invoice()
@@ -394,7 +543,6 @@ class Order_invoice extends PS_Controller
 	}
 
 
-
 	public function print_multiple_tax_invoice($gen_id)
 	{
 		$this->load->library('printer');
@@ -443,7 +591,6 @@ class Order_invoice extends PS_Controller
 			$this->load->view('print/print_multiple_tax_invoice', $arr);
 		}
 	}
-
 
 
 	public function print_selected_do_invoice()
@@ -555,6 +702,22 @@ class Order_invoice extends PS_Controller
 	}
 
 
+	public function print_postal_slip($code)
+	{
+		$order = $this->order_invoice_model->get($code);
+
+		if( ! empty($order))
+		{
+			$this->load->library('printer');
+			$this->load->helper('print');
+			$this->load->view('print/print_postal_slip', ['order' => $order]);
+		}
+		else
+		{
+			$this->page_error();
+		}
+	}
+
 
 	public function print_tax_receipt($code)
 	{
@@ -569,11 +732,13 @@ class Order_invoice extends PS_Controller
 		$this->print_invoice($code);
 	}
 
+
 	public function print_tax_billing_note($code)
 	{
 		$this->title = "ใบวางบิล/ใบแจ้งหนี้";
 		$this->print_billing_note($code);
 	}
+
 
 	public function print_do_receipt($code)
 	{
@@ -581,12 +746,12 @@ class Order_invoice extends PS_Controller
 		$this->print_receipt($code);
 	}
 
+
 	public function print_do_invoice($code)
 	{
 		$this->title = "ใบส่งสินค้า/ใบแจ้งหนี้";
 		$this->print_invoice($code);
 	}
-
 
 
 	public function print_invoice($code)
@@ -707,7 +872,6 @@ class Order_invoice extends PS_Controller
 	}
 
 
-
 	public function save()
 	{
 		$sc = TRUE;
@@ -791,8 +955,6 @@ class Order_invoice extends PS_Controller
 	}
 
 
-
-
 	public function add_to_order()
 	{
 		$this->load->model('orders/orders_model');
@@ -874,7 +1036,6 @@ class Order_invoice extends PS_Controller
 	}
 
 
-
 	public function remove_reference_detail()
 	{
 		$this->load->model('orders/orders_model');
@@ -910,8 +1071,6 @@ class Order_invoice extends PS_Controller
 	}
 
 
-
-
 	public function get_order_list()
 	{
 		$customer_code = trim($this->input->get('customer_code'));
@@ -941,8 +1100,6 @@ class Order_invoice extends PS_Controller
 
 		echo json_encode($ds);
 	}
-
-
 
 
 	public function create_invoice($order_code)
@@ -984,6 +1141,7 @@ class Order_invoice extends PS_Controller
 
 						if(!empty($address))
 						{
+							$arr['is_company'] = $address->branch_code == "" ? 0 : 1;
 							$arr['branch_code'] = get_null($address->branch_code);
 							$arr['branch_name'] = get_null($address->branch_name);
 							$arr['address'] = get_null($address->address);
@@ -1136,7 +1294,6 @@ class Order_invoice extends PS_Controller
 	}
 
 
-
 	public function gen_new_invoice()
 	{
 		$sc = TRUE;
@@ -1212,8 +1369,6 @@ class Order_invoice extends PS_Controller
 			echo $this->error;
 		}
 	}
-
-
 
 
 	//--- create invoice multi order group by customer code
@@ -1292,6 +1447,7 @@ class Order_invoice extends PS_Controller
 
 						if(!empty($address))
 						{
+							$arr['is_company'] = $address->branch_code == "" ? 0 : 1;
 							$arr['branch_code'] = get_null($address->branch_code);
 							$arr['branch_name'] = get_null($address->branch_name);
 							$arr['address'] = get_null($address->address);
@@ -1433,7 +1589,6 @@ class Order_invoice extends PS_Controller
 	}
 
 
-
 	//--- create invoice multi order group by customer code
 	public function create_each_order_invoice()
 	{
@@ -1492,6 +1647,7 @@ class Order_invoice extends PS_Controller
 
 								if(!empty($address))
 								{
+									$arr['is_company'] = $address->branch_code == "" ? 0 : 1;
 									$arr['branch_code'] = get_null($address->branch_code);
 									$arr['branch_name'] = get_null($address->branch_name);
 									$arr['address'] = get_null($address->address);
@@ -1653,29 +1809,27 @@ class Order_invoice extends PS_Controller
 	}
 
 
-
-
 	public function get_new_code($date = NULL)
-  {
-    $date = empty($date) ? date('Y-m-d') : $date;
-    $Y = date('y', strtotime($date));
-    $M = date('m', strtotime($date));
-    $prefix = getConfig('PREFIX_INVOICE');
-    $run_digit = getConfig('RUN_DIGIT_INVOICE');
-    $pre = $prefix .'-'.$Y.$M;
-    $code = $this->order_invoice_model->get_max_code($pre);
-    if(! is_null($code))
-    {
-      $run_no = mb_substr($code, ($run_digit*-1), NULL, 'UTF-8') + 1;
-      $new_code = $prefix . '-' . $Y . $M . sprintf('%0'.$run_digit.'d', $run_no);
-    }
-    else
-    {
-      $new_code = $prefix . '-' . $Y . $M . sprintf('%0'.$run_digit.'d', '001');
-    }
+	{
+		$date = empty($date) ? date('Y-m-d') : $date;
+		$Y = date('y', strtotime($date));
+		$M = date('m', strtotime($date));
+		$prefix = getConfig('PREFIX_INVOICE');
+		$run_digit = getConfig('RUN_DIGIT_INVOICE');
+		$pre = $prefix .'-'.$Y.$M;
+		$code = $this->order_invoice_model->get_max_code($pre);
+		if(! is_null($code))
+		{
+			$run_no = mb_substr($code, ($run_digit*-1), NULL, 'UTF-8') + 1;
+			$new_code = $prefix . '-' . $Y . $M . sprintf('%0'.$run_digit.'d', $run_no);
+		}
+		else
+		{
+			$new_code = $prefix . '-' . $Y . $M . sprintf('%0'.$run_digit.'d', '001');
+		}
 
-    return $new_code;
-  }
+		return $new_code;
+	}
 
 
 	public function clear_filter()
