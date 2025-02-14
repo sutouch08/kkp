@@ -6,6 +6,74 @@ class Sales_report_model extends CI_Model
     parent::__construct();
   }
 
+  public function get_sales_invoice_report(array $ds = array())
+  {
+    $from_date = empty($ds['from_date']) ? date('Y-m-01') : $ds['from_date'];
+    $to_date = empty($ds['to_date']) ? date('Y-m-t') : $ds['to_date'];
+
+    $this->db
+    ->where('doc_date >=', $from_date)
+    ->where('doc_date <=', $to_date);
+
+    if(isset($ds['status']) && $ds['status'] != 'all')
+    {
+      $this->db->where('status', $ds['status']);
+    }
+
+    if(isset($ds['order_by']) && $ds['order_by'] == 'date')
+    {
+      $this->db->order_by('doc_date', 'ASC');
+    }
+    else
+    {
+      $this->db->order_by('code', 'ASC');
+    }
+
+    $rs = $this->db->get('order_invoice');
+
+    if($rs->num_rows() > 0)
+    {
+      return $rs->result();
+    }
+
+    return NULL;
+  }
+
+
+  public function get_sum_vatable_amount($code)
+  {
+    $rs = $this->db
+    ->select_sum('amount')
+    ->where('invoice_code', $code)
+    ->where('vat_rate >', 0)
+    ->get('order_invoice_detail');
+
+    if($rs->num_rows() > 0)
+    {
+      return $rs->row()->amount;
+    }
+
+    return 0;
+  }
+
+
+  public function get_sum_non_vat_amount($code)
+  {
+    $rs = $this->db
+    ->select_sum('amount')
+    ->where('invoice_code', $code)
+    ->where('vat_rate', 0)
+    ->get('order_invoice_detail');
+
+    if($rs->num_rows() > 0)
+    {
+      return $rs->row()->amount;
+    }
+
+    return 0;
+  }
+
+
 	public function get_sum_item_sales_by_date_upd(array $ds = array())
   {
     if(!empty($ds))
