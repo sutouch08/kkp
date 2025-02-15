@@ -3,8 +3,6 @@ $('#date').datepicker({
 });
 
 
-
-
 //---- เปลี่ยนสถานะออเดอร์  เป็นบันทึกแล้ว
 function saveOrder(){
   var order_code = $('#order_code').val();
@@ -29,6 +27,73 @@ function saveOrder(){
 }
 
 
+function add() {
+  clearErrorByClass('e');
+
+  let h = {
+    'date_add' : $('#date').val().trim(),
+    'customer_code' : $('#customer').val().trim(),
+    'customer_name' : $('#customer-name').val().trim(),
+    'customer_ref' : $('#customer-ref').val().trim(),
+    'reference' : $('#reference').val().trim(),
+    'channels_code' : $('#channels').val(),
+    'payment_code' : $('#payment').val(),
+    'sender_id' : $('#sender_id').val(),
+    'remark' : $('#remark').val().trim()
+  };
+
+  if( ! isDate(h.date_add)) {
+    $('#date').hasError();
+    return false;
+  }
+
+  if(h.customer_code.length == 0) {
+    $('#customer').hasError();
+    return false;
+  }
+
+  if(h.customer_name.length == 0) {
+    $('#customer-name').hasError();
+    return false;
+  }
+
+  if(h.channels_code == "") {
+    $('#channels').hasError();
+    return false;
+  }
+
+  if(h.payment_code == "") {
+    $('#payment').hasError();
+    return false;
+  }
+
+  $.ajax({
+    url:HOME + 'add',
+    type:'POST',
+    cache:false,
+    data:{
+      'data' : JSON.stringify(h)
+    },
+    success:function(rs) {
+      if(isJson(rs)) {
+        let ds = JSON.parse(rs);
+
+        if(ds.status = 'success') {
+          window.location.href = HOME + 'edit_detail/'+ds.code;
+        }
+        else {
+          showError(ds.message);
+        }
+      }
+      else {
+        showError(rs);
+      }
+    },
+    error:function(rs) {
+      showError(rs);
+    }
+  })
+}
 
 function update_detail(id) {
 	var c_qty = parseDefaultValue($('#current_qty_'+id).val(), 0, 'float');
@@ -149,32 +214,10 @@ $("#customer").autocomplete({
 			var code = arr[0];
 			var name = arr[1];
 			$(this).val(code);
-			$("#customerCode").val(code);
-			$("#customerName").val(name);
-		}else{
-			$("#customerCode").val('');
-			$('#customerName').val('');
-			$(this).val('');
+			$("#customer-name").val(name);
 		}
-	}
-});
-
-
-$("#customerName").autocomplete({
-	source: BASE_URL + 'auto_complete/get_customer_code_and_name',
-	autoFocus: true,
-	close: function(){
-		var rs = $.trim($(this).val());
-		var arr = rs.split(' | ');
-		if( arr.length == 2 ){
-			var code = arr[0];
-			var name = arr[1];
-			$(this).val(name);
-			$("#customerCode").val(code);
-			$("#customer").val(code);
-		}else{
-			$("#customerCode").val('');
-			$("#customer").val('');
+    else {
+			$('#customer-name').val('');
 			$(this).val('');
 		}
 	}
@@ -195,20 +238,10 @@ $('#qt_no').autocomplete({
 });
 
 
-var customer;
-var channels;
-var payment;
-var date;
-
-
 function getEdit(){
   $('.edit').removeAttr('disabled');
   $('#btn-edit').addClass('hide');
   $('#btn-update').removeClass('hide');
-  customer = $("#customerCode").val();
-	channels = $("#channels").val();
-	payment  = $("#payment").val();
-	date = $("#date").val();
 }
 
 function editRemark() {
@@ -510,38 +543,50 @@ function countInput(){
 
 
 
-function validUpdate(){
-	var date_add = $("#date").val();
-	var customer_code = $("#customerCode").val();
-  var customer_name = $('#customer').val();
-	var channels_code = $("#channels").val();
-	var payment_code = $("#payment").val();
-  var recal = 0;
-	//---- ตรวจสอบวันที่
-	if( ! isDate(date_add) ){
-		swal("วันที่ไม่ถูกต้อง");
-		return false;
-	}
+function validUpdate() {
+  clearErrorByClass('e');
 
-	//--- ตรวจสอบลูกค้า
-	if( customer_code.length == 0 || customer_name == "" ){
-		swal("ชื่อลูกค้าไม่ถูกต้อง");
-		return false;
-	}
+  let prev_customer = $('#customer-code').val();
+  let prev_channels = $('#channels_code').val();
+  let prev_payment = $('#payment_code').val();
+  let prev_date = $('#date_add').val();
+  let recal = 0;
 
-  if(channels_code == ""){
-    swal('กรุณาเลือกช่องทางขาย');
+  let h = {
+    'date_add' : $('#date').val().trim(),
+    'customer_code' : $('#customer').val().trim(),
+    'customer_name' : $('#customer-name').val().trim(),
+    'channels_code' : $('#channels').val(),
+    'payment_code' : $('#payment').val()
+  };
+
+  if( ! isDate(h.date_add)) {
+    $('#date').hasError();
     return false;
   }
 
+  if(h.customer_code.length == 0) {
+    $('#customer').hasError();
+    return false;
+  }
 
-  if(payment_code == ""){
-    swal('กรุณาเลือกช่องทางการชำระเงิน');
+  if(h.customer_name.length == 0) {
+    $('#customer-name').hasError();
+    return false;
+  }
+
+  if(h.channels_code == "") {
+    $('#channels').hasError();
+    return false;
+  }
+
+  if(h.payment_code == "") {
+    $('#payment').hasError();
     return false;
   }
 
 	//--- ตรวจสอบความเปลี่ยนแปลงที่สำคัญ
-	if( (date_add != date) || ( customer_code != customer ) || ( channels_code != channels ) || ( payment_code != payment ) )
+	if( (h.date_add != prev_date) || ( h.customer_code != prev_customer ) || ( h.channels_code != prev_channels ) || ( h.payment_code != prev_payment ) )
   {
 		recal = 1; //--- ระบุว่าต้องคำนวณส่วนลดใหม่
 	}
@@ -550,21 +595,48 @@ function validUpdate(){
 }
 
 
+function updateOrder(recal) {
+  clearErrorByClass('e');
 
+  let h = {
+    'code' : $('#order_code').val().trim(),
+    'date_add' : $('#date').val().trim(),
+    'customer_code' : $('#customer').val().trim(),
+    'customer_name' : $('#customer-name').val().trim(),
+    'customer_ref' : $('#customer_ref').val().trim(),
+    'reference' : $('#reference').val().trim(),
+    'channels_code' : $('#channels').val(),
+    'payment_code' : $('#payment').val(),
+    'sender_id' : $('#sender_id').val(),
+    'shipping_code' : $('#shipping_code').val().trim(),
+    'remark' : $('#remark').val().trim(),
+    'recal' : recal
+  };
 
+  if( ! isDate(h.date_add)) {
+    $('#date').hasError();
+    return false;
+  }
 
-function updateOrder(recal){
-	var order_code = $("#order_code").val();
-	var date_add = $("#date").val();
-	var customer_code = $("#customerCode").val();
-  var customer_name = $("#customer").val();
-  var customer_ref = $('#customer_ref').val();
-	var channels_code = $("#channels").val();
-	var payment_code = $("#payment").val();
-	var reference = $('#reference').val();
-  var sender_id = $('#sender_id').val();
-	var remark = $("#remark").val();
-	var qt_no = $('#qt_no').val();
+  if(h.customer_code.length == 0) {
+    $('#customer').hasError();
+    return false;
+  }
+
+  if(h.customer_name.length == 0) {
+    $('#customer-name').hasError();
+    return false;
+  }
+
+  if(h.channels_code == "") {
+    $('#channels').hasError();
+    return false;
+  }
+
+  if(h.payment_code == "") {
+    $('#payment').hasError();
+    return false;
+  }
 
 	load_in();
 
@@ -573,22 +645,12 @@ function updateOrder(recal){
 		type:"POST",
 		cache:"false",
 		data:{
-      "order_code" : order_code,
-  		"date_add"	: date_add,
-  		"customer_code" : customer_code,
-      "customer_ref" : customer_ref,
-  		"channels_code" : channels_code,
-  		"payment_code" : payment_code,
-  		"reference" : reference,
-      "sender_id" : sender_id,
-  		"remark" : remark,
-			"qt_no" : qt_no,
-      "recal" : recal
+      "data" : JSON.stringify(h)
     },
-		success: function(rs){
+		success: function(rs) {
 			load_out();
-			var rs = $.trim(rs);
-			if( rs == 'success' ){
+
+			if( rs.trim() == 'success' ){
 				swal({
           title: 'Done !',
           type: 'success',
@@ -599,14 +661,14 @@ function updateOrder(recal){
           window.location.reload();
         }, 1200);
 
-			}else{
-				swal({
-          title: "Error!",
-          text: rs,
-          type: 'error'
-        });
 			}
-		}
+      else {
+				showError(rs);
+			}
+		},
+    error:function(rs) {
+      showError(rs);
+    }
 	});
 }
 

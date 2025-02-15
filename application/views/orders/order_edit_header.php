@@ -5,26 +5,26 @@
     </div>
     <div class="col-lg-1 col-md-1-harf col-sm-1-harf col-xs-4 padding-5">
     	<label>วันที่</label>
-			<input type="text" class="form-control input-sm text-center edit" name="date" id="date" value="<?php echo thai_date($order->date_add); ?>" disabled readonly />
+			<input type="text" class="form-control input-sm text-center edit e" name="date" id="date" value="<?php echo thai_date($order->date_add); ?>" disabled readonly />
     </div>
 
 		<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-4 padding-5">
     	<label>รหัสลูกค้า</label>
-			<input type="text" class="form-control input-sm text-center edit" id="customer" name="customer" value="<?php echo $order->customer_code; ?>" required disabled />
+			<input type="text" class="form-control input-sm text-center edit e" id="customer" value="<?php echo $order->customer_code; ?>" required disabled />
     </div>
 
     <div class="col-lg-5-harf col-md-4 col-sm-4 col-xs-7 padding-5">
     	<label>ลูกค้า[ในระบบ]</label>
-			<input type="text" class="form-control input-sm edit" id="customerName" name="customerName" value="<?php echo $order->customer_name; ?>" disabled />
+			<input type="text" class="form-control input-sm edit e" id="customer-name" value="<?php echo $order->customer_name; ?>" disabled />
     </div>
     <div class="col-lg-2-harf col-md-2-harf col-sm-2-harf col-xs-5 padding-5">
     	<label>ลูกค้า[ออนไลน์]</label>
-      <input type="text" class="form-control input-sm text-center edit" id="customer_ref" name="customer_ref" value="<?php echo str_replace('"', '&quot;',$order->customer_ref); ?>" disabled />
+      <input type="text" class="form-control input-sm text-center edit" id="customer_ref" value="<?php echo str_replace('"', '&quot;',$order->customer_ref); ?>" disabled />
     </div>
 
 		<div class="col-lg-2 col-md-2 col-sm-2 col-xs-5 padding-5">
     	<label>ใบเสนอราคา</label>
-      <input type="text" class="form-control input-sm text-center edit" id="qt_no" name="qt_no" value="<?php echo $order->qt_no; ?>" disabled />
+      <input type="text" class="form-control input-sm text-center edit" id="qt_no" value="<?php echo $order->qt_no; ?>" disabled />
     </div>
 		<div class="col-lg-1 col-md-1 col-sm-1 col-xs-3 padding-5">
     	<label class="display-block not-show">ดึง</label>
@@ -33,7 +33,7 @@
 
 		<div class="col-lg-1-harf col-md-2-harf col-sm-2-harf col-xs-4 padding-5">
     	<label>ช่องทางขาย</label>
-			<select class="form-control input-sm edit" name="channels" id="channels" required disabled>
+			<select class="form-control input-sm edit e" name="channels" id="channels" disabled>
 				<option value="">เลือกรายการ</option>
 				<?php echo select_channels($order->channels_code); ?>
 			</select>
@@ -41,7 +41,7 @@
     </div>
     <div class="col-lg-1-harf col-md-2-harf col-sm-2-harf col-xs-5 padding-5">
     	<label>การชำระเงิน</label>
-			<select class="form-control input-sm edit" name="payment" id="payment" required disabled>
+			<select class="form-control input-sm edit e" name="payment" id="payment" disabled>
 				<option value="">เลือกรายการ</option>
 				<?php echo select_payment_method($order->payment_code); ?>
 			</select>
@@ -82,7 +82,10 @@
 			<?php endif; ?>
 		</div>
 		<?php endif; ?>
-    <input type="hidden" name="order_code" id="order_code" value="<?php echo $order->code; ?>" />
-    <input type="hidden" name="customerCode" id="customerCode" value="<?php echo $order->customer_code; ?>" />
-		<input type="hidden" name="deposit_amount" id="deposit-amount" value="<?php echo $order->deposit; ?>" />
+    <input type="hidden" id="order_code" value="<?php echo $order->code; ?>" />
+		<input type="hidden" id="date_add" value="<?php echo thai_date($order->date_add); ?>" />
+    <input type="hidden" id="customer-code" value="<?php echo $order->customer_code; ?>" />
+		<input type="hidden" id="channels_code" value="<?php echo $order->channels_code; ?>" />
+		<input type="hidden" id="payment_code" value="<?php echo $order->payment_code; ?>" />
+		<input type="hidden" id="deposit-amount" value="<?php echo $order->deposit; ?>" />
 </div>

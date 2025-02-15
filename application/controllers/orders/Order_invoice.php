@@ -1621,7 +1621,7 @@ class Order_invoice extends PS_Controller
 						{
 							$details = $this->order_invoice_model->get_billed_details($order->code);
 
-							if(!empty($details))
+							if( ! empty($details))
 							{
 								$customer = $this->customers_model->get($order->customer_code);
 								$doc_date = getConfig('ORDER_SOLD_DATE') == 'D' ? $order->date_add : date('Y-m-d');
@@ -1633,8 +1633,8 @@ class Order_invoice extends PS_Controller
 									'code' => $code,
 									'doc_date' => $doc_date,
 									'vat_type' => 'I',
-									'customer_code' => $customer->code,
-									'customer_name' => $customer->name,
+									'customer_code' => $order->customer_code,
+									'customer_name' => $order->customer_name,
 									'tax_id' => get_null($customer->Tax_Id),
 									'remark' => NULL,
 									'uname' => $this->_user->uname,
@@ -1645,8 +1645,13 @@ class Order_invoice extends PS_Controller
 
 								$address = $this->customer_address_model->get_customer_bill_to_address($customer->code);
 
-								if(!empty($address))
+								if( ! empty($address))
 								{
+									if( ! empty($address->customer_name))
+									{
+										$arr['customer_name'] = $address->customer_name;
+									}
+
 									$arr['is_company'] = $address->branch_code == "" ? 0 : 1;
 									$arr['branch_code'] = get_null($address->branch_code);
 									$arr['branch_name'] = get_null($address->branch_name);

@@ -20,8 +20,8 @@ $delete = $this->pm->can_delete;
 <hr class="margin-bottom-15 padding-5" />
 <?php $this->load->view('orders/order_edit_header'); ?>
 
-<hr class="padding-5 "/>
-<div class="row">
+<hr class="padding-5 hide"/>
+<div class="row hide">
 	<div class="col-lg-9 col-md-9 col-sm-9 hidden-xs">&nbsp;</div>
 	<div class="col-lg-1-harf col-md-1-harf col-sm-1-harf col-xs-6 padding-5">
 		<label>ค่าจัดส่ง</label>

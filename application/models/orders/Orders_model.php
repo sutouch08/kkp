@@ -84,12 +84,7 @@ class Orders_model extends CI_Model
 
   public function get($code)
   {
-		$rs = $this->db
-		->select('o.*, c.name AS customer_name')
-		->from('orders AS o')
-		->join('customers AS c', 'o.customer_code = c.code', 'left')
-		->where('o.code', $code)
-		->get();
+    $rs = $this->db->where('code', $code)->get('orders');
 
     if($rs->num_rows() == 1)
     {
@@ -403,8 +398,7 @@ class Orders_model extends CI_Model
 	public function count_rows(array $ds = array(), $role = 'S')
 	{
 		$this->db
-		->from('orders')
-		->join('customers', 'orders.customer_code = customers.code', 'left')
+		->from('orders')		
 		->join('zone', 'orders.zone_code = zone.code', 'left')
 		->join('user', 'orders.user = user.uname', 'left');
 
@@ -419,9 +413,9 @@ class Orders_model extends CI_Model
 		//--- รหัส/ชื่อ ลูกค้า
 		if( ! empty($ds['customer']))
 		{
-			$this->db->group_start();
-			$this->db->like('customers.code', $ds['customer']);
-			$this->db->or_like('customers.name', $ds['customer']);
+      $this->db->group_start();
+			$this->db->like('orders.customer_code', $ds['customer']);
+			$this->db->or_like('orders.customer_name', $ds['customer']);
 			$this->db->or_like('orders.customer_ref', $ds['customer']);
 			$this->db->group_end();
 		}
@@ -569,7 +563,6 @@ class Orders_model extends CI_Model
 		->distinct()
 		->select('orders.*')
 		->from('orders')
-		->join('customers', 'orders.customer_code = customers.code', 'left')
 		->join('zone', 'orders.zone_code = zone.code', 'left')
 		->join('user', 'orders.user = user.uname', 'left');
 
@@ -585,8 +578,8 @@ class Orders_model extends CI_Model
 		if( ! empty($ds['customer']))
 		{
 			$this->db->group_start();
-			$this->db->like('customers.code', $ds['customer']);
-			$this->db->or_like('customers.name', $ds['customer']);
+			$this->db->like('orders.customer_code', $ds['customer']);
+			$this->db->or_like('orders.customer_name', $ds['customer']);
 			$this->db->or_like('orders.customer_ref', $ds['customer']);
 			$this->db->group_end();
 		}

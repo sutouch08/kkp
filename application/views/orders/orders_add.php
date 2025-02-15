@@ -18,7 +18,6 @@ $pay_pm = get_permission('DBPAYM', $this->_user->uid, $this->_user->id_profile);
     </div>
 </div><!-- End Row -->
 <hr class="padding-5"/>
-<form id="searchForm" method="post" action="<?php echo $this->home; ?>/add">
 <div class="row">
   <div class="col-lg-1-harf col-md-1-harf col-sm-1-harf col-xs-6 padding-5 hidden-xs">
     <label>เลขที่เอกสาร</label>
@@ -27,12 +26,12 @@ $pay_pm = get_permission('DBPAYM', $this->_user->uid, $this->_user->id_profile);
 
   <div class="col-lg-1-harf col-md-1-harf col-sm-1-harf col-xs-4 padding-5">
     <label>วันที่</label>
-    <input type="text" class="form-control input-sm text-center" name="date" id="date" value="<?php echo date('d-m-Y'); ?>" required readonly />
+    <input type="text" class="form-control input-sm text-center e" name="date" id="date" value="<?php echo date('d-m-Y'); ?>" required readonly />
   </div>
 
 	<div class="col-lg-2 col-md-2 col-sm-2-harf col-xs-6 padding-5">
     <label>รหัสลูกค้า</label>
-    <input type="text" class="form-control input-sm" name="customer" id="customer" value="" autofocus required />
+    <input type="text" class="form-control input-sm e" name="customer" id="customer" value="" autofocus required />
   </div>
 
 	<div class="col-lg-1 col-md-1 col-sm-1 col-xs-2 padding-5">
@@ -46,22 +45,22 @@ $pay_pm = get_permission('DBPAYM', $this->_user->uid, $this->_user->id_profile);
 
   <div class="col-md-6 col-sm-5-harf col-xs-7 padding-5">
     <label>ชื่อลูกค้า</label>
-    <input type="text" class="form-control input-sm" name="customerName" id="customerName" value="" required />
+    <input type="text" class="form-control input-sm e" name="customerName" id="customer-name" value="" required />
   </div>
 
 	<div class="col-lg-2 col-md-2 col-sm-2-harf col-xs-5 padding-5">
     <label>ลูกค้า[ออนไลน์]</label>
-		<input type="text" class="form-control input-sm" name="cust_ref" value="" />
+		<input type="text" class="form-control input-sm" name="cust_ref" id="customer-ref" value="" />
   </div>
 
 	<div class="col-lg-2 col-md-2 col-sm-2-harf col-xs-6 padding-5">
     <label>อ้างอิงออเดอร์</label>
-		<input type="text" class="form-control input-sm" name="reference" value="" />
+		<input type="text" class="form-control input-sm" name="reference" id="reference" value="" />
   </div>
 
 	<div class="col-lg-3 col-md-3 col-sm-2-harf col-xs-4 padding-5">
     <label>ช่องทางขาย</label>
-		<select class="form-control input-sm" name="channels" id="channels" required>
+		<select class="form-control input-sm e" name="channels" id="channels">
 			<option value="">ทั้งหมด</option>
 			<?php echo select_channels(); ?>
 		</select>
@@ -78,7 +77,7 @@ $pay_pm = get_permission('DBPAYM', $this->_user->uid, $this->_user->id_profile);
 
 	<div class="col-lg-3 col-md-3 col-sm-2-harf col-xs-4 padding-5">
     <label>การชำระเงิน</label>
-		<select class="form-control input-sm" name="payment" id="payment" required>
+		<select class="form-control input-sm e" name="payment" id="payment">
 			<option value="">ทั้งหมด</option>
 			<?php echo select_payment_method(); ?>
 		</select>
@@ -110,11 +109,10 @@ $pay_pm = get_permission('DBPAYM', $this->_user->uid, $this->_user->id_profile);
 
   <div class="col-lg-1-harf col-md-1-harf col-sm-1-harf col-xs-2 padding-5">
     <label class="display-block not-show">Submit</label>
-    <button type="submit" class="btn btn-xs btn-success btn-block">เพิ่ม</button>
+    <button type="button" class="btn btn-xs btn-success btn-block" onclick="add()">เพิ่ม</button>
   </div>
 </div>
-<input type="hidden" name="customerCode" id="customerCode" value="" />
-</form>
+<input type="hidden" name="customerCode" id="customer-code" value="" />
 <hr class="margin-top-15 padding-5">
 
 
