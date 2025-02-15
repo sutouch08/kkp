@@ -342,7 +342,7 @@ class Order_invoice_model extends CI_Model
 
 	public function get_invoice_list(array $ds = array())
 	{
-		$rs = $this->db->where_in('code', $ds)->where('status', 1)->get('order_invoice');
+		$rs = $this->db->where_in('code', $ds)->where_in('status', [1,2])->get('order_invoice');
 
 		if($rs->num_rows() > 0)
 		{

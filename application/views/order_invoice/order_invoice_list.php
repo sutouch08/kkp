@@ -102,7 +102,7 @@
 				<tr>
 					<td class="middle text-center no"><?php echo $no; ?></td>
 					<td class="middle text-center" style="padding-left:0px; padding-right:0px;">
-						<?php if($rs->status == 1) : ?>
+						<?php if($rs->status != 0) : ?>
 						<label>
 							<input type="checkbox" class="ace chk" value="<?php echo $rs->code; ?>" />
 							<span class="lbl"></span>

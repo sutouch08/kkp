@@ -140,8 +140,8 @@ if(!empty($data))
 			if($order->status == 2)
 			{
 				$page .= '
-				<div style="width:0px; height:0px; position:relative; left:30%; line-height:0px; top:300px;color:red; text-align:center; z-index:100000; opacity:0.1; transform:rotate(-45deg)">
-						<span style="font-size:150px; border-color:red; border:solid 10px; border-radius:20px; padding:0 20 0 20;">ยกเลิก</span>
+				<div style="width:0px; height:0px; position:absolute; left:30%; line-height:0px; top:500px;color:red; text-align:center; z-index:100000; opacity:0.1; transform:rotate(-45deg)">
+						<span style="font-size:150px; padding:0 20 0 20;">ยกเลิก</span>
 				</div>';
 			}
 
