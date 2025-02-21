@@ -258,6 +258,22 @@ class Order_invoice extends PS_Controller
 	}
 
 
+	public function update_remark()
+	{
+		$sc = TRUE;
+		$code = $this->input->post('code');
+		$remark = get_null(trim($this->input->post('remark')));
+
+		if( ! $this->order_invoice_model->update($code, ['remark' => $remark]))
+		{
+			$sc = FALSE;
+			$this->error = "Update remark failed";
+		}
+
+		echo $sc === TRUE ? 'success' : $this->error;
+	}
+
+
 	public function update()
 	{
 		$sc = TRUE;

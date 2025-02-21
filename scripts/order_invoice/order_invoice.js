@@ -905,6 +905,32 @@ function update() {
 }
 
 
+function updateRemark(code) {
+	let remark = $('#remark').val().trim();
+
+	$.ajax({
+		url:HOME + 'update_remark',
+		type:'POST',
+		cache:false,
+		data:{
+			'code' : code,
+			'remark' : remark
+		},
+		success:function(rs) {
+			if(rs.trim() === 'success') {
+				console.log(rs);
+			}
+			else {
+				showError(rs);
+			}
+		},
+		error:function(rs) {
+			showError(rs);
+		}
+	})
+}
+
+
 function getSearch() {
 	$('#searchForm').submit();
 }

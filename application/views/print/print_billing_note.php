@@ -7,7 +7,7 @@ $config 		= array(
 	"row" => 12,
 	"total_row" => $total_row,
 	"font_size" => 10,
-	"text_color" => "text-purple" //--- hilight text color class
+	"text_color" => "" //--- hilight text color class
 );
 $this->font_size = 10;
 
@@ -44,7 +44,7 @@ $header['left']['A']['phone'] = "โทร: ". getConfig('COMPANY_PHONE');
 
 
 $header['left']['B'] = array(
-	"client" => "<span style='font-size:".($this->printer->font_size + 1)."px; font-weight:bolder; white-space:normal; color:green;'>ลูกค้า</span>",
+	"client" => "<span style='font-size:".($this->printer->font_size + 1)."px; font-weight:bolder; white-space:normal;'>ลูกค้า</span>",
 	"customer" => "<span style='font-size:".($this->printer->font_size + 1)."px; font-weight:bolder; white-space:normal;'>({$order->customer_code}) : {$order->customer_name}".( empty($order->branch_name) ? '' : ' ('.$order->branch_name.')')."</span>",
 	"address1" => "{$address}"
 );
@@ -345,7 +345,7 @@ $first_row = $use_vat ? "" : "subtotal-first-row";
   array_push($subTotal, array($sub_net));
 
 	//--- หมายเหตุ
-	$sub_remark  = '<td colspan="3" class="no-border" style="white-space:normal;"><span class="green"><b>หมายเหตุ : </b></span>'.$remark.'</td>';
+	$sub_remark  = '<td colspan="3" class="no-border" style="white-space:normal;"><span class=""><b>หมายเหตุ : </b></span>'.$remark.'</td>';
   array_push($subTotal, array($sub_remark));
 
 	$page .= $this->printer->print_sub_total($subTotal);

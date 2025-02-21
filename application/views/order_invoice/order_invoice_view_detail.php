@@ -220,8 +220,7 @@ if($order->status == 2)
 			<tfoot>
 				<tr>
 					<td colspan="<?php echo ($use_vat === TRUE ? 7 : 6); ?>" rowspan="<?php echo ($use_vat === TRUE ? 5 : 2); ?>" style="white-space:normal; border-right: solid 1px #dddddd;">
-						<b>หมายเหตุ : </b>
-						<?php echo $order->remark; ?>
+						<b>หมายเหตุ </b><input type="text" class="width-100" id="remark" onchange="updateRemark('<?php echo $order->code; ?>')" value="<?php echo $order->remark; ?>" />
 					</td>
 					<td colspan="2" class="middle text-right">รวมเป็นเงิน</td>
 					<td class="middle text-right"><?php echo number($total_amount_ex, 2); ?></td>
