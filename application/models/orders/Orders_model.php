@@ -398,7 +398,7 @@ class Orders_model extends CI_Model
 	public function count_rows(array $ds = array(), $role = 'S')
 	{
 		$this->db
-		->from('orders')		
+		->from('orders')
 		->join('zone', 'orders.zone_code = zone.code', 'left')
 		->join('user', 'orders.user = user.uname', 'left');
 
@@ -435,6 +435,11 @@ class Orders_model extends CI_Model
 			$this->db->like('orders.reference', $ds['reference']);
 		}
 
+    if( ! empty($ds['invoice_code']))
+    {
+      $this->db->like('orders.invoice_code', $ds['invoice_code']);
+    }
+    
 		//---เลขที่จัดส่ง
 		if( ! empty($ds['ship_code']))
 		{
@@ -598,6 +603,11 @@ class Orders_model extends CI_Model
 		{
 			$this->db->like('orders.reference', $ds['reference']);
 		}
+
+    if( ! empty($ds['invoice_code']))
+    {
+      $this->db->like('orders.invoice_code', $ds['invoice_code']);
+    }
 
 		//---เลขที่จัดส่ง
 		if( ! empty($ds['ship_code']))

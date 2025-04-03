@@ -37,6 +37,11 @@
   </div>
 
 	<div class="col-lg-2 col-md-2 col-sm-2 col-xs-6 padding-5">
+    <label>เลขที่ใบกำกับภาษี</label>
+		<input type="text" class="form-control input-sm search" name="invoice_code" value="<?php echo $invoice_code; ?>" />
+  </div>
+
+	<div class="col-lg-2 col-md-2 col-sm-2 col-xs-6 padding-5">
     <label>เลขที่จัดส่ง</label>
 		<input type="text" class="form-control input-sm search" name="shipCode" value="<?php echo $ship_code; ?>" />
   </div>
