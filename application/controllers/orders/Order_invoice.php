@@ -506,7 +506,7 @@ class Order_invoice extends PS_Controller
 		if(!empty($invoices))
 		{
 			$this->load->library('printer');
-			$this->title = "ใบแจ้งหนี้/ใบกำกับภาษี";
+			$this->title = "ใบเสร็จ/ใบกำกับภาษี";
 			$use_vat = getConfig('USE_VAT') ? TRUE : FALSE;
 
 			$data = $this->order_invoice_model->get_invoice_list($invoices);
