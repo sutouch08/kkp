@@ -44,7 +44,7 @@
 
 <div class="row">
 	<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-0 table-responsive border-1" style="min-height:300px;">
-		<table class="table table-bordered" style="min-width:1340px; margin-top:-1px;">
+		<table class="table table-bordered" style="min-width:1440px; margin-top:-1px;">
 			<thead>
 				<tr>
 					<th class="fix-width-50 text-center">#</th>
@@ -59,6 +59,7 @@
 					<th class="fix-width-100 text-center">VAT</th>
 					<th class="fix-width-100 text-center">สินค้า No-Vat</th>
 					<th class="fix-width-100 text-center">มูลค่ารวม</th>
+					<th class="fix-width-100 text-center">Channels</th>
 				</tr>
 			</thead>
 			<tbody id="result-table">
@@ -84,6 +85,7 @@
 	      <td class="text-right">{{ vatTotal }}</td>
 				<td class="text-right">{{ totalNonVat }}</td>
 				<td class="text-right">{{ docTotal }}</td>
+				<td></td>
 	    </tr>
 	    {{else}}
 	    <tr class="font-size-12">
@@ -99,6 +101,7 @@
 	      <td class="text-right">{{ vatAmount }}</td>
 				<td class="text-right">{{ nonVatAmount }}</td>
 				<td class="text-right">{{ lineTotal }}</td>
+				<td class="text-right">{{ channels }}</td>
 	    </tr>
 	    {{/if}}
 	  {{/if}}

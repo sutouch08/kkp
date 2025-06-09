@@ -85,6 +85,17 @@ class Order_invoice_model extends CI_Model
 	}
 
 
+	public function update_detail($id, array $ds = array())
+	{
+		if( ! empty($ds))
+		{
+			return $this->db->where('id', $id)->update('order_invoice_detail', $ds);
+		}
+
+		return FALSE;
+	}
+	
+
 	public function update_details_status($code, $status)
 	{
 		//--- 0 = pending 1 = saved 2 = cancled

@@ -172,3 +172,38 @@ function confirm_remove(reference) {
 		})
 	})
 }
+
+
+function updateItemName(id) {
+	clearErrorByClass('r');
+	let el = $('#name-'+id);
+	let name = el.val().trim();
+
+	if(name.length == 0) {
+		el.hasError();
+		return false;
+	}
+
+	$.ajax({
+		url:HOME + 'update_item_name',
+		type:'POST',
+		cache:false,
+		data:{
+			'id' : id,
+			'name' : name
+		},
+		success:function(rs) {
+			if(rs == 'success') {
+				return true;
+			}
+			else {
+				beep();
+				showError(rs);
+			}
+		},
+		error:function(rs) {
+			beep();
+			showError(rs);
+		}
+	})
+}

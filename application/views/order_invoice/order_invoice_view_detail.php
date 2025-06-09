@@ -193,7 +193,13 @@ if($order->status == 2)
 				<tr id="row-<?php echo $rs->id; ?>">
 					<td class="middle text-center no"><?php echo $no; ?></td>
 					<td class="middle"><?php echo $rs->product_code; ?></td>
-					<td class="middle"><?php echo $rs->product_name; ?></td>
+					<td class="middle">
+						<input type="text" class="form-control input-xs text-label r"
+						id="name-<?php echo $rs->id; ?>"
+						data-id="<?php echo $rs->id; ?>"
+						value="<?php echo $rs->product_name; ?>"
+						onchange="updateItemName(<?php echo $rs->id; ?>)"	 />
+					</td>
 					<td class="middle"><?php echo $rs->order_code; ?></td>
 					<td class="middle text-right"><?php echo number($rs->qty,2); ?></td>
 					<td class="middle"><?php echo $rs->unit_name; ?></td>

@@ -64,8 +64,8 @@ $header['right']['A'] = array(
 );
 
 $header['right']['B'] = array(
-	array('label' => 'พนักงานขาย', 'value' => (empty($saleman) ? '-' : $saleman->name)),
-	array('label' => 'อ้างอิง', 'value' => (strlen($order->reference) > 50 ? substr($order->reference, 0, 50)."..." : $order->reference))
+	array('label' => 'อ้างอิง', 'value' => (strlen($order->reference) > 50 ? substr($order->reference, 0, 50)."..." : $order->reference)),
+	array('label' => '', 'value' => barcodeImage($order->code, 12))
 );
 
 $this->printer->add_header($header);

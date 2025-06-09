@@ -13,6 +13,7 @@ class Sales_invoice_summary extends PS_Controller
     parent::__construct();
     $this->home = base_url().'report/sales/sales_invoice_summary';
     $this->load->model('report/sales/sales_report_model');
+    $this->load->helper('channels');
   }
 
   public function index()
@@ -46,11 +47,15 @@ class Sales_invoice_summary extends PS_Controller
         $totalAmount = 0;
         $no = 1;
 
+        $ch = channels_array();
+
         foreach($res as $rs)
         {
           $sumVatable = $this->sales_report_model->get_sum_vatable_amount($rs->code);
           $sumNonVat = $this->sales_report_model->get_sum_non_vat_amount($rs->code);
           $amountBefVat = $sumVatable - $rs->vat_amount;
+          $channels = empty($rs->reference) ? NULL : $this->sales_report_model->get_channels_by_order($rs->reference);
+          $channels_name = empty($channels) ? NULL : (empty($ch[$channels]) ? NULL : $ch[$channels]);
 
           $result[] = array(
             'no' => $no,
@@ -64,7 +69,8 @@ class Sales_invoice_summary extends PS_Controller
             'amountBefVat' => number($amountBefVat, 2),
             'vatAmount' => number($rs->vat_amount, 2),
             'nonVatAmount' => number($sumNonVat, 2),
-            'lineTotal' => number($rs->total_amount, 2)
+            'lineTotal' => number($rs->total_amount, 2),
+            'channels' => $channels_name
           );
 
           $totalBefVat += $amountBefVat;
@@ -133,6 +139,7 @@ class Sales_invoice_summary extends PS_Controller
     $this->excel->getActiveSheet()->setCellValue('J4', 'VAT');
     $this->excel->getActiveSheet()->setCellValue('K4', 'สินค้า Non-VAT');
     $this->excel->getActiveSheet()->setCellValue('L4', 'มูลค่ารวม');
+    $this->excel->getActiveSheet()->setCellValue('M4', 'Channels');
 
     $row = 5;
 
@@ -150,11 +157,15 @@ class Sales_invoice_summary extends PS_Controller
     {
       $no = 1;
 
+      $ch = channels_array();
+
       foreach($res as $rs)
       {
         $sumVatable = $this->sales_report_model->get_sum_vatable_amount($rs->code);
         $sumNonVat = $this->sales_report_model->get_sum_non_vat_amount($rs->code);
         $amountBefVat = $sumVatable - $rs->vat_amount;
+        $channels = empty($rs->reference) ? NULL : $this->sales_report_model->get_channels_by_order($rs->reference);
+        $channels_name = empty($channels) ? NULL : (empty($ch[$channels]) ? NULL : $ch[$channels]);
 
         $this->excel->getActiveSheet()->setCellValue('A'.$row, $no);
         $this->excel->getActiveSheet()->setCellValue('B'.$row, thai_date($rs->doc_date, FALSE, '-'));
@@ -168,6 +179,8 @@ class Sales_invoice_summary extends PS_Controller
         $this->excel->getActiveSheet()->setCellValue('J'.$row, $rs->vat_amount);
         $this->excel->getActiveSheet()->setCellValue('K'.$row, $sumNonVat);
         $this->excel->getActiveSheet()->setCellValue('L'.$row, $rs->total_amount);
+        $this->excel->getActiveSheet()->setCellValue('M'.$row, $channels_name);
+
 
         $no++;
         $row++;

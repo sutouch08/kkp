@@ -274,6 +274,22 @@ class Order_invoice extends PS_Controller
 	}
 
 
+	public function update_item_name()
+	{
+		$sc = TRUE;
+		$id = $this->input->post('id');
+		$name = trim($this->input->post('name'));
+
+		if( ! $this->order_invoice_model->update_detail($id, ['product_name' => $name]))
+		{
+			$sc = FALSE;
+			$this->error = "Failed to updage item description";
+		}
+
+		echo $sc === TRUE ? 'success' : $this->error;
+	}
+
+
 	public function update()
 	{
 		$sc = TRUE;

@@ -162,6 +162,12 @@ h4.title {
 }
 
 
+.text-label {
+  border:0px !important;
+  background-color: transparent !important;
+  color:#333333 !important;
+}
+
 
 p > button{
 	margin-left: 5px;

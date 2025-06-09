@@ -6,6 +6,19 @@ class Sales_report_model extends CI_Model
     parent::__construct();
   }
 
+  public function get_channels_by_order($order_code)
+  {
+    $rs = $this->db->select('channels_code')->where('code', $order_code)->get('orders');
+
+    if($rs->num_rows() === 1)
+    {
+      return $rs->row()->channels_code;
+    }
+
+    return NULL;
+  }
+  
+
   public function get_sales_invoice_report(array $ds = array())
   {
     $from_date = empty($ds['from_date']) ? date('Y-m-01') : $ds['from_date'];

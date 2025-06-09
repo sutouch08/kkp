@@ -16,4 +16,25 @@ function select_channels($code = '')
   return $sc;
 }
 
+
+function channels_array()
+{
+  $sc = [];
+
+  $ci =& get_instance();
+  $ci->load->model('masters/channels_model');
+
+  $list = $ci->channels_model->get_all();
+
+  if( ! empty($list))
+  {
+    foreach($list as $rs)
+    {
+      $sc[$rs->code] = $rs->name;
+    }
+  }
+
+  return $sc;
+}
+
  ?>
