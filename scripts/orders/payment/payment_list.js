@@ -2,8 +2,7 @@
 setInterval(function(){ getSearch(); }, 1000*60);
 
 
-function confirmPayment(id)
-{
+function confirmPayment(id) {
 	$("#confirmModal").modal('hide');
 	load_in();
 	$.ajax({
@@ -32,9 +31,7 @@ function confirmPayment(id)
 }
 
 
-
-function unConfirmPayment(id)
-{
+function unConfirmPayment(id) {
 	$("#confirmModal").modal('hide');
 	load_in();
 	$.ajax({
@@ -63,9 +60,7 @@ function unConfirmPayment(id)
 }
 
 
-
-function viewDetail(id)
-{
+function viewDetail(id) {
 	load_in();
 	$.ajax({
 		url:BASE_URL + 'orders/order_payment/get_payment_detail',
@@ -91,10 +86,7 @@ function viewDetail(id)
 }
 
 
-
-
-function removePayment(id, name)
-{
+function removePayment(id, name) {
 	swal({
 		title: 'คุณแน่ใจ ?',
 		text: 'ต้องการลบการแจ้งชำระของ '+ name + ' หรือไม่?',
@@ -140,10 +132,45 @@ $("#fromDate").datepicker({
 });
 
 
-
 $("#toDate").datepicker({
 	dateFormat: 'dd-mm-yy',
 	onClose: function(sd){
 		$("#fromDate").datepicker("option", "maxDate", sd);
 	}
 });
+
+
+function checkAll() {
+	if($('#chk-all').is(':checked')) {
+		$('.chk').prop('checked', true);
+	}
+	else {
+		$('.chk').prop('checked', false);
+	}
+}
+
+
+function downloadImages() {
+	let h = {
+		'orders' : [],
+	};
+
+	if($('.chk:checked').length) {
+		$('.chk:checked').each(function() {
+			let code = $(this).val();
+
+			if(code.length) {
+				h.orders.push(code);
+			}
+		})
+	}
+
+	if(h.orders.length) {
+		$('#orders').val(JSON.stringify(h.orders));
+		let token = generateUID();
+		$('#token').val(token);
+
+		get_download(token);
+		$('#download-form').submit();
+	}
+}

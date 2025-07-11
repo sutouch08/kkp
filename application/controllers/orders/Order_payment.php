@@ -62,8 +62,6 @@ class Order_payment extends PS_Controller
   }
 
 
-
-
   public function get_payment_detail()
   {
     $sc = TRUE;
@@ -98,8 +96,6 @@ class Order_payment extends PS_Controller
 
     echo $sc === TRUE ? json_encode($ds) : 'fail';
   }
-
-
 
 
   public function confirm_payment()
@@ -190,7 +186,6 @@ class Order_payment extends PS_Controller
 
     echo $sc === TRUE ? 'success' : $this->error;
   }
-
 
 
   public function un_confirm_payment()
@@ -381,6 +376,94 @@ class Order_payment extends PS_Controller
     {
       $sc = FALSE;
       $this->error = 'ไม่พบตัวแปร id กรุณา reload หน้าเว็บแล้วลองใหม่';
+    }
+
+    echo $sc === TRUE ? 'success' : $this->error;
+  }
+
+
+  public function download_images()
+  {
+    $sc = TRUE;
+    $ds = json_decode($this->input->post('orders'));
+    $token = $this->input->post('token');
+
+    if( ! empty($ds))
+    {
+      $path = $this->config->item('image_file_path').'payments/';
+
+      if(extension_loaded('zip'))
+      {
+        $zip = new ZipArchive();
+        $zipName = $path.time().'.zip';
+
+        if($zip->open($zipName, ZipArchive::CREATE) === TRUE)
+        {
+          foreach($ds as $code)
+          {
+            $images = $this->order_payment_model->get_image_name($code);
+
+            if( ! empty($images))
+            {
+              foreach($images as $rs)
+              {
+                $file = $path.$rs->img.".jpg";
+
+                if(file_exists($file))
+                {
+                  $zip->addFile($file, $rs->img.".jpg");
+                }
+              }
+            }
+          }
+
+          $zip->close();
+
+          if(file_exists($zipName))
+          {
+            setToken($token);
+            $file_name = time().".zip";
+            header("Pragma: public");
+            header("Expires: 0");
+            header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+            header("Cache-Control: public");
+            header("Content-Description: File Transfer");
+            header("Content-type: application/octet-stream");
+            header("Content-Disposition: attachment; filename=\"".$file_name."\"");
+            header("Content-Transfer-Encoding: binary");
+            header("Content-Length: ".filesize($zipName));
+            ob_end_flush();
+            @readfile($zipName);
+            unlink($zipName);
+
+            // header("Content-Type: application/zip");
+            // header("Content-Length: ".filesize($zipName));
+            // header("Content-Disposition: attachment; filename=\"{$zipName}\"");
+            // readfile($zipName);
+            // unlink($zipName); // remove file from temp
+          }
+          else
+          {
+            $sc = FALSE;
+            $this->error = "No files";
+          }
+        }
+        else
+        {
+          $sc = FALSE;
+          $this->error = "Cannot create zip file at this time";
+        }
+      }
+      else
+      {
+        $sc = FALSE;
+        $this->error = "Zip not supported !";
+      }
+    }
+    else
+    {
+      $sc = FALSE;
+      $this->error = "Please select order(s)";
     }
 
     echo $sc === TRUE ? 'success' : $this->error;

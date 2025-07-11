@@ -163,6 +163,17 @@ class Order_payment_model extends CI_Model
   }
 
 
+  public function get_image_name($code)
+  {
+    $rs = $this->db->select('img')->where('order_code', $code)->get('order_payment');
+
+    if($rs->num_rows() > 0)
+    {
+      return $rs->result();
+    }
+
+    return NULL;
+  }
 
   public function valid_payment($id)
   {

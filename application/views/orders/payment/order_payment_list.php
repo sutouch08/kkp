@@ -1,70 +1,77 @@
 <?php $this->load->view('include/header'); ?>
 <div class="row">
-	<div class="col-sm-12">
-    <h3 class="title">
-      <?php echo $this->title; ?>
-    </h3>
-    </div>
+	<div class="col-lg-8 col-md-8 col-sm-8 col-xs-12 padding-5">
+		<h3 class="title"><?php echo $this->title; ?></h3>
+	</div>
+	<div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 padding-5 text-right">
+		<button type="button" class="btn btn-sm btn-info" onclick="downloadImages()"><i class="fa fa-download"></i> Download Payslip</button>
+	</div>
 </div><!-- End Row -->
 <hr class=""/>
 <form id="searchForm" method="post" action="<?php echo current_url(); ?>">
-<div class="row">
-  <div class="col-lg-1-harf col-md-2 col-sm-2-harf col-xs-6 padding-5">
-    <label>เลขที่เอกสาร</label>
-    <input type="text" class="form-control input-sm search" name="code"  value="<?php echo $code; ?>" />
-  </div>
+	<div class="row">
+		<div class="col-lg-1-harf col-md-2 col-sm-2-harf col-xs-6 padding-5">
+			<label>เลขที่เอกสาร</label>
+			<input type="text" class="form-control input-sm search" name="code"  value="<?php echo $code; ?>" />
+		</div>
 
-  <div class="col-lg-1-harf col-md-2 col-sm-2-harf col-xs-6 padding-5">
-    <label>ลูกค้า</label>
-    <input type="text" class="form-control input-sm search" name="customer" value="<?php echo $customer; ?>" />
-  </div>
+		<div class="col-lg-1-harf col-md-2 col-sm-2-harf col-xs-6 padding-5">
+			<label>ลูกค้า</label>
+			<input type="text" class="form-control input-sm search" name="customer" value="<?php echo $customer; ?>" />
+		</div>
 
-	<div class="col-lg-1-harf col-md-2 col-sm-2-harf col-xs-6 padding-5">
-    <label>พนักงาน</label>
-    <input type="text" class="form-control input-sm search" name="user" value="<?php echo $user; ?>" />
-  </div>
+		<div class="col-lg-1-harf col-md-2 col-sm-2-harf col-xs-6 padding-5">
+			<label>พนักงาน</label>
+			<input type="text" class="form-control input-sm search" name="user" value="<?php echo $user; ?>" />
+		</div>
 
-	<div class="col-lg-2 col-md-3 col-sm-3 col-xs-6 padding-5">
-    <label>เลขที่บัญชี</label>
-		<select class="form-control input-sm" name="account" onchange="getSearch()">
-      <option value="">ทั้งหมด</option>
-      <?php echo select_bank_account($account); ?>
-    </select>
-  </div>
-	<div class="col-lg-2 col-md-3 col-sm-3 col-xs-6 padding-5">
-    <label>วันที่</label>
-    <div class="input-daterange input-group">
-      <input type="text" class="form-control input-sm width-50 text-center from-date" name="from_date" id="fromDate" value="<?php echo $from_date; ?>" />
-      <input type="text" class="form-control input-sm width-50 text-center" name="to_date" id="toDate" value="<?php echo $to_date; ?>" />
-    </div>
+		<div class="col-lg-2 col-md-3 col-sm-3 col-xs-6 padding-5">
+			<label>เลขที่บัญชี</label>
+			<select class="form-control input-sm" name="account" onchange="getSearch()">
+				<option value="">ทั้งหมด</option>
+				<?php echo select_bank_account($account); ?>
+			</select>
+		</div>
+		<div class="col-lg-2 col-md-3 col-sm-3 col-xs-6 padding-5">
+			<label>วันที่</label>
+			<div class="input-daterange input-group">
+				<input type="text" class="form-control input-sm width-50 text-center from-date" name="from_date" id="fromDate" value="<?php echo $from_date; ?>" />
+				<input type="text" class="form-control input-sm width-50 text-center" name="to_date" id="toDate" value="<?php echo $to_date; ?>" />
+			</div>
 
-  </div>
+		</div>
 
-  <div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
-    <label>สถานะ</label>
-		<select class="form-control input-sm" name="valid" onchange="getSearch()">
-      <option value="0" <?php echo is_selected($valid, '0'); ?>>รอตรวจสอบ</option>
-      <option value="1" <?php echo is_selected($valid, '1'); ?>>ยืนยันแล้ว</option>
-    </select>
-  </div>
+		<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
+			<label>สถานะ</label>
+			<select class="form-control input-sm" name="valid" onchange="getSearch()">
+				<option value="0" <?php echo is_selected($valid, '0'); ?>>รอตรวจสอบ</option>
+				<option value="1" <?php echo is_selected($valid, '1'); ?>>ยืนยันแล้ว</option>
+			</select>
+		</div>
 
-  <div class="col-lg-1 col-md-1-harf col-sm-1-harf col-xs-6 padding-5">
-    <label class="display-block not-show">buton</label>
-    <button type="submit" class="btn btn-xs btn-primary btn-block"><i class="fa fa-search"></i> Search</button>
-  </div>
-	<div class="col-lg-1 col-md-1-harf col-sm-1-harf col-xs-6 padding-5">
-    <label class="display-block not-show">buton</label>
-    <button type="button" class="btn btn-xs btn-warning btn-block" onclick="clearFilter()"><i class="fa fa-retweet"></i> Reset</button>
-  </div>
-</div>
-<hr class="margin-top-15">
+		<div class="col-lg-1 col-md-1-harf col-sm-1-harf col-xs-6 padding-5">
+			<label class="display-block not-show">buton</label>
+			<button type="submit" class="btn btn-xs btn-primary btn-block"><i class="fa fa-search"></i> Search</button>
+		</div>
+		<div class="col-lg-1 col-md-1-harf col-sm-1-harf col-xs-6 padding-5">
+			<label class="display-block not-show">buton</label>
+			<button type="button" class="btn btn-xs btn-warning btn-block" onclick="clearFilter()"><i class="fa fa-retweet"></i> Reset</button>
+		</div>
+	</div>
+	<hr class="margin-top-15">
 </form>
 <?php echo $this->pagination->create_links(); ?>
 <div class="row">
 	<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5 table-responsive">
-		<table class="table table-striped table-hover border-1" style="min-width:900px;">
+		<table class="table table-striped table-hover border-1" style="min-width:950px;">
 			<thead>
 				<tr>
+					<th class="fix-width-40 middle text-center">
+						<label>
+							<input type="checkbox" class="ace" id="chk-all" onchange="checkAll()">
+							<span class="lbl"></span>
+						</label>
+					</th>
 					<th class="fix-width-40 middle text-center">ลำดับ</th>
 					<th class="fix-width-120 middle">เลขที่เอกสาร</th>
           <th class="fix-width-120 middle">ช่องทาง</th>
@@ -81,6 +88,12 @@
           <?php foreach($orders as $rs) : ?>
             <?php $customer_name = (!empty($rs->customer_ref)) ? $rs->customer_ref : $rs->customer_name; ?>
             <tr id="row-<?php echo $rs->id; ?>" sytle="font-size:12px;">
+							<td class="middle text-center">
+								<label>
+									<input type="checkbox" class="ace chk" value="<?php echo $rs->order_code; ?>" />
+									<span class="lbl"></span>
+								</label>
+							</td>
               <td class="middle text-center"><?php echo $no; ?></td>
               <td class="middle" style="font-size:12px;"><?php echo $rs->order_code; ?></td>
               <td class="middle" style="font-size:12px;"><?php echo $rs->channels; ?></td>
@@ -107,6 +120,11 @@
 		</table>
 	</div>
 </div>
+
+<form id="download-form" method="post" action="<?php echo $this->home; ?>/download_images">
+	<input type="hidden" name="orders" id="orders" value="">
+	<input type="hidden" name="token" id="token" value="">
+</form>
 
 <div class='modal fade' id='confirmModal' tabindex='-1' role='dialog' aria-labelledby='myModalLabel' aria-hidden='true'>
     <div class='modal-dialog' style="width:350px;">
@@ -199,7 +217,7 @@
 {{/each}}
 </script>
 
-<script src="<?php echo base_url(); ?>scripts/orders/payment/payment.js"></script>
-<script src="<?php echo base_url(); ?>scripts/orders/payment/payment_list.js"></script>
+<script src="<?php echo base_url(); ?>scripts/orders/payment/payment.js?v=<?php echo date('Ymd'); ?>"></script>
+<script src="<?php echo base_url(); ?>scripts/orders/payment/payment_list.js?v=<?php echo date('Ymd'); ?>"></script>
 
 <?php $this->load->view('include/footer'); ?>
