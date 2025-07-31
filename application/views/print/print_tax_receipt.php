@@ -228,9 +228,9 @@ while($total_page > 0 )
 		$qty  = "<b>*** จำนวนรวม  ".qty_format($total_qty, 0)."  หน่วย ***</b>";
 		$f_total = number($total_amount, 2); //--- ราคารวมภาษี
 		$f_total_vatable = number($total_vatable, 2);
-		$f_total_bef_vat = number($total_vatable - $total_vat, 2);
+		$f_total_bef_vat = number($total_vatable - $order->vat_amount, 2);
 		$f_total_non_vat = number($total_non_vat, 2);
-		$f_total_vat = number($total_vat, 2);
+		$f_total_vat = number($order->vat_amount, 2);
 		$remark = $order->remark;
 		$baht_text = "(".baht_text($total_amount).")";
 	}

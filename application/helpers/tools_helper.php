@@ -173,16 +173,16 @@ function get_vat_amount($amount, $vat = NULL, $type = NULL)
 		if($type == 'I')
 		{
 			$re_vat = ($amount * $vat) / (100+$vat);
-			return round($re_vat,2);
+			return $re_vat;
 		}
 		else
 		{
 			$re_vat = $amount * ($vat * 0.01);
-			return round($re_vat, 2);
+			return $re_vat;
 		}
 	}
 
-	return round($amount, 2);
+	return $amount;
 }
 
 
@@ -197,10 +197,10 @@ function remove_vat($amount, $vat = NULL)
 	if( $vat != 0 )
 	{
 		$re_vat	= ($vat + 100) / 100;
-		return round($amount/$re_vat, 2);
+		return $amount/$re_vat;
 	}
 
-	return round($amount, 2);
+	return $amount;
 }
 
 //---- remove discount percent return price after discount
@@ -251,10 +251,10 @@ function add_vat($amount, $vat = NULL)
 	if( $vat != 0 )
 	{
 		$re_vat = $vat * 0.01;
-		return round(($amount * $re_vat) + $amount, 2);
+		return ($amount * $re_vat) + $amount;
 	}
 
-	return round($amount, 2);
+	return $amount;
 }
 
 

@@ -223,6 +223,7 @@ if($order->status == 2)
 		</tr>
 	<?php endif; ?>
 			</tbody>
+
 			<tfoot>
 				<tr>
 					<td colspan="<?php echo ($use_vat === TRUE ? 7 : 6); ?>" rowspan="<?php echo ($use_vat === TRUE ? 5 : 2); ?>" style="white-space:normal; border-right: solid 1px #dddddd;">
@@ -242,7 +243,7 @@ if($order->status == 2)
 				</tr>
 				<tr>
 					<td colspan="2" class="middle text-right">ภาษีมูลค่าเพิ่ม <?php echo getConfig('SALE_VAT_RATE'); ?> %</td>
-					<td class="middle text-right"><?php echo number($total_vat, 2); ?></td>
+					<td class="middle text-right"><?php echo number($order->vat_amount, 2); ?></td>
 				</tr>
 			<?php endif; ?>
 				<tr>
